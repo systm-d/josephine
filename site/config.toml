@@ -1,0 +1,13 @@
+base_url = "https://systm-d.github.io/josephine"
+title = "Joséphine"
+description = "Your computer's guardian angel"
+default_language = "en"
+compile_sass = true
+build_search_index = false
+
+[markdown]
+highlight_code = true
+
+[extra]
+brand_color = "#E0A458"
+repo_url = "https://github.com/systm-d/josephine"

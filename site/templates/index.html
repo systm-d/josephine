@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="hero">
+  <h1>✨ {{ config.title }}</h1>
+  <p class="tagline">{{ config.description }}</p>
+  <p><a class="button" href="{{ config.extra.repo_url }}">View on GitHub</a></p>
+</header>
+<main class="container">
+  {{ section.content | safe }}
+</main>
+{% endblock content %}
