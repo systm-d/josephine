@@ -46,6 +46,7 @@ jobs:
 
   crates-io:
     name: publish to crates.io
+    needs: [artifacts]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4

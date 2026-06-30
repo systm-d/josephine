@@ -13,6 +13,11 @@ source=("$pkgname-$pkgver.tar.gz::https://github.com/systm-d/josephine/archive/r
 # release tarball's sha256). Do NOT use 'SKIP' — it bypasses integrity checks.
 sha256sums=('0000000000000000000000000000000000000000000000000000000000000000')
 
+prepare() {
+  cd "$pkgname-$pkgver"
+  cargo fetch --locked --target "x86_64-unknown-linux-gnu"
+}
+
 build() {
   cd "$pkgname-$pkgver"
   export RUSTUP_TOOLCHAIN=stable
