@@ -18,7 +18,7 @@ jobs:
     name: lint (fmt + clippy)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -42,7 +42,7 @@ jobs:
       - name: Install container prerequisites (Fedora)
         if: matrix.container != ''
         run: dnf -y install gcc git curl
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Rust via rustup (Fedora container)
         if: matrix.container != ''
         run: |
@@ -61,7 +61,7 @@ jobs:
     name: coverage (informational)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@v2
@@ -78,7 +78,7 @@ jobs:
     name: security (audit + deny)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/install-action@v2
         with:
@@ -90,7 +90,7 @@ jobs:
     name: bench-smoke
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo bench --no-run --locked
