@@ -1,0 +1,46 @@
+name: Bug report
+description: Something isn't working as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Joséphine is Linux-only.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run `josephine ...`
+        2. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Joséphine version
+      description: Output of `josephine --version`
+    validations:
+      required: true
+  - type: input
+    id: distro
+    attributes:
+      label: Linux distribution & version
+      placeholder: e.g. Fedora 41, Ubuntu 24.04
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Output of `josephine doctor` or `josephine daemon logs`, if relevant
+      render: shell
+    validations:
+      required: false
