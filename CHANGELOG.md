@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Project landing site (Zola) deployed to GitHub Pages.
 - `josephine daemon run` foreground subcommand for systemd supervision.
 - Packaging: systemd user unit, deb/rpm metadata, AUR PKGBUILD, Homebrew (Linux)
   formula, and a tag-driven release workflow (GitHub Releases + crates.io).
