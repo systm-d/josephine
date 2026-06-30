@@ -36,7 +36,7 @@ Tout reste **100 % local** : aucune donnée envoyée sur Internet, aucun compte,
 ```bash
 git clone <repo>
 cd josephine
-cargo install --path crates/josephine-cli
+cargo install --path crates/josephine
 ```
 
 **Notifications desktop :**
@@ -162,7 +162,7 @@ history:
 ## Architecture
 
 ```
-josephine-cli  →  josephine-core
+josephine  →  josephine-core
                     ├── checks/      cpu, memory, disk, temperature, systemd
                     ├── rules/       moteur d'états anti-spam
                     ├── scheduler/   boucle tokio (démon)
@@ -180,8 +180,8 @@ josephine-cli  →  josephine-core
 ```bash
 cargo build
 cargo test
-cargo run -p josephine-cli -- status
-cargo run -p josephine-cli -- doctor
+cargo run -p josephine -- status
+cargo run -p josephine -- doctor
 ```
 
 **Documentation développeur :** [docs/README.md](docs/README.md) · [docs/CURRENT_STATE.md](docs/CURRENT_STATE.md) · [AGENTS.md](AGENTS.md)

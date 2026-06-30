@@ -9,6 +9,7 @@ use crate::rules::StateTransition;
 const MIGRATIONS: &[&str] = &[include_str!("../migrations/V001__init.sql")];
 
 /// Apply every migration newer than the recorded schema version. Idempotent.
+// NOTE: future multi-statement migrations should be wrapped in a transaction (BEGIN/COMMIT) so a mid-migration failure cannot leave a partially-applied, unstamped schema.
 fn apply_migrations(conn: &Connection) -> Result<()> {
     conn.execute_batch("CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL);")?;
     let current: i64 = conn.query_row(

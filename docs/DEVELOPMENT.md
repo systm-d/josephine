@@ -22,12 +22,12 @@ cargo test
 cargo test -p josephine-core
 
 # Exécution locale
-cargo run -p josephine-cli -- status
-cargo run -p josephine-cli -- doctor
-cargo run -p josephine-cli -- daemon start
+cargo run -p josephine -- status
+cargo run -p josephine -- doctor
+cargo run -p josephine -- daemon start
 
 # Installation binaire
-cargo install --path crates/josephine-cli
+cargo install --path crates/josephine
 ```
 
 ---
@@ -39,7 +39,7 @@ josephine/
 ├── Cargo.toml              # workspace + deps partagées
 ├── crates/
 │   ├── josephine-core/     # lib métier
-│   └── josephine-cli/      # binaire josephine
+│   └── josephine/          # binaire josephine
 └── docs/                   # specs, roadmap, architecture
 ```
 
