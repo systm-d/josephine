@@ -35,3 +35,26 @@ predicates.workspace = true
 
 [lints]
 workspace = true
+
+[package.metadata.deb]
+maintainer = "Kevin Delfour <k@levilainpetit.dev>"
+copyright = "2026, Kevin Delfour"
+license-file = ["LICENSE-MIT", "0"]
+extended-description = "Joséphine watches your Linux machine and warns you, kindly, before something goes wrong. Local-only, no cloud."
+section = "utils"
+priority = "optional"
+assets = [
+    ["target/release/josephine", "usr/bin/", "755"],
+    ["packaging/systemd/josephine.service", "usr/lib/systemd/user/josephine.service", "644"],
+    ["README.md", "usr/share/doc/josephine/README.md", "644"],
+    ["LICENSE-MIT", "usr/share/doc/josephine/LICENSE-MIT", "644"],
+    ["LICENSE-APACHE", "usr/share/doc/josephine/LICENSE-APACHE", "644"],
+]
+
+[package.metadata.generate-rpm]
+assets = [
+    { source = "target/release/josephine", dest = "/usr/bin/josephine", mode = "755" },
+    { source = "packaging/systemd/josephine.service", dest = "/usr/lib/systemd/user/josephine.service", mode = "644" },
+    { source = "LICENSE-MIT", dest = "/usr/share/licenses/josephine/LICENSE-MIT", mode = "644" },
+    { source = "LICENSE-APACHE", dest = "/usr/share/licenses/josephine/LICENSE-APACHE", mode = "644" },
+]
