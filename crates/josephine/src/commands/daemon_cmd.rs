@@ -14,6 +14,8 @@ pub enum DaemonAction {
     Status,
     /// Affiche les derniers logs
     Logs,
+    /// Exécute le watcher en avant-plan (utilisé par systemd `--user`)
+    Run,
 }
 
 pub async fn run(action: DaemonAction) -> Result<()> {
@@ -51,6 +53,9 @@ pub async fn run(action: DaemonAction) -> Result<()> {
         DaemonAction::Logs => {
             let logs = control.logs(50)?;
             println!("{logs}");
+        }
+        DaemonAction::Run => {
+            josephine_core::daemon::run_daemon_foreground().await?;
         }
     }
 

@@ -40,3 +40,13 @@ fn unknown_command_fails() {
         .assert()
         .failure();
 }
+
+#[test]
+fn daemon_help_lists_run() {
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .args(["daemon", "--help"])
+        .assert()
+        .success()
+        .stdout(contains("run"));
+}
