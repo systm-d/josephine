@@ -1,199 +1,52 @@
-# Joséphine
+# josephine
 
-> **L'ange gardien de votre ordinateur.**
+> Your computer's quiet guardian angel.
 
-Joséphine observe votre machine en silence et n'intervient que lorsqu'une intervention est utile. Elle surveille, détecte, prévient et accompagne — sans jamais devenir intrusive.
+[![CI](https://github.com/systm-d/josephine/actions/workflows/ci.yml/badge.svg)](https://github.com/systm-d/josephine/actions/workflows/ci.yml)
+[![crates.io](https://img.shields.io/crates/v/josephine.svg)](https://crates.io/crates/josephine)
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](#license)
 
-Tout reste **100 % local** : aucune donnée envoyée sur Internet, aucun compte, aucun cloud.
+Joséphine watches your machine silently and only speaks up when it actually
+helps. She monitors CPU, memory, disk, temperature and systemd services,
+detects trouble early, and sends warm, plain-language desktop notifications —
+never intrusive, always local. No data ever leaves your computer.
 
----
-
-## Philosophie
-
-| Principe | Description |
-|----------|-------------|
-| **Invisible** | Pas de fenêtre, pas d'interface graphique. Elle n'apparaît que quand c'est utile. |
-| **Bienveillante** | Jamais `ERROR`, `FATAL`, `PANIC`. Toujours un ton chaleureux, à la Joséphine *ange gardien*. |
-| **Locale** | Exécution entièrement sur votre machine. |
-
----
-
-## Fonctionnalités
-
-- **Surveillance** — CPU, mémoire, disque, température, services systemd
-- **Démon** — veille en arrière-plan avec intervalles configurables
-- **Règles anti-spam** — une notification par changement d'état (NORMAL → WARNING → CRITICAL → RECOVERED)
-- **Notifications desktop** — via libnotify, messages avec humour bienveillant
-- **Historique SQLite** — métriques et événements sur 90 jours (configurable)
-- **CLI soigné** — tableaux, barres de progression, barres d'indicateurs colorées
-
----
+> User-facing messages and notifications are intentionally in **French** — that
+> is part of Joséphine's character. See [`docs/README.fr.md`](docs/README.fr.md)
+> for the French product guide.
 
 ## Installation
 
-**Prérequis :** Rust 1.75+, Linux (Debian 13+ recommandé).
-
-```bash
-git clone <repo>
-cd josephine
-cargo install --path crates/josephine-cli
+```sh
+cargo install josephine
 ```
 
-**Notifications desktop :**
+## Usage
 
-```bash
-sudo apt install libnotify-bin
+```sh
+josephine               # quick status summary (default)
+josephine status        # CPU, memory, disk, temperature, systemd at a glance
+josephine doctor        # detailed diagnostics, check by check
+josephine history       # last 24 hours: peaks and notable events
+josephine daemon start  # run the background watcher
+josephine daemon status # daemon state (PID, uptime)
+josephine config show   # print the current configuration
+josephine --version
 ```
 
----
+Configuration lives at `~/.config/josephine/config.yaml` (created on first run).
+History and the daemon's state live under `~/.local/share/josephine/`.
 
-## Démarrage rapide
+## Development
 
-```bash
-josephine status          # résumé instantané
-josephine doctor          # diagnostic détaillé
-josephine daemon start    # lancer la surveillance
-josephine history         # synthèse des dernières 24 h
-```
-
----
-
-## Commandes
-
-| Commande | Description |
-|----------|-------------|
-| `josephine` | Alias de `status` |
-| `josephine status` | Résumé CPU, RAM, disque, température, systemd |
-| `josephine doctor` | Diagnostic complet avec détails par check |
-| `josephine history` | Historique 24 h (max métriques + événements) |
-| `josephine daemon start` | Démarre le démon de surveillance |
-| `josephine daemon stop` | Arrête le démon |
-| `josephine daemon status` | État du démon (PID, uptime) |
-| `josephine daemon logs` | Dernières lignes du journal |
-| `josephine daemon restart` | Redémarre le démon |
-| `josephine config show` | Affiche la configuration YAML |
-| `josephine config validate` | Valide la configuration |
-
-**Prévu :** `clean`, `fix`, `report`, `config edit` — voir [docs/ROADMAP.md](docs/ROADMAP.md).
-
-**Hors périmètre :** Docker, TUI/`watch` (voir roadmap).
-
----
-
-## Notifications
-
-Les notifications sont envoyées par le **démon** lorsqu'un seuil est franchi ou qu'une situation revient à la normale.
-
-Exemple :
-
-```
-✨ Joséphine
-
-Votre disque est à 92 % — il tousse un peu.
-Même au paradis, on n'a pas de stockage illimité.
-
-Je peux vous aider à voir ce qui encombre : josephine doctor.
-```
-
-Activer / désactiver dans `~/.config/josephine/config.yaml` :
-
-```yaml
-notifications:
-  desktop: true
-  terminal: false   # non implémenté
-```
-
----
-
-## Configuration
-
-Fichier : `~/.config/josephine/config.yaml` (créé automatiquement au premier lancement).
-
-```yaml
-checks:
-  cpu:
-    enabled: true
-    interval_secs: 30
-    warning: 85
-    critical: 95
-  memory:
-    enabled: true
-    interval_secs: 60
-    warning: 85
-    critical: 95
-  disk:
-    enabled: true
-    interval_secs: 120
-    warning: 85
-    critical: 95
-  temperature:
-    enabled: true
-    interval_secs: 60
-    warning: 75
-    critical: 90
-  systemd:
-    enabled: true
-    interval_secs: 120
-    failed_warning: 1
-    failed_critical: 3
-    restarts_warning: 5
-    restarts_critical: 10
-
-notifications:
-  desktop: true
-  terminal: false
-
-history:
-  enabled: true
-  retention_days: 90
-```
-
-**Chemins :**
-
-| Fichier | Emplacement |
-|---------|-------------|
-| Config | `~/.config/josephine/config.yaml` |
-| Base SQLite | `~/.local/share/josephine/josephine.db` |
-| Logs démon | `~/.local/share/josephine/daemon.log` |
-| PID démon | `~/.local/share/josephine/daemon.pid` |
-
----
-
-## Architecture
-
-```
-josephine-cli  →  josephine-core
-                    ├── checks/      cpu, memory, disk, temperature, systemd
-                    ├── rules/       moteur d'états anti-spam
-                    ├── scheduler/   boucle tokio (démon)
-                    ├── storage/     SQLite
-                    ├── messages/    voix des notifications
-                    └── notify/      libnotify
-```
-
-**Stack :** Rust, clap, tokio, sysinfo, rusqlite, notify-rust, indicatif, comfy-table.
-
----
-
-## Développement
-
-```bash
+```sh
 cargo build
 cargo test
-cargo run -p josephine-cli -- status
-cargo run -p josephine-cli -- doctor
+cargo fmt --check
+cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-**Documentation développeur :** [docs/README.md](docs/README.md) · [docs/CURRENT_STATE.md](docs/CURRENT_STATE.md) · [AGENTS.md](AGENTS.md)
+## License
 
----
-
-## Roadmap
-
-Voir [docs/ROADMAP.md](docs/ROADMAP.md). Prochaine cible : **v0.2** (`report`, `daemon install`, packaging).
-
----
-
-## Licence
-
-MIT
+Licensed under either of [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE) at
+your option.
