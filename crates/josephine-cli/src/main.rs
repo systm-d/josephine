@@ -7,8 +7,8 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 use commands::{
-    config_cmd, daemon_cmd, doctor_cmd, history_cmd, status_cmd, stub_cmd, ConfigAction,
-    DaemonAction, StubCommand,
+    ConfigAction, DaemonAction, StubCommand, config_cmd, daemon_cmd, doctor_cmd, history_cmd,
+    status_cmd, stub_cmd,
 };
 
 #[derive(Parser)]

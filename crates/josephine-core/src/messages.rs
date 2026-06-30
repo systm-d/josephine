@@ -53,11 +53,9 @@ pub fn recovery_message(check_name: &str, metric: &Metric) -> String {
              Fini la fournaise — votre machine me remercie.",
             metric.value
         ),
-        "systemd" if metric.name == "failed_units" => {
-            "Tous vos services sont remis sur pied. \
+        "systemd" if metric.name == "failed_units" => "Tous vos services sont remis sur pied. \
              Moi, je n'ai jamais douté — enfin, presque."
-                .into()
-        }
+            .into(),
         "systemd" => format!(
             "Les redémarrages se taisent ({:.0}). \
              La stabilité est revenue au poste.",

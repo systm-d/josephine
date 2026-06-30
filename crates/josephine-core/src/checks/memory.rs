@@ -60,7 +60,12 @@ impl Check for MemoryCheck {
             .collect();
 
         let mut details = vec![
-            format!("Mémoire utilisée : {:.1} % ({:.1} / {:.1} Go)", usage_percent, used / 1_073_741_824.0, total / 1_073_741_824.0),
+            format!(
+                "Mémoire utilisée : {:.1} % ({:.1} / {:.1} Go)",
+                usage_percent,
+                used / 1_073_741_824.0,
+                total / 1_073_741_824.0
+            ),
             format!("Swap utilisé : {:.1} %", swap_percent),
         ];
         if !top_processes.is_empty() {

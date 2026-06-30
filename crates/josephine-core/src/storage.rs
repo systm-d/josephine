@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use chrono::{DateTime, Duration, Utc};
-use rusqlite::{params, Connection};
+use rusqlite::{Connection, params};
 
 use crate::paths::Paths;
 use crate::rules::StateTransition;
@@ -92,11 +92,7 @@ impl Storage {
         Ok(())
     }
 
-    pub fn insert_metrics(
-        &self,
-        check_name: &str,
-        metrics: &[(String, f64)],
-    ) -> Result<()> {
+    pub fn insert_metrics(&self, check_name: &str, metrics: &[(String, f64)]) -> Result<()> {
         let now = Utc::now().to_rfc3339();
         let mut stmt = self.conn.prepare(
             "INSERT INTO metrics (check_name, metric_name, value, recorded_at) VALUES (?1, ?2, ?3, ?4)",
@@ -166,10 +162,8 @@ impl Storage {
             "DELETE FROM metrics WHERE recorded_at < ?1",
             params![cutoff],
         )?;
-        self.conn.execute(
-            "DELETE FROM events WHERE created_at < ?1",
-            params![cutoff],
-        )?;
+        self.conn
+            .execute("DELETE FROM events WHERE created_at < ?1", params![cutoff])?;
         Ok(())
     }
 
@@ -195,7 +189,10 @@ impl Storage {
                     to_state: row.get(3)?,
                     value: row.get(4)?,
                     message: row.get(5)?,
-                    created_at: row.get::<_, String>(6)?.parse().unwrap_or_else(|_| Utc::now()),
+                    created_at: row
+                        .get::<_, String>(6)?
+                        .parse()
+                        .unwrap_or_else(|_| Utc::now()),
                 })
             })?
             .collect::<Result<Vec<_>, _>>()?;

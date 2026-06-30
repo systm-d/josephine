@@ -95,7 +95,9 @@ impl Check for DiskCheck {
             check_name: "disk".into(),
             metrics,
             details,
-            top_processes: vec![format!("Partition la plus remplie : {worst_mount} ({worst_usage:.1} %)")],
+            top_processes: vec![format!(
+                "Partition la plus remplie : {worst_mount} ({worst_usage:.1} %)"
+            )],
         })
     }
 }

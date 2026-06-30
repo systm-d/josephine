@@ -49,10 +49,7 @@ impl Check for TemperatureCheck {
             });
         }
 
-        let max = readings
-            .iter()
-            .map(|r| r.celsius)
-            .fold(0.0_f64, f64::max);
+        let max = readings.iter().map(|r| r.celsius).fold(0.0_f64, f64::max);
 
         let hottest = readings
             .iter()

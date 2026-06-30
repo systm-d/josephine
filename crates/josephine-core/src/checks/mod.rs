@@ -26,9 +26,7 @@ pub fn build_checks(config: &ChecksConfig) -> Vec<Box<dyn Check>> {
         checks.push(Box::new(DiskCheck::new(config.disk.clone())));
     }
     if config.temperature.enabled {
-        checks.push(Box::new(TemperatureCheck::new(
-            config.temperature.clone(),
-        )));
+        checks.push(Box::new(TemperatureCheck::new(config.temperature.clone())));
     }
     if config.systemd.enabled {
         checks.push(Box::new(SystemdCheck::new(config.systemd.clone())));

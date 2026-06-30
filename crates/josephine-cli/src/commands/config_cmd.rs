@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use clap::Subcommand;
 use josephine_core::config::Config;
 use josephine_core::paths::Paths;
@@ -29,7 +29,10 @@ pub fn run(action: ConfigAction) -> Result<()> {
             println!("✨ Configuration valide.");
         }
         ConfigAction::Edit => {
-            bail!("Cette fonctionnalité arrive bientôt avec Joséphine.\nÉditez {} manuellement.", paths.config.display());
+            bail!(
+                "Cette fonctionnalité arrive bientôt avec Joséphine.\nÉditez {} manuellement.",
+                paths.config.display()
+            );
         }
     }
 

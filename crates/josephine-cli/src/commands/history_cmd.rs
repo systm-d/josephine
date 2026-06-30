@@ -27,8 +27,14 @@ pub fn run() -> Result<()> {
         Cell::new("Métrique").add_attribute(Attribute::Bold),
         Cell::new("Maximum").add_attribute(Attribute::Bold),
     ]);
-    metrics_table.add_row(vec![Cell::new("CPU"), Cell::new(format_max(summary.cpu_max, "%"))]);
-    metrics_table.add_row(vec![Cell::new("RAM"), Cell::new(format_max(summary.memory_max, "%"))]);
+    metrics_table.add_row(vec![
+        Cell::new("CPU"),
+        Cell::new(format_max(summary.cpu_max, "%")),
+    ]);
+    metrics_table.add_row(vec![
+        Cell::new("RAM"),
+        Cell::new(format_max(summary.memory_max, "%")),
+    ]);
     metrics_table.add_row(vec![
         Cell::new("Température"),
         Cell::new(format_max(summary.temperature_max, "°C")),

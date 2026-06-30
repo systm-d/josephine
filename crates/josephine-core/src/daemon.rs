@@ -4,8 +4,8 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 use std::time::{Duration, SystemTime};
 
-use anyhow::{anyhow, Context, Result};
-use tracing_subscriber::{fmt, EnvFilter};
+use anyhow::{Context, Result, anyhow};
+use tracing_subscriber::{EnvFilter, fmt};
 
 use crate::config::Config;
 use crate::paths::Paths;
@@ -13,7 +13,10 @@ use crate::scheduler::Scheduler;
 
 #[derive(Debug, Clone)]
 pub enum DaemonStatus {
-    Running { pid: u32, started_at: Option<SystemTime> },
+    Running {
+        pid: u32,
+        started_at: Option<SystemTime>,
+    },
     Stopped,
 }
 
@@ -128,9 +131,10 @@ pub async fn run_daemon_foreground() -> Result<()> {
         .open(&paths.log_file)?;
 
     let subscriber = fmt()
-        .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-            EnvFilter::new("josephine_core=info")
-        }))
+        .with_env_filter(
+            EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| EnvFilter::new("josephine_core=info")),
+        )
         .with_writer(log_file)
         .with_ansi(false)
         .finish();

@@ -1,13 +1,13 @@
 use comfy_table::presets::UTF8_BORDERS_ONLY;
-use comfy_table::{
-    Attribute, Cell, ColumnConstraint, ContentArrangement, Table, Width,
-};
+use comfy_table::{Attribute, Cell, ColumnConstraint, ContentArrangement, Table, Width};
 
 use josephine_core::check::CheckResult;
 
 use super::bars::metric_line_cell;
 use super::status::state_badge;
-use super::style::{check_label, is_tty, primary_metric, print_banner, print_footer, severity_icon};
+use super::style::{
+    check_label, is_tty, primary_metric, print_banner, print_footer, severity_icon,
+};
 
 const PANEL_WIDTH: u16 = 72;
 
@@ -72,8 +72,7 @@ fn thresholded_metrics(result: &CheckResult) -> Vec<&josephine_core::check::Metr
         .metrics
         .iter()
         .filter(|m| {
-            m.threshold_warning.is_some()
-                && primary_metric(result).is_none_or(|p| p.name != m.name)
+            m.threshold_warning.is_some() && primary_metric(result).is_none_or(|p| p.name != m.name)
         })
         .collect()
 }

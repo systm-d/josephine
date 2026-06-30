@@ -1,7 +1,7 @@
 use std::io::IsTerminal;
 
 use colored::Colorize;
-use josephine_core::check::{metric_severity, Metric, Severity};
+use josephine_core::check::{Metric, Severity, metric_severity};
 
 pub fn is_tty() -> bool {
     std::io::stdout().is_terminal()
@@ -52,7 +52,10 @@ pub fn primary_metric(result: &josephine_core::check::CheckResult) -> Option<&Me
     match result.check_name.as_str() {
         "cpu" => result.metrics.iter().find(|m| m.name == "usage_percent"),
         "memory" => result.metrics.iter().find(|m| m.name == "usage_percent"),
-        "disk" => result.metrics.iter().find(|m| m.name == "usage_percent_worst"),
+        "disk" => result
+            .metrics
+            .iter()
+            .find(|m| m.name == "usage_percent_worst"),
         "temperature" => result.metrics.iter().find(|m| m.name == "temp_max_celsius"),
         "systemd" => result
             .metrics

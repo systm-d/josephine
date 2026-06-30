@@ -42,7 +42,14 @@ impl Check for CpuCheck {
         let top_processes: Vec<String> = processes
             .iter()
             .take(3)
-            .map(|p| format!("{} (PID {}) — {:.1} %", p.name().to_string_lossy(), p.pid(), p.cpu_usage()))
+            .map(|p| {
+                format!(
+                    "{} (PID {}) — {:.1} %",
+                    p.name().to_string_lossy(),
+                    p.pid(),
+                    p.cpu_usage()
+                )
+            })
             .collect();
 
         let mut details = vec![

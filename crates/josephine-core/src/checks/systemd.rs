@@ -25,7 +25,10 @@ impl Check for SystemdCheck {
 
         let mut details = vec![
             format!("Services en échec : {}", snapshot.failed_units.len()),
-            format!("Redémarrages max (service actif) : {}", snapshot.max_restarts),
+            format!(
+                "Redémarrages max (service actif) : {}",
+                snapshot.max_restarts
+            ),
         ];
 
         if snapshot.failed_units.is_empty() {
@@ -116,10 +119,7 @@ fn list_failed_units() -> Result<Vec<String>> {
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
-    Ok(stdout
-        .lines()
-        .filter_map(parse_unit_line)
-        .collect())
+    Ok(stdout.lines().filter_map(parse_unit_line).collect())
 }
 
 fn max_running_restarts() -> Result<(u64, Option<(String, u64)>)> {

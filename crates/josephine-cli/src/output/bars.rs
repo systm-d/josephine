@@ -1,5 +1,5 @@
 use comfy_table::Color;
-use josephine_core::check::{metric_severity, Metric, Severity};
+use josephine_core::check::{Metric, Severity, metric_severity};
 
 pub const BAR_WIDTH: usize = 16;
 

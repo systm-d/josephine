@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::check::{metric_severity, Metric, Severity};
+use crate::check::{Metric, Severity, metric_severity};
 use crate::config::CheckThresholds;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -58,9 +58,7 @@ impl RulesEngine {
         metrics
             .iter()
             .filter(|m| m.threshold_warning.is_some())
-            .filter_map(|metric| {
-                self.evaluate_metric(check_name, metric, thresholds)
-            })
+            .filter_map(|metric| self.evaluate_metric(check_name, metric, thresholds))
             .collect()
     }
 
@@ -81,16 +79,11 @@ impl RulesEngine {
         self.states.insert(key.clone(), current);
 
         let (from, to, notify, recovered) = match (previous, current) {
-            (AlertState::Normal, AlertState::Warning) => {
-                (previous, current, true, false)
-            }
-            (AlertState::Normal, AlertState::Critical) => {
-                (previous, current, true, false)
-            }
-            (AlertState::Warning, AlertState::Critical) => {
-                (previous, current, true, false)
-            }
-            (AlertState::Warning, AlertState::Normal) | (AlertState::Critical, AlertState::Normal) => {
+            (AlertState::Normal, AlertState::Warning) => (previous, current, true, false),
+            (AlertState::Normal, AlertState::Critical) => (previous, current, true, false),
+            (AlertState::Warning, AlertState::Critical) => (previous, current, true, false),
+            (AlertState::Warning, AlertState::Normal)
+            | (AlertState::Critical, AlertState::Normal) => {
                 (previous, AlertState::Normal, true, true)
             }
             _ => (previous, current, false, false),

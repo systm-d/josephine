@@ -1,15 +1,11 @@
 use colored::Colorize;
 use comfy_table::presets::UTF8_FULL_CONDENSED;
-use comfy_table::{
-    Attribute, Cell, ColumnConstraint, ContentArrangement, Table, Width,
-};
+use comfy_table::{Attribute, Cell, ColumnConstraint, ContentArrangement, Table, Width};
 
 use josephine_core::check::{CheckResult, Severity};
 
-use super::bars::{metric_measure_cell, severity_color, BAR_WIDTH};
-use super::style::{
-    check_label, is_tty, primary_metric, print_banner, severity_icon,
-};
+use super::bars::{BAR_WIDTH, metric_measure_cell, severity_color};
+use super::style::{check_label, is_tty, primary_metric, print_banner, severity_icon};
 
 const TABLE_WIDTH: u16 = 72;
 
@@ -113,14 +109,8 @@ fn status_row(result: &CheckResult) -> Vec<Cell> {
 fn systemd_measure_cell(result: &CheckResult) -> Cell {
     use comfy_table::Color;
 
-    let failed = result
-        .metrics
-        .iter()
-        .find(|m| m.name == "failed_units");
-    let restarts = result
-        .metrics
-        .iter()
-        .find(|m| m.name == "max_restarts");
+    let failed = result.metrics.iter().find(|m| m.name == "failed_units");
+    let restarts = result.metrics.iter().find(|m| m.name == "max_restarts");
 
     let failed_count = failed.map(|m| m.value as u64).unwrap_or(0);
     let restart_count = restarts.map(|m| m.value as u64).unwrap_or(0);
@@ -152,9 +142,7 @@ fn plain_state(severity: Severity) -> &'static str {
 fn print_global_summary(global: Severity) {
     let message = match global {
         Severity::Info => "Votre machine va bien.",
-        Severity::Attention => {
-            "Joséphine a remarqué quelque chose — consultez `josephine doctor`."
-        }
+        Severity::Attention => "Joséphine a remarqué quelque chose — consultez `josephine doctor`.",
         Severity::Critique => "Une intervention serait utile — lancez `josephine doctor`.",
     };
 
