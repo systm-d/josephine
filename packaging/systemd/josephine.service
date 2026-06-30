@@ -1,0 +1,13 @@
+[Unit]
+Description=Joséphine — your computer's guardian angel
+Documentation=https://github.com/systm-d/josephine
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/josephine daemon run
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
