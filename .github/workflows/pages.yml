@@ -20,8 +20,14 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
+      - name: Configure Pages (enable if needed)
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: taiki-e/install-action@v2
         with:
           tool: zola@0.19.2
