@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Continuous integration: lint, multi-distro test matrix (Ubuntu 22.04/24.04,
+  Fedora 40/41), coverage (informational), supply-chain security checks, and a
+  criterion benchmark.
+
 ### Changed
 
 - Migrated the workspace to Rust edition 2024 (MSRV 1.85).
