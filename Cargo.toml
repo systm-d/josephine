@@ -6,8 +6,8 @@ members = ["crates/josephine-core", "crates/josephine-cli"]
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
-license = "MIT"
-authors = ["Joséphine Contributors"]
+license = "MIT OR Apache-2.0"
+authors = ["Kevin Delfour"]
 repository = "https://github.com/systm-d/josephine"
 description = "L'ange gardien de votre ordinateur"
 
