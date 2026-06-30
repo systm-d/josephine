@@ -19,7 +19,7 @@ assert_cmd = "2"
 predicates = "3"
 chrono = { version = "0.4", features = ["serde"] }
 clap = { version = "4", features = ["derive"] }
-colored = "2"
+colored = "3"
 comfy-table = { version = "7", features = ["tty"] }
 indicatif = "0.17"
 dirs = "6"
