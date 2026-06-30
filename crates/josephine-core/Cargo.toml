@@ -2,8 +2,13 @@
 name = "josephine-core"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
-description = "Core library for Joséphine system guardian"
+authors.workspace = true
+repository.workspace = true
+description = "Core library for Joséphine — system guardian"
+keywords = ["monitoring", "system", "daemon"]
+categories = ["os"]
 
 [dependencies]
 anyhow.workspace = true

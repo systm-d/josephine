@@ -9,6 +9,7 @@ rust-version = "1.85"
 license = "MIT OR Apache-2.0"
 authors = ["Kevin Delfour"]
 repository = "https://github.com/systm-d/josephine"
+homepage = "https://github.com/systm-d/josephine"
 description = "L'ange gardien de votre ordinateur"
 
 [workspace.dependencies]
