@@ -60,7 +60,7 @@ Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est i
 
 ### Affichage CLI
 
-- Module `josephine-cli/src/output/` : `bars`, `status`, `doctor`, `runner`, `style`
+- Module `josephine/src/output/` : `bars`, `status`, `doctor`, `runner`, `style`
 - `indicatif` : progression pendant les checks (`status`, `doctor`)
 - `comfy-table` + couleurs via API table (pas d'ANSI dans les cellules)
 - Mode plain si sortie non-TTY
@@ -141,7 +141,7 @@ crates/josephine-core/src/
   daemon.rs          start/stop/status
   notify.rs          libnotify
 
-crates/josephine-cli/src/
+crates/josephine/src/
   main.rs            clap
   output/            rendu terminal
   commands/          sous-commandes

@@ -8,7 +8,7 @@ Guide technique pour contribuer au code.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  josephine-cli                                          │
+│  josephine                                          │
 │  clap → commands → output (tables, barres, spinner)    │
 └───────────────────────────┬─────────────────────────────┘
                             │
