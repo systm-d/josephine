@@ -4,7 +4,8 @@ members = ["crates/josephine-core", "crates/josephine-cli"]
 
 [workspace.package]
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+rust-version = "1.85"
 license = "MIT"
 authors = ["Joséphine Contributors"]
 repository = "https://github.com/systm-d/josephine"
