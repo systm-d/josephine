@@ -9,7 +9,9 @@ license=('MIT' 'Apache-2.0')
 depends=('gcc-libs')
 makedepends=('cargo')
 source=("$pkgname-$pkgver.tar.gz::https://github.com/systm-d/josephine/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('SKIP')
+# Fill with the real checksum before publishing: run `updpkgsums` (or paste the
+# release tarball's sha256). Do NOT use 'SKIP' — it bypasses integrity checks.
+sha256sums=('0000000000000000000000000000000000000000000000000000000000000000')
 
 build() {
   cd "$pkgname-$pkgver"
