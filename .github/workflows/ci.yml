@@ -53,6 +53,8 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         if: matrix.container == ''
+        with:
+          key: ${{ matrix.name }}
       - run: cargo test --workspace --locked
 
   coverage:
