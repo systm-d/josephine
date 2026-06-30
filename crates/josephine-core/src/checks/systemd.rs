@@ -40,10 +40,10 @@ impl Check for SystemdCheck {
             }
         }
 
-        if let Some((unit, count)) = &snapshot.max_restart_unit {
-            if *count > 0 {
-                details.push(format!("  • {unit} : {count} redémarrage(s)"));
-            }
+        if let Some((unit, count)) = &snapshot.max_restart_unit
+            && *count > 0
+        {
+            details.push(format!("  • {unit} : {count} redémarrage(s)"));
         }
 
         if !snapshot.systemd_available {

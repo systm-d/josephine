@@ -150,7 +150,7 @@ mod tests {
         let t = thresholds();
         let m = metric(90.0, 85.0, 95.0);
 
-        let first = engine.evaluate_check("cpu", &[m.clone()], &t);
+        let first = engine.evaluate_check("cpu", std::slice::from_ref(&m), &t);
         assert_eq!(first.len(), 1);
 
         let second = engine.evaluate_check("cpu", &[m], &t);

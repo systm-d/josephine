@@ -44,7 +44,7 @@ impl Check for MemoryCheck {
         };
 
         let mut processes: Vec<_> = self.system.processes().values().collect();
-        processes.sort_by(|a, b| b.memory().cmp(&a.memory()));
+        processes.sort_by_key(|b| std::cmp::Reverse(b.memory()));
 
         let top_processes: Vec<String> = processes
             .iter()

@@ -36,11 +36,11 @@ pub async fn run(action: DaemonAction) -> Result<()> {
         DaemonAction::Status => match control.status()? {
             DaemonStatus::Running { pid, started_at } => {
                 println!("État : en veille (PID {pid})");
-                if let Some(t) = started_at {
-                    if let Ok(elapsed) = t.elapsed() {
-                        let mins = elapsed.as_secs() / 60;
-                        println!("Depuis : {mins} min");
-                    }
+                if let Some(t) = started_at
+                    && let Ok(elapsed) = t.elapsed()
+                {
+                    let mins = elapsed.as_secs() / 60;
+                    println!("Depuis : {mins} min");
                 }
             }
             DaemonStatus::Stopped => {

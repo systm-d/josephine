@@ -29,7 +29,7 @@ pub fn severity_icon(severity: Severity) -> &'static str {
 pub fn print_banner(subtitle: &str) {
     if is_tty() {
         println!();
-        println!("{}", format!("✨ Joséphine").bold().cyan());
+        println!("{}", "✨ Joséphine".to_string().bold().cyan());
         println!("{}", subtitle.dimmed());
         println!("{}", "─".repeat(52).dimmed());
         println!();

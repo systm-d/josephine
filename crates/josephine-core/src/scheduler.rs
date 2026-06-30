@@ -40,10 +40,7 @@ impl Scheduler {
             return Ok(());
         }
 
-        let engine = Arc::new(Mutex::new(std::mem::replace(
-            &mut self.rules,
-            RulesEngine::new(),
-        )));
+        let engine = Arc::new(Mutex::new(std::mem::take(&mut self.rules)));
         let storage = Arc::new(Mutex::new(Storage::open(&self.paths)?));
         let config = self.config.clone();
         let retention = self.config.history.retention_days;
@@ -89,16 +86,15 @@ impl Scheduler {
 
                                 for transition in transitions {
                                     let store = storage.lock().await;
-                                    if let Ok(event_id) = store.insert_event(&transition) {
-                                        if desktop_notify && transition.notify {
-                                            if let Err(e) =
-                                                notify::send_josephine(&transition.message)
-                                            {
-                                                error!("notification : {e}");
-                                            } else {
-                                                let _ =
-                                                    store.insert_notification(event_id, "desktop");
-                                            }
+                                    if let Ok(event_id) = store.insert_event(&transition)
+                                        && desktop_notify
+                                        && transition.notify
+                                    {
+                                        if let Err(e) = notify::send_josephine(&transition.message)
+                                        {
+                                            error!("notification : {e}");
+                                        } else {
+                                            let _ = store.insert_notification(event_id, "desktop");
                                         }
                                     }
                                 }

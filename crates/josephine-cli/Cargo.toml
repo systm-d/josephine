@@ -20,3 +20,6 @@ josephine-core = { path = "../josephine-core" }
 serde_yaml.workspace = true
 tokio.workspace = true
 tracing.workspace = true
+
+[lints]
+workspace = true

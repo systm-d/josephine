@@ -71,9 +71,7 @@ async fn run() -> Result<()> {
     let cli = Cli::parse();
 
     if cli.__daemon__ {
-        return josephine_core::daemon::run_daemon_foreground()
-            .await
-            .map_err(Into::into);
+        return josephine_core::daemon::run_daemon_foreground().await;
     }
 
     match cli.command {

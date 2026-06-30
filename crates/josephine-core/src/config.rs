@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::paths::Paths;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub struct Config {
     #[serde(default)]
     pub checks: ChecksConfig,
@@ -135,16 +135,6 @@ fn default_restarts_warning() -> f64 {
 
 fn default_restarts_critical() -> f64 {
     10.0
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            checks: ChecksConfig::default(),
-            notifications: NotificationsConfig::default(),
-            history: HistoryConfig::default(),
-        }
-    }
 }
 
 impl Default for ChecksConfig {

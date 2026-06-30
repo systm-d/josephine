@@ -38,15 +38,15 @@ impl CheckResult {
 }
 
 pub fn metric_severity(metric: &Metric) -> Severity {
-    if let Some(critical) = metric.threshold_critical {
-        if metric.value >= critical {
-            return Severity::Critique;
-        }
+    if let Some(critical) = metric.threshold_critical
+        && metric.value >= critical
+    {
+        return Severity::Critique;
     }
-    if let Some(warning) = metric.threshold_warning {
-        if metric.value >= warning {
-            return Severity::Attention;
-        }
+    if let Some(warning) = metric.threshold_warning
+        && metric.value >= warning
+    {
+        return Severity::Attention;
     }
     Severity::Info
 }
