@@ -46,7 +46,50 @@ pre {
   padding: 1rem;
   border-radius: 8px;
   overflow-x: auto;
+  font-size: .9rem;
+  line-height: 1.45;
 }
 code { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+p code {
+  background: rgba($brand, 0.16);
+  color: #8a5a16;
+  padding: .1rem .35rem;
+  border-radius: 4px;
+  font-size: .9em;
+}
+
+.container h2 {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba($brand, 0.25);
+}
+.container h3 { margin-top: 2rem; }
+
+.notifs {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.notif {
+  display: flex;
+  gap: .75rem;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-left: 4px solid $brand;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.notif p { margin: 0; }
+.notif__icon { font-size: 1.25rem; line-height: 1.4; }
+.notif code {
+  background: rgba(0, 0, 0, 0.06);
+  padding: .1rem .35rem;
+  border-radius: 4px;
+}
+.notif--ok { border-left-color: #4c9a5d; }
+.notif--warn { border-left-color: $brand; }
+.notif--crit { border-left-color: #cf5c4e; }
 
 footer { text-align: center; padding: 2rem; color: #9a9a9a; font-size: .9rem; }
