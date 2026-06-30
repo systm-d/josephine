@@ -1,0 +1,21 @@
+# cargo-tarpaulin coverage config.
+# Target: 80% on the testable pure-logic core (documented goal, not yet enforced —
+# enforce via `fail_under` once the IO modules gain tests; see ROADMAP).
+[report]
+out = ["Xml", "Stdout"]
+
+[default]
+workspace = true
+# IO-bound modules excluded: they read real hardware / spawn the daemon / draw
+# terminal UI and cannot be unit-tested deterministically in CI.
+exclude-files = [
+    "crates/josephine-core/src/checks/*",
+    "crates/josephine-core/src/daemon.rs",
+    "crates/josephine-core/src/scheduler.rs",
+    "crates/josephine-core/src/notify.rs",
+    "crates/josephine/src/output/*",
+    "crates/josephine/src/main.rs",
+    "crates/josephine/src/cli.rs",
+    "crates/josephine/tests/*",
+    "crates/josephine-core/benches/*",
+]
