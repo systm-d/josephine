@@ -1,0 +1,22 @@
+[package]
+name = "josephine-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "CLI for Joséphine — personal system guardian"
+
+[[bin]]
+name = "josephine"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+chrono.workspace = true
+clap.workspace = true
+colored.workspace = true
+comfy-table.workspace = true
+indicatif.workspace = true
+josephine-core = { path = "../josephine-core" }
+serde_yaml.workspace = true
+tokio.workspace = true
+tracing.workspace = true

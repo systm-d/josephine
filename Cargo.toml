@@ -1,0 +1,29 @@
+[workspace]
+resolver = "2"
+members = ["crates/josephine-core", "crates/josephine-cli"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Joséphine Contributors"]
+repository = "https://github.com/systm-d/josephine"
+description = "L'ange gardien de votre ordinateur"
+
+[workspace.dependencies]
+anyhow = "1"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4", features = ["derive"] }
+colored = "2"
+comfy-table = { version = "7", features = ["tty"] }
+indicatif = "0.17"
+dirs = "6"
+notify-rust = "4"
+rusqlite = { version = "0.32", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_yaml = "0.9"
+sysinfo = "0.33"
+thiserror = "2"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
