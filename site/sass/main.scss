@@ -15,7 +15,7 @@ a { color: $brand; }
 .hero {
   text-align: center;
   padding: 5rem 1rem 3rem;
-  background: linear-gradient(180deg, rgba(224, 164, 88, 0.14), transparent);
+  background: linear-gradient(180deg, rgba($brand, 0.14), transparent);
 }
 .hero h1 { font-size: 3rem; margin: 0; }
 .hero .tagline { font-size: 1.3rem; color: #6b6b6b; margin-top: .5rem; }
