@@ -5,6 +5,30 @@ use rusqlite::{Connection, params};
 use crate::paths::Paths;
 use crate::rules::StateTransition;
 
+/// Embedded, ordered schema migrations. The version of `MIGRATIONS[i]` is `i + 1`.
+const MIGRATIONS: &[&str] = &[include_str!("../migrations/V001__init.sql")];
+
+/// Apply every migration newer than the recorded schema version. Idempotent.
+fn apply_migrations(conn: &Connection) -> Result<()> {
+    conn.execute_batch("CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL);")?;
+    let current: i64 = conn.query_row(
+        "SELECT COALESCE(MAX(version), 0) FROM schema_version",
+        [],
+        |row| row.get(0),
+    )?;
+    for (index, sql) in MIGRATIONS.iter().enumerate() {
+        let version = index as i64 + 1;
+        if version > current {
+            conn.execute_batch(sql)?;
+            conn.execute(
+                "INSERT INTO schema_version (version) VALUES (?1)",
+                [version],
+            )?;
+        }
+    }
+    Ok(())
+}
+
 pub struct Storage {
     conn: Connection,
 }
@@ -42,54 +66,8 @@ impl Storage {
         paths.ensure_dirs()?;
         let conn = Connection::open(&paths.database)
             .with_context(|| format!("ouverture de {}", paths.database.display()))?;
-        let storage = Self { conn };
-        storage.migrate()?;
-        Ok(storage)
-    }
-
-    fn migrate(&self) -> Result<()> {
-        self.conn.execute_batch(
-            "
-            CREATE TABLE IF NOT EXISTS metrics (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                check_name TEXT NOT NULL,
-                metric_name TEXT NOT NULL,
-                value REAL NOT NULL,
-                recorded_at TEXT NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_metrics_check_time
-                ON metrics(check_name, recorded_at);
-
-            CREATE TABLE IF NOT EXISTS events (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                check_name TEXT NOT NULL,
-                metric_name TEXT NOT NULL,
-                from_state TEXT NOT NULL,
-                to_state TEXT NOT NULL,
-                value REAL NOT NULL,
-                message TEXT NOT NULL,
-                created_at TEXT NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS notifications (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                event_id INTEGER NOT NULL,
-                channel TEXT NOT NULL,
-                sent_at TEXT NOT NULL,
-                FOREIGN KEY(event_id) REFERENCES events(id)
-            );
-
-            CREATE TABLE IF NOT EXISTS checks_log (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                check_name TEXT NOT NULL,
-                status TEXT NOT NULL,
-                duration_ms INTEGER NOT NULL,
-                error_message TEXT,
-                ran_at TEXT NOT NULL
-            );
-            ",
-        )?;
-        Ok(())
+        apply_migrations(&conn)?;
+        Ok(Self { conn })
     }
 
     pub fn insert_metrics(&self, check_name: &str, metrics: &[(String, f64)]) -> Result<()> {
@@ -214,5 +192,33 @@ impl Storage {
             |row| row.get(0),
         )?;
         Ok(value)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn migrations_apply_to_in_memory_database() {
+        let conn = Connection::open_in_memory().unwrap();
+        apply_migrations(&conn).unwrap();
+        let applied: i64 = conn
+            .query_row("SELECT MAX(version) FROM schema_version", [], |row| {
+                row.get(0)
+            })
+            .unwrap();
+        assert_eq!(applied, MIGRATIONS.len() as i64);
+    }
+
+    #[test]
+    fn applying_migrations_twice_is_idempotent() {
+        let conn = Connection::open_in_memory().unwrap();
+        apply_migrations(&conn).unwrap();
+        apply_migrations(&conn).unwrap();
+        let rows: i64 = conn
+            .query_row("SELECT COUNT(*) FROM schema_version", [], |row| row.get(0))
+            .unwrap();
+        assert_eq!(rows, MIGRATIONS.len() as i64);
     }
 }
