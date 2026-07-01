@@ -68,7 +68,7 @@ jobs:
         with:
           tool: cargo-tarpaulin
       - run: cargo tarpaulin --workspace --out Xml
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v7
         with:
           files: cobertura.xml
           token: ${{ secrets.CODECOV_TOKEN }}
