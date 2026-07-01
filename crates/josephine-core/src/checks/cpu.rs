@@ -41,7 +41,7 @@ impl Check for CpuCheck {
 
         let top_processes: Vec<String> = processes
             .iter()
-            .take(3)
+            .take(10)
             .map(|p| {
                 format!(
                     "{} (PID {}) — {:.1} %",
@@ -52,17 +52,13 @@ impl Check for CpuCheck {
             })
             .collect();
 
-        let mut details = vec![
+        let details = vec![
             format!("Utilisation CPU : {:.1} %", usage),
             format!(
                 "Charge moyenne : {:.2} / {:.2} / {:.2} (1/5/15 min)",
                 load.one, load.five, load.fifteen
             ),
         ];
-        if !top_processes.is_empty() {
-            details.push("Processus les plus actifs :".into());
-            details.extend(top_processes.iter().cloned());
-        }
 
         Ok(CheckResult {
             check_name: "cpu".into(),
@@ -75,6 +71,7 @@ impl Check for CpuCheck {
             }],
             details,
             top_processes,
+            status_value: Some(format!("{usage:.0}%")),
         })
     }
 }

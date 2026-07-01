@@ -27,6 +27,8 @@ pub struct ChecksConfig {
     pub temperature: TemperatureThresholds,
     #[serde(default)]
     pub systemd: SystemdCheckConfig,
+    #[serde(default)]
+    pub updates: UpdatesCheckConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -70,6 +72,18 @@ pub struct SystemdCheckConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct UpdatesCheckConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    #[serde(default = "default_interval_3600")]
+    pub interval_secs: u64,
+    #[serde(default = "default_updates_warning")]
+    pub warning: f64,
+    #[serde(default = "default_updates_critical")]
+    pub critical: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct NotificationsConfig {
     #[serde(default = "default_true")]
     pub desktop: bool,
@@ -99,6 +113,18 @@ fn default_interval_60() -> u64 {
 
 fn default_interval_120() -> u64 {
     120
+}
+
+fn default_interval_3600() -> u64 {
+    3600
+}
+
+fn default_updates_warning() -> f64 {
+    1.0
+}
+
+fn default_updates_critical() -> f64 {
+    50.0
 }
 
 fn default_warning() -> f64 {
@@ -154,6 +180,18 @@ impl Default for ChecksConfig {
             },
             temperature: TemperatureThresholds::default(),
             systemd: SystemdCheckConfig::default(),
+            updates: UpdatesCheckConfig::default(),
+        }
+    }
+}
+
+impl Default for UpdatesCheckConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            interval_secs: default_interval_3600(),
+            warning: default_updates_warning(),
+            critical: default_updates_critical(),
         }
     }
 }
@@ -242,6 +280,7 @@ impl Config {
         Self::validate_thresholds("disk", &self.checks.disk)?;
         Self::validate_temperature(&self.checks.temperature)?;
         Self::validate_systemd(&self.checks.systemd)?;
+        Self::validate_updates(&self.checks.updates)?;
 
         if self.history.retention_days == 0 {
             bail!("history.retention_days doit être supérieur à 0");
@@ -297,6 +336,19 @@ impl Config {
         }
         if c.restarts_warning >= c.restarts_critical {
             bail!("checks.systemd.restarts_warning doit être inférieur à restarts_critical");
+        }
+        Ok(())
+    }
+
+    fn validate_updates(c: &UpdatesCheckConfig) -> Result<()> {
+        if c.interval_secs < 5 {
+            bail!("checks.updates.interval_secs doit être ≥ 5 secondes");
+        }
+        if c.warning < 1.0 || c.critical < 1.0 {
+            bail!("checks.updates.warning et critical doivent être ≥ 1");
+        }
+        if c.warning >= c.critical {
+            bail!("checks.updates.warning doit être inférieur à critical");
         }
         Ok(())
     }

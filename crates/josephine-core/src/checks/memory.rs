@@ -48,7 +48,7 @@ impl Check for MemoryCheck {
 
         let top_processes: Vec<String> = processes
             .iter()
-            .take(3)
+            .take(10)
             .map(|p| {
                 format!(
                     "{} (PID {}) — {:.1} Mo",
@@ -59,7 +59,7 @@ impl Check for MemoryCheck {
             })
             .collect();
 
-        let mut details = vec![
+        let details = vec![
             format!(
                 "Mémoire utilisée : {:.1} % ({:.1} / {:.1} Go)",
                 usage_percent,
@@ -68,10 +68,6 @@ impl Check for MemoryCheck {
             ),
             format!("Swap utilisé : {:.1} %", swap_percent),
         ];
-        if !top_processes.is_empty() {
-            details.push("Processus les plus gourmands :".into());
-            details.extend(top_processes.iter().cloned());
-        }
 
         Ok(CheckResult {
             check_name: "memory".into(),
@@ -93,6 +89,11 @@ impl Check for MemoryCheck {
             ],
             details,
             top_processes,
+            status_value: Some(format!(
+                "{usage_percent:.0}% ({} / {})",
+                crate::check::human_size(used),
+                crate::check::human_size(total)
+            )),
         })
     }
 }

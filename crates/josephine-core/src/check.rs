@@ -22,6 +22,9 @@ pub struct CheckResult {
     pub metrics: Vec<Metric>,
     pub details: Vec<String>,
     pub top_processes: Vec<String>,
+    /// Ready-to-display value for the `status` one-liner (e.g. `73% (28G / 38G)`).
+    /// Falls back to the primary metric when `None`.
+    pub status_value: Option<String>,
 }
 
 impl CheckResult {
@@ -34,6 +37,20 @@ impl CheckResult {
             }
         }
         worst
+    }
+}
+
+/// Format a byte count as a compact gibibyte string (`28G`, `4.9G`, `512M`).
+pub fn human_size(bytes: f64) -> String {
+    let gib = bytes / 1_073_741_824.0;
+    if gib >= 1.0 {
+        if gib >= 10.0 {
+            format!("{gib:.0}G")
+        } else {
+            format!("{gib:.1}G")
+        }
+    } else {
+        format!("{:.0}M", bytes / 1_048_576.0)
     }
 }
 

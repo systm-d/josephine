@@ -50,6 +50,17 @@ impl Check for SystemdCheck {
             details.push("systemctl indisponible — check systemd ignoré.".into());
         }
 
+        let failed_count = snapshot.failed_units.len();
+        let status_value = if !snapshot.systemd_available {
+            "systemctl indisponible".to_string()
+        } else if failed_count == 0 {
+            "Tous les services fonctionnent".to_string()
+        } else if failed_count == 1 {
+            "1 service en échec".to_string()
+        } else {
+            format!("{failed_count} services en échec")
+        };
+
         Ok(CheckResult {
             check_name: "systemd".into(),
             metrics: vec![
@@ -70,6 +81,7 @@ impl Check for SystemdCheck {
             ],
             details,
             top_processes: snapshot.failed_units.clone(),
+            status_value: Some(status_value),
         })
     }
 }
