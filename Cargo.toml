@@ -21,7 +21,7 @@ chrono = { version = "0.4", features = ["serde"] }
 clap = { version = "4", features = ["derive"] }
 colored = "3"
 comfy-table = { version = "7", features = ["tty"] }
-indicatif = "0.17"
+indicatif = "0.18"
 dirs = "6"
 notify-rust = "4"
 rusqlite = { version = "0.32", features = ["bundled"] }
