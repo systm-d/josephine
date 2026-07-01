@@ -1,31 +1,65 @@
-# josephine
+<p align="center">
+  <img src="resources/social_preview.png" alt="Joséphine — your computer's quiet guardian angel" width="720">
+</p>
 
-> Your computer's quiet guardian angel.
+<h1 align="center">Joséphine</h1>
 
-[![CI](https://github.com/systm-d/josephine/actions/workflows/ci.yml/badge.svg)](https://github.com/systm-d/josephine/actions/workflows/ci.yml)
-[![crates.io](https://img.shields.io/crates/v/josephine.svg)](https://crates.io/crates/josephine)
-[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](#license)
+<p align="center"><em>Your computer's quiet guardian angel.</em></p>
+
+<p align="center">
+  <a href="https://github.com/systm-d/josephine/actions/workflows/ci.yml"><img src="https://github.com/systm-d/josephine/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/systm-d/josephine/releases/latest"><img src="https://img.shields.io/github/v/release/systm-d/josephine?color=e0a458&label=release" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/platform-Linux-333" alt="Linux only">
+  <a href="#license"><img src="https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue" alt="License: MIT OR Apache-2.0"></a>
+</p>
 
 Joséphine watches your machine silently and only speaks up when it actually
-helps. She monitors CPU, memory, disk, temperature and systemd services,
-detects trouble early, and sends warm, plain-language desktop notifications —
-never intrusive, always local. No data ever leaves your computer.
+helps. She keeps an eye on CPU, memory, disk, temperature, systemd services and
+pending updates, detects trouble early, and sends warm, plain-language desktop
+notifications — never intrusive, always local. **No data ever leaves your
+computer.**
 
 > User-facing messages and notifications are intentionally in **French** — that
 > is part of Joséphine's character. See [`docs/README.fr.md`](docs/README.fr.md)
 > for the French product guide.
 
+## Features
+
+- **Six built-in checks** — CPU, memory, disk, temperature, systemd services and
+  available package updates (apt / dnf / pacman).
+- **Warm notifications** — plain-language desktop alerts that escalate only when
+  it helps; never `ERROR` / `FATAL` / `PANIC`.
+- **Background daemon** — a lightweight systemd *user* service that watches
+  continuously and records a rolling **24-hour history** (local SQLite).
+- **At-a-glance `status`** — colour-coded summary with a **customizable banner**.
+- **Detailed `doctor`** — check-by-check diagnostics; `--verbose` adds thresholds,
+  the top 10 processes and each check's collection interval.
+- **100% local** — no cloud, no telemetry, Linux-native (systemd, `/sys`,
+  libnotify).
+
 ## Installation
 
+Grab a package from the [latest release](https://github.com/systm-d/josephine/releases/latest):
+
 ```sh
-cargo install josephine
+# Debian / Ubuntu
+sudo dpkg -i josephine_*_amd64.deb
+
+# Fedora / RHEL
+sudo rpm -i josephine-*.x86_64.rpm
+```
+
+Or build from source (requires Rust 1.85+):
+
+```sh
+cargo install --git https://github.com/systm-d/josephine josephine
 ```
 
 ## Usage
 
 ```sh
 josephine               # quick status summary (default)
-josephine status        # CPU, memory, disk, temperature, systemd at a glance
+josephine status        # CPU, memory, disk, temperature, systemd, updates at a glance
 josephine doctor        # detailed diagnostics, check by check
 josephine doctor -v     # verbose: thresholds, top 10 processes, intervals
 josephine history       # last 24 hours: peaks and notable events
@@ -35,6 +69,13 @@ josephine config show   # print the current configuration
 josephine --version
 ```
 
+To keep Joséphine watching across reboots, enable the bundled systemd **user**
+unit ([`packaging/systemd/josephine.service`](packaging/systemd/josephine.service)):
+
+```sh
+systemctl --user enable --now josephine
+```
+
 Configuration lives at `~/.config/josephine/config.yaml` (created on first run).
 History and the daemon's state live under `~/.local/share/josephine/`.
 
@@ -42,14 +83,22 @@ The `status` banner is customizable: drop any ASCII/Braille art in
 `~/.config/josephine/banner.txt` and it replaces the built-in angel (tinted with
 a gradient). A ready-to-use example lives at [`resources/banner.txt`](resources/banner.txt).
 
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md) · [Current state](docs/CURRENT_STATE.md) · [Roadmap](docs/ROADMAP.md)
+- [Contributing](CONTRIBUTING.md) · [Conventions](CONVENTIONS.md) · [Code of Conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md)
+- Website: <https://systm-d.github.io/josephine/>
+
 ## Development
 
 ```sh
 cargo build
-cargo test
+cargo test --workspace
 cargo fmt --check
 cargo clippy --workspace --all-targets -- -D warnings
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and quality gate.
 
 ## License
 
