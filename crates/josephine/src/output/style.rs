@@ -1,10 +1,27 @@
-use std::io::IsTerminal;
+use std::io::{self, IsTerminal, Write};
 
+use anyhow::Result;
 use colored::Colorize;
 use josephine_core::check::{Metric, metric_severity};
 
 pub fn is_tty() -> bool {
     std::io::stdout().is_terminal()
+}
+
+/// Ask a yes/no question on the terminal. Returns `false` on a non-interactive
+/// stdin (so nothing destructive ever runs unattended without `--yes`).
+pub fn confirm(question: &str) -> Result<bool> {
+    if !is_tty() {
+        return Ok(false);
+    }
+    print!("{question} [o/N] ");
+    io::stdout().flush()?;
+    let mut answer = String::new();
+    io::stdin().read_line(&mut answer)?;
+    Ok(matches!(
+        answer.trim().to_lowercase().as_str(),
+        "o" | "oui" | "y" | "yes"
+    ))
 }
 
 pub fn check_label(name: &str) -> &'static str {
@@ -15,6 +32,8 @@ pub fn check_label(name: &str) -> &'static str {
         "temperature" => "Température",
         "systemd" => "Services systemd",
         "updates" => "Mises à jour",
+        "network" => "Réseau",
+        "battery" => "Batterie",
         _ => "Système",
     }
 }
@@ -54,6 +73,11 @@ pub fn primary_metric(result: &josephine_core::check::CheckResult) -> Option<&Me
             .metrics
             .iter()
             .max_by_key(|m| (metric_severity(m), m.name == "failed_units")),
+        "network" => result
+            .metrics
+            .iter()
+            .find(|m| m.name == "gateway_latency_ms"),
+        "battery" => result.metrics.iter().find(|m| m.name == "charge_percent"),
         _ => result.metrics.first(),
     }
 }
@@ -94,6 +118,7 @@ pub fn format_metric_value(metric: &Metric) -> String {
                 _ => format!("{n} mises à jour"),
             }
         }
+        "ms" => format!("{:.0} ms", metric.value),
         _ => format!("{:.1} {}", metric.value, metric.unit),
     }
 }

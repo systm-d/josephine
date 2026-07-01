@@ -126,6 +126,7 @@ fn fmt_threshold(value: f64, unit: &str) -> String {
     match unit {
         "%" => format!("{value:.0} %"),
         "°C" => format!("{value:.0} °C"),
+        "ms" => format!("{value:.0} ms"),
         _ => format!("{value:.0}"),
     }
 }
@@ -149,6 +150,9 @@ fn metric_label(name: &str) -> String {
         "failed_units" => "Services en échec".into(),
         "max_restarts" => "Redémarrages max".into(),
         "updates_available" => "Mises à jour".into(),
+        "gateway_latency_ms" => "Latence passerelle".into(),
+        "charge_percent" => "Charge".into(),
+        "battery_depletion_percent" => "Décharge".into(),
         other => other.replace('_', " "),
     }
 }

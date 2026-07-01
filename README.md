@@ -25,8 +25,9 @@ computer.**
 
 ## Features
 
-- **Six built-in checks** — CPU, memory, disk, temperature, systemd services and
-  available package updates (apt / dnf / pacman).
+- **Eight built-in checks** — CPU, memory, disk, temperature, systemd services,
+  available package updates (apt / dnf / pacman), local network (gateway latency)
+  and battery.
 - **Warm notifications** — plain-language desktop alerts that escalate only when
   it helps; never `ERROR` / `FATAL` / `PANIC`.
 - **Background daemon** — a lightweight systemd *user* service that watches
@@ -69,8 +70,12 @@ josephine history       # last 24 hours: peaks and notable events
 josephine daemon start  # run the background watcher
 josephine daemon status # daemon state (PID, uptime)
 josephine config show   # print the current configuration
+josephine config edit   # edit the config in $EDITOR, then re-validate
+josephine report        # dated plain-text health report (-o writes to a file)
+josephine clean         # preview reclaimable disk space (--apply clears caches)
+josephine fix           # guided remediation for failed services / low disk
+josephine notify test   # send a test desktop notification
 josephine update        # check GitHub for a newer version and install it
-josephine update --check # only report whether a new version is available
 josephine --version
 ```
 

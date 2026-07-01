@@ -191,6 +191,8 @@ fn check_style(name: &str) -> (&'static str, &'static str) {
         "temperature" => ("🌡️", "Température"),
         "systemd" => ("🛡️", "Services critiques"),
         "updates" => ("🔄", "Mises à jour"),
+        "network" => ("🌐", "Réseau"),
+        "battery" => ("🔋", "Batterie"),
         _ => ("•", "Système"),
     }
 }

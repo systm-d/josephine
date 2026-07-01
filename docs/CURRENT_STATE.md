@@ -1,7 +1,7 @@
 # Joséphine — État actuel du code
 
-**Version :** 0.1.0  
-**Dernière mise à jour :** 2026-06-29  
+**Version :** 0.3.0  
+**Dernière mise à jour :** 2026-07-01  
 **Langage :** Rust (workspace Cargo)  
 **Cible :** Linux (Debian 13+ recommandé)
 
@@ -11,7 +11,7 @@ Ce document est la **source de vérité** pour l'état du dépôt. En cas de div
 
 ## Livré
 
-### Checks (5)
+### Checks (8)
 
 | Check | Métriques principales | Source |
 |-------|----------------------|--------|
@@ -20,6 +20,9 @@ Ce document est la **source de vérité** pour l'état du dépôt. En cas de div
 | `disk` | partitions montées, `usage_percent_worst` | `sysinfo` |
 | `temperature` | `temp_max_celsius` | `/sys/class/thermal`, NVMe hwmon |
 | `systemd` | `failed_units`, `max_restarts` | `systemctl` |
+| `updates` | `updates_available` | `apt` / `dnf` / `pacman` |
+| `network` | `gateway_latency_ms` (LAN, 100 % local) | `/proc/net/route`, `ping` |
+| `battery` | `charge_percent`, `battery_depletion_percent` | `/sys/class/power_supply` |
 
 Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est indépendant, configurable via YAML.
 
@@ -28,13 +31,13 @@ Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est i
 | Commande | Statut |
 |----------|--------|
 | `status` (défaut) | ✅ |
-| `doctor` | ✅ |
+| `doctor` (`--verbose`) | ✅ |
 | `history` | ✅ |
-| `daemon start/stop/restart/status/logs` | ✅ |
-| `config show/validate` | ✅ |
+| `daemon start/stop/restart/status/logs/run` | ✅ |
+| `config show/validate/edit` | ✅ |
+| `clean` (`--apply`), `fix`, `report` (`-o`) | ✅ |
+| `notify test` | ✅ |
 | `update` (`--check`, `--yes`) | ✅ |
-| `clean`, `fix`, `report` | stub |
-| `config edit` | stub |
 
 **Supprimé du scope :** `watch` (TUI), check Docker.
 
@@ -85,16 +88,14 @@ Validation dans `config.rs::validate()`.
 
 ## Tests
 
-10 tests unitaires dans `josephine-core` :
+Tests unitaires (`josephine-core`) + intégration CLI (`assert_cmd`) couvrant
+config, règles, messages, self-update, réseau, batterie et le parsing des
+commandes (`clean`, `fix`).
 
-- `config` (2)
-- `rules` (3)
-- `messages` (3)
-- `checks/systemd` (2)
+Les checks reposant sur `/proc` / `systemctl` / `ping` ne sont pas exécutés
+en CI ; leur logique pure est testée via des helpers dédiés.
 
-Pas de tests d'intégration système en CI (dépendance `/proc`, `systemctl`).
-
-Commande : `cargo test`
+Commande : `cargo test --workspace`
 
 ---
 

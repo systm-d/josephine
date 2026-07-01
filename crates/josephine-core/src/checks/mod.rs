@@ -1,13 +1,17 @@
+mod battery;
 mod cpu;
 mod disk;
 mod memory;
+mod network;
 mod systemd;
 mod temperature;
 mod updates;
 
+pub use battery::BatteryCheck;
 pub use cpu::CpuCheck;
 pub use disk::DiskCheck;
 pub use memory::MemoryCheck;
+pub use network::NetworkCheck;
 pub use systemd::SystemdCheck;
 pub use temperature::TemperatureCheck;
 pub use updates::UpdatesCheck;
@@ -36,6 +40,12 @@ pub fn build_checks(config: &ChecksConfig) -> Vec<Box<dyn Check>> {
     if config.updates.enabled {
         checks.push(Box::new(UpdatesCheck::new(config.updates.clone())));
     }
+    if config.network.enabled {
+        checks.push(Box::new(NetworkCheck::new(config.network.clone())));
+    }
+    if config.battery.enabled {
+        checks.push(Box::new(BatteryCheck::new(config.battery.clone())));
+    }
 
     checks
 }
@@ -48,6 +58,8 @@ pub fn interval_for_check(name: &str, config: &ChecksConfig) -> u64 {
         "temperature" => config.temperature.interval_secs,
         "systemd" => config.systemd.interval_secs,
         "updates" => config.updates.interval_secs,
+        "network" => config.network.interval_secs,
+        "battery" => config.battery.interval_secs,
         _ => 60,
     }
 }

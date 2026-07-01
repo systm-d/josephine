@@ -1,11 +1,12 @@
+use std::path::PathBuf;
 use std::process::ExitCode;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 use crate::commands::{
-    ConfigAction, DaemonAction, StubCommand, config_cmd, daemon_cmd, doctor_cmd, history_cmd,
-    status_cmd, stub_cmd, update_cmd,
+    ConfigAction, DaemonAction, NotifyAction, clean_cmd, config_cmd, daemon_cmd, doctor_cmd,
+    fix_cmd, history_cmd, notify_cmd, report_cmd, status_cmd, update_cmd,
 };
 
 /// L'ange gardien de votre ordinateur
@@ -46,15 +47,25 @@ enum Commands {
         #[command(subcommand)]
         action: ConfigAction,
     },
-    /// Nettoyage (bientôt)
+    /// Fait le point sur l'espace récupérable (aperçu par défaut)
     Clean {
+        /// Nettoie réellement les miniatures au lieu du simple aperçu
         #[arg(long)]
-        dry_run: bool,
+        apply: bool,
     },
-    /// Corrections guidées (bientôt)
+    /// Corrections guidées : ce qui cloche et comment y remédier
     Fix,
-    /// Rapport complet (bientôt)
-    Report,
+    /// Rapport système daté, à l'écran ou dans un fichier
+    Report {
+        /// Écrit le rapport dans ce fichier au lieu de l'afficher
+        #[arg(short, long)]
+        output: Option<PathBuf>,
+    },
+    /// Notifications de bureau
+    Notify {
+        #[command(subcommand)]
+        action: NotifyAction,
+    },
     /// Vérifie et installe la dernière version de Joséphine
     Update {
         /// Signale une nouvelle version sans l'installer
@@ -91,9 +102,10 @@ async fn dispatch() -> Result<()> {
         Some(Commands::History) => history_cmd::run()?,
         Some(Commands::Daemon { action }) => daemon_cmd::run(action).await?,
         Some(Commands::Config { action }) => config_cmd::run(action)?,
-        Some(Commands::Clean { dry_run }) => stub_cmd::run(StubCommand::Clean { dry_run })?,
-        Some(Commands::Fix) => stub_cmd::run(StubCommand::Fix)?,
-        Some(Commands::Report) => stub_cmd::run(StubCommand::Report)?,
+        Some(Commands::Clean { apply }) => clean_cmd::run(apply)?,
+        Some(Commands::Fix) => fix_cmd::run()?,
+        Some(Commands::Report { output }) => report_cmd::run(output)?,
+        Some(Commands::Notify { action }) => notify_cmd::run(action)?,
         Some(Commands::Update { check, yes }) => update_cmd::run(check, yes)?,
         None => status_cmd::run()?,
     }

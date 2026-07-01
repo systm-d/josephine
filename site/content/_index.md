@@ -9,8 +9,8 @@ computer.
 
 <div class="features">
   <div class="feature">
-    <h3>🩺 Six checks</h3>
-    <p>CPU, memory, disk, temperature, systemd and package updates — early warnings before trouble.</p>
+    <h3>🩺 Eight checks</h3>
+    <p>CPU, memory, disk, temperature, systemd, package updates, network and battery — early warnings before trouble.</p>
   </div>
   <div class="feature">
     <h3>🔔 Kind notifications</h3>
@@ -107,6 +107,8 @@ Or build from source (Rust 1.85+): `cargo install --git https://github.com/systm
 ```sh
 josephine            # quick status
 josephine doctor     # detailed diagnostics
+josephine report     # dated health report
+josephine clean      # preview reclaimable disk space
 josephine update     # check for a new version and install it
 josephine daemon start
 ```

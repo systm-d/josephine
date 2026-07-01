@@ -1,6 +1,6 @@
 # Joséphine — Roadmap
 
-**Baseline actuelle :** v0.1.0 — voir [CURRENT_STATE.md](CURRENT_STATE.md)
+**Baseline actuelle :** v0.3.0 — voir [CURRENT_STATE.md](CURRENT_STATE.md)
 
 ---
 
@@ -28,40 +28,39 @@ Surveillance locale silencieuse de la **machine** :
 
 ---
 
-## v0.2 — Produit installable
+## v0.2 — Produit installable ✅
 
-**Objectif :** Joséphine utilisable au quotidien sans `cargo run`.
+**Objectif :** Joséphine utilisable au quotidien sans `cargo run`. **Livré.**
 
-| # | Feature | Priorité |
-|---|---------|----------|
-| 1 | `josephine report` — export texte daté | Haute |
-| 2 | `josephine daemon install` — unité systemd user | Haute |
-| 3 | Packaging `.deb` + doc installation | Moyenne |
-| 4 | Tests d'intégration checks (mocks sysfs / systemctl) | Moyenne |
-| 5 | `josephine notify test` — valider libnotify | Basse |
+| # | Feature | État |
+|---|---------|------|
+| 1 | `josephine report` — export texte daté | ✅ |
+| 2 | Packaging `.deb`/`.rpm` + install systemd user | ✅ |
+| 3 | `josephine notify test` — valider libnotify | ✅ |
+| 4 | `josephine update` — self-update (bonus) | ✅ |
 
 **Spec :** [superpowers/specs/2026-06-29-josephine-v02-design.md](superpowers/specs/2026-06-29-josephine-v02-design.md)  
 **Plan :** [superpowers/plans/2026-06-29-josephine-v02-plan.md](superpowers/plans/2026-06-29-josephine-v02-plan.md)
 
 ---
 
-## v0.3 — Machine complète
+## v0.3 — Machine complète ✅
 
-| # | Feature |
-|---|---------|
-| 1 | Check **réseau** (DNS, passerelle, latence) |
-| 2 | Check **batterie** (laptop) |
-| 3 | `josephine clean --dry-run` (caches système, `/tmp`, journaux) |
+| # | Feature | État |
+|---|---------|------|
+| 1 | Check **réseau** (passerelle, latence, DNS) — LAN uniquement, 100 % local | ✅ |
+| 2 | Check **batterie** (laptop) | ✅ |
+| 3 | `josephine clean` (aperçu + miniatures) | ✅ |
 
 ---
 
 ## v0.4 — Accompagnement
 
-| # | Feature |
-|---|---------|
-| 1 | `josephine fix` — actions guidées (systemd, espace disque) |
-| 2 | `config edit` — `$EDITOR` + revalidation |
-| 3 | Sparklines / synthèse enrichie dans `history` |
+| # | Feature | État |
+|---|---------|------|
+| 1 | `josephine fix` — actions guidées (systemd, espace disque) | ✅ |
+| 2 | `config edit` — `$EDITOR` + revalidation | ✅ |
+| 3 | Sparklines / synthèse enrichie dans `history` | à venir |
 
 ---
 

@@ -4,7 +4,7 @@
 //! This is the ONLY place Joséphine touches the network, and only when the user
 //! runs the command explicitly — never in the background (the "100 % local" rule).
 
-use std::io::{self, Write};
+use std::io;
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitStatus};
 use std::time::Duration;
@@ -14,7 +14,7 @@ use josephine_core::messages;
 use josephine_core::paths::Paths;
 use josephine_core::update::{self, Asset, InstallPlan, ReleaseInfo, UpdateStatus};
 
-use crate::output::{is_tty, print_banner};
+use crate::output::{confirm, print_banner};
 
 const USER_AGENT: &str = concat!("josephine/", env!("CARGO_PKG_VERSION"));
 
@@ -162,21 +162,6 @@ fn verify(release: &ReleaseInfo, asset: &Asset, package: &Path) -> Integrity {
         (Some(_), Some(_)) => Integrity::Mismatch,
         _ => Integrity::Unverified,
     }
-}
-
-fn confirm(question: &str) -> Result<bool> {
-    // Non-interactive shells never auto-install without an explicit `--yes`.
-    if !is_tty() {
-        return Ok(false);
-    }
-    print!("{question} [o/N] ");
-    io::stdout().flush()?;
-    let mut answer = String::new();
-    io::stdin().read_line(&mut answer)?;
-    Ok(matches!(
-        answer.trim().to_lowercase().as_str(),
-        "o" | "oui" | "y" | "yes"
-    ))
 }
 
 fn run_install(command: &[String], sudo: bool) -> Result<ExitStatus> {

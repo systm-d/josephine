@@ -29,6 +29,10 @@ pub struct ChecksConfig {
     pub systemd: SystemdCheckConfig,
     #[serde(default)]
     pub updates: UpdatesCheckConfig,
+    #[serde(default)]
+    pub network: NetworkCheckConfig,
+    #[serde(default)]
+    pub battery: BatteryCheckConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -84,6 +88,32 @@ pub struct UpdatesCheckConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct NetworkCheckConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    #[serde(default = "default_interval_60")]
+    pub interval_secs: u64,
+    /// Round-trip latency to the default gateway, in milliseconds.
+    #[serde(default = "default_net_warning")]
+    pub warning: f64,
+    #[serde(default = "default_net_critical")]
+    pub critical: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct BatteryCheckConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    #[serde(default = "default_interval_120")]
+    pub interval_secs: u64,
+    /// Charge level (%) at or below which — while on battery — Joséphine warns.
+    #[serde(default = "default_batt_warning")]
+    pub warning: f64,
+    #[serde(default = "default_batt_critical")]
+    pub critical: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct NotificationsConfig {
     #[serde(default = "default_true")]
     pub desktop: bool,
@@ -125,6 +155,22 @@ fn default_updates_warning() -> f64 {
 
 fn default_updates_critical() -> f64 {
     50.0
+}
+
+fn default_net_warning() -> f64 {
+    150.0
+}
+
+fn default_net_critical() -> f64 {
+    500.0
+}
+
+fn default_batt_warning() -> f64 {
+    20.0
+}
+
+fn default_batt_critical() -> f64 {
+    10.0
 }
 
 fn default_warning() -> f64 {
@@ -181,6 +227,8 @@ impl Default for ChecksConfig {
             temperature: TemperatureThresholds::default(),
             systemd: SystemdCheckConfig::default(),
             updates: UpdatesCheckConfig::default(),
+            network: NetworkCheckConfig::default(),
+            battery: BatteryCheckConfig::default(),
         }
     }
 }
@@ -192,6 +240,28 @@ impl Default for UpdatesCheckConfig {
             interval_secs: default_interval_3600(),
             warning: default_updates_warning(),
             critical: default_updates_critical(),
+        }
+    }
+}
+
+impl Default for NetworkCheckConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            interval_secs: 60,
+            warning: default_net_warning(),
+            critical: default_net_critical(),
+        }
+    }
+}
+
+impl Default for BatteryCheckConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            interval_secs: 120,
+            warning: default_batt_warning(),
+            critical: default_batt_critical(),
         }
     }
 }
@@ -281,6 +351,8 @@ impl Config {
         Self::validate_temperature(&self.checks.temperature)?;
         Self::validate_systemd(&self.checks.systemd)?;
         Self::validate_updates(&self.checks.updates)?;
+        Self::validate_network(&self.checks.network)?;
+        Self::validate_battery(&self.checks.battery)?;
 
         if self.history.retention_days == 0 {
             bail!("history.retention_days doit être supérieur à 0");
@@ -349,6 +421,33 @@ impl Config {
         }
         if c.warning >= c.critical {
             bail!("checks.updates.warning doit être inférieur à critical");
+        }
+        Ok(())
+    }
+
+    fn validate_network(c: &NetworkCheckConfig) -> Result<()> {
+        if c.interval_secs < 5 {
+            bail!("checks.network.interval_secs doit être ≥ 5 secondes");
+        }
+        if c.warning <= 0.0 || c.critical <= 0.0 {
+            bail!("checks.network.warning et critical doivent être positifs (ms)");
+        }
+        if c.warning >= c.critical {
+            bail!("checks.network.warning doit être inférieur à critical");
+        }
+        Ok(())
+    }
+
+    fn validate_battery(c: &BatteryCheckConfig) -> Result<()> {
+        if c.interval_secs < 5 {
+            bail!("checks.battery.interval_secs doit être ≥ 5 secondes");
+        }
+        if !(0.0..=100.0).contains(&c.warning) || !(0.0..=100.0).contains(&c.critical) {
+            bail!("checks.battery.warning et critical doivent être entre 0 et 100 %");
+        }
+        // Battery thresholds are LOW-water marks: warn above critical.
+        if c.critical >= c.warning {
+            bail!("checks.battery.critical doit être inférieur à warning (seuils bas)");
         }
         Ok(())
     }

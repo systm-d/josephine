@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-01
+
+### Added
+
+- Two new checks, bringing the total to eight:
+  - **network** — default-gateway reachability and latency. Stays strictly local
+    (pings the LAN gateway, reads `/proc/net/route` and `/etc/resolv.conf`); no
+    external host is ever contacted.
+  - **battery** — charge level, charging state and health from
+    `/sys/class/power_supply`; only warns while discharging and low, and reports
+    "no battery" gracefully on desktops.
+- `josephine report` — a dated, plain-text health snapshot, printed or written to
+  a file with `--output`.
+- `josephine clean` — previews reclaimable space (user cache, thumbnails, `/tmp`,
+  systemd journals) by default; `--apply` clears the always-safe thumbnail cache
+  and shows the exact commands for the privileged reclaims.
+- `josephine fix` — guided remediation: surfaces failed services and disk
+  pressure with the precise command to fix each. Advisory only; nothing
+  privileged runs on its own.
+- `josephine notify test` — sends a test desktop notification to verify libnotify.
+- `josephine config edit` — opens the config in `$EDITOR`, then re-validates it.
+
+### Changed
+
+- Replaced the `clean`/`fix`/`report` and `config edit` stubs with working
+  commands.
+- Roadmap and current-state docs refreshed to the 0.3.0 baseline; dropped an
+  obsolete cargo-deny advisory exception that no longer matched any crate.
+
 ## [0.2.2] - 2026-07-01
 
 ### Added

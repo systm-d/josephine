@@ -6,11 +6,6 @@
 # Use the default advisory database; fail on any unmaintained/vulnerable crate.
 version = 2
 yanked = "deny"
-ignore = [
-    # number_prefix (RUSTSEC-2025-0119) is unmaintained; transitive via indicatif.
-    # No safe upgrade is available as of 2026-06-30. Tracked as known accepted risk.
-    { id = "RUSTSEC-2025-0119", reason = "Transitive via indicatif; no safe upgrade available as of initial policy creation." },
-]
 
 [licenses]
 version = 2

@@ -24,12 +24,25 @@ fn help_lists_core_subcommands() {
 }
 
 #[test]
-fn clean_is_a_friendly_stub() {
+fn clean_previews_without_deleting() {
     Command::cargo_bin("josephine")
         .unwrap()
-        .args(["clean", "--dry-run"])
+        .arg("clean")
         .assert()
-        .success();
+        .success()
+        .stdout(contains("aperçu"));
+}
+
+#[test]
+fn help_lists_new_subcommands() {
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .arg("--help")
+        .assert()
+        .success()
+        .stdout(contains("report"))
+        .stdout(contains("update"))
+        .stdout(contains("notify"));
 }
 
 #[test]

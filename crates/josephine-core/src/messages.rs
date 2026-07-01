@@ -21,6 +21,8 @@ pub fn alert_message(
         "systemd" if metric.name == "failed_units" => systemd_failed_alert(metric.value),
         "systemd" => systemd_restarts_alert(metric.value),
         "updates" => updates_alert(metric.value),
+        "network" => network_alert(metric.value),
+        "battery" => battery_alert(metric.value),
         other => format!(
             "Entre nous, {other} me fait un signe ({:.1} {}). \
              Rien de grave… pour l'instant. `josephine doctor` ?",
@@ -64,6 +66,12 @@ pub fn recovery_message(check_name: &str, metric: &Metric) -> String {
         ),
         "updates" => "Tout est à jour — votre machine brille comme un sou neuf. \
              Beau travail, on peut être fières."
+            .into(),
+        "network" => "Le réseau est revenu, fluide et vaillant. \
+             Je range mes plumes — tout communique de nouveau."
+            .into(),
+        "battery" => "Votre batterie a repris des forces (ou vous voilà branché). \
+             Ouf — je respire mieux, moi aussi."
             .into(),
         other => format!(
             "Tout est rentré dans l'ordre pour {other} ({:.1} {}). \
@@ -208,6 +216,23 @@ fn updates_alert(count: f64) -> String {
         "{n} {subject} {verb}. \
          Un petit coup de neuf et votre machine sera parée comme un ange.\n\n\
          La liste : `josephine doctor`.",
+    )
+}
+
+fn network_alert(latency_ms: f64) -> String {
+    format!(
+        "Votre lien réseau tousse un peu ({latency_ms:.0} ms vers la passerelle, \
+         voire plus de réponse du tout). Un coup d'œil au Wi-Fi ou au câble ?\n\n\
+         Les détails : `josephine doctor`.",
+    )
+}
+
+fn battery_alert(depletion_percent: f64) -> String {
+    let charge = 100.0 - depletion_percent;
+    format!(
+        "Votre batterie descend à {charge:.0} %. \
+         Un petit branchement et tout le monde respire — pensez au chargeur.\n\n\
+         L'état complet : `josephine doctor`.",
     )
 }
 
