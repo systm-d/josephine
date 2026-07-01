@@ -73,6 +73,40 @@ pub fn recovery_message(check_name: &str, metric: &Metric) -> String {
     }
 }
 
+// --- Self-update (`josephine update`) ---------------------------------------
+
+/// Already on the newest published version.
+pub fn update_up_to_date(version: &str) -> String {
+    format!(
+        "Vous avez déjà la dernière version ({version}). \
+         Tout est neuf, je n'ai rien à faire — et ça me va très bien."
+    )
+}
+
+/// Local build is ahead of anything published (a dev build).
+pub fn update_ahead(current: &str, latest: &str) -> String {
+    format!(
+        "Votre version ({current}) devance la dernière publiée ({latest}). \
+         Vous avez une longueur d'avance — j'aime cette audace."
+    )
+}
+
+/// A newer version is available to install.
+pub fn update_available(version: &str) -> String {
+    format!(
+        "Une nouvelle version vous attend : {version}. \
+         Un petit coup de neuf et votre ange portera ses plus belles plumes."
+    )
+}
+
+/// The update finished installing.
+pub fn update_done(version: &str) -> String {
+    format!(
+        "Voilà, Joséphine est passée en {version}. \
+         Merci de votre confiance — je reprends ma veille, fraîche et pimpante."
+    )
+}
+
 fn cpu_alert(value: f64, state: AlertState, thresholds: &CheckThresholds) -> String {
     match state {
         AlertState::Critical => format!(
@@ -232,5 +266,24 @@ mod tests {
     fn alerts_mention_doctor() {
         let msg = disk_alert(92.0);
         assert!(msg.contains("josephine doctor"));
+    }
+
+    #[test]
+    fn update_messages_stay_warm() {
+        let forbidden = ["ERROR", "FATAL", "PANIC", "CRASH", "ÉCHEC"];
+        let messages = [
+            update_up_to_date("0.2.1"),
+            update_ahead("0.3.0", "0.2.1"),
+            update_available("0.3.0"),
+            update_done("0.3.0"),
+        ];
+        for msg in messages {
+            for word in forbidden {
+                assert!(
+                    !msg.to_uppercase().contains(word),
+                    "message contient {word}: {msg}"
+                );
+            }
+        }
     }
 }

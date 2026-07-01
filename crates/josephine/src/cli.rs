@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand};
 
 use crate::commands::{
     ConfigAction, DaemonAction, StubCommand, config_cmd, daemon_cmd, doctor_cmd, history_cmd,
-    status_cmd, stub_cmd,
+    status_cmd, stub_cmd, update_cmd,
 };
 
 /// L'ange gardien de votre ordinateur
@@ -55,6 +55,15 @@ enum Commands {
     Fix,
     /// Rapport complet (bientôt)
     Report,
+    /// Vérifie et installe la dernière version de Joséphine
+    Update {
+        /// Signale une nouvelle version sans l'installer
+        #[arg(long)]
+        check: bool,
+        /// N'attend pas de confirmation avant d'installer
+        #[arg(short = 'y', long = "yes")]
+        yes: bool,
+    },
 }
 
 /// Entry point: parse, dispatch, and map errors to a process exit code.
@@ -85,6 +94,7 @@ async fn dispatch() -> Result<()> {
         Some(Commands::Clean { dry_run }) => stub_cmd::run(StubCommand::Clean { dry_run })?,
         Some(Commands::Fix) => stub_cmd::run(StubCommand::Fix)?,
         Some(Commands::Report) => stub_cmd::run(StubCommand::Report)?,
+        Some(Commands::Update { check, yes }) => update_cmd::run(check, yes)?,
         None => status_cmd::run()?,
     }
 

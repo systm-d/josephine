@@ -34,6 +34,11 @@ jobs:
           cargo install cargo-deb cargo-generate-rpm
           cargo deb -p josephine --no-build
           cargo generate-rpm -p crates/josephine
+      - name: Checksum .deb and .rpm
+        run: |
+          for pkg in target/debian/*.deb target/generate-rpm/*.rpm; do
+            ( cd "$(dirname "$pkg")" && sha256sum "$(basename "$pkg")" | tee "$(basename "$pkg").sha256" )
+          done
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v3
         with:
@@ -42,7 +47,9 @@ jobs:
             josephine-*-x86_64-unknown-linux-gnu.tar.gz
             josephine-*-x86_64-unknown-linux-gnu.tar.gz.sha256
             target/debian/*.deb
+            target/debian/*.deb.sha256
             target/generate-rpm/*.rpm
+            target/generate-rpm/*.rpm.sha256
 
   crates-io:
     name: publish to crates.io

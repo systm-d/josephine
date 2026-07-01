@@ -24,10 +24,11 @@ clap.workspace = true
 colored.workspace = true
 comfy-table.workspace = true
 indicatif.workspace = true
-josephine-core = { path = "../josephine-core", version = "0.2.1" }
+josephine-core = { path = "../josephine-core", version = "0.2.2" }
 serde_yaml.workspace = true
 tokio.workspace = true
 tracing.workspace = true
+ureq.workspace = true
 
 [dev-dependencies]
 assert_cmd.workspace = true

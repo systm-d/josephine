@@ -34,6 +34,9 @@ computer.**
 - **At-a-glance `status`** — colour-coded summary with a **customizable banner**.
 - **Detailed `doctor`** — check-by-check diagnostics; `--verbose` adds thresholds,
   the top 10 processes and each check's collection interval.
+- **Self-update** — `josephine update` checks GitHub Releases and installs the
+  package matching your install (`.deb` / `.rpm`); reaches the network only when
+  you ask.
 - **100% local** — no cloud, no telemetry, Linux-native (systemd, `/sys`,
   libnotify).
 
@@ -66,8 +69,15 @@ josephine history       # last 24 hours: peaks and notable events
 josephine daemon start  # run the background watcher
 josephine daemon status # daemon state (PID, uptime)
 josephine config show   # print the current configuration
+josephine update        # check GitHub for a newer version and install it
+josephine update --check # only report whether a new version is available
 josephine --version
 ```
+
+`josephine update` reaches the network only when you run it — never in the
+background. It detects how Joséphine was installed (`.deb`/`.rpm`/…), downloads
+the matching package, verifies its checksum, and hands the privileged install
+step (`sudo`) to you.
 
 To keep Joséphine watching across reboots, enable the bundled systemd **user**
 unit ([`packaging/systemd/josephine.service`](packaging/systemd/josephine.service)):
@@ -79,9 +89,9 @@ systemctl --user enable --now josephine
 Configuration lives at `~/.config/josephine/config.yaml` (created on first run).
 History and the daemon's state live under `~/.local/share/josephine/`.
 
-The `status` banner is customizable: drop any ASCII/Braille art in
-`~/.config/josephine/banner.txt` and it replaces the built-in angel (tinted with
-a gradient). A ready-to-use example lives at [`resources/banner.txt`](resources/banner.txt).
+The `status` header is deliberately sober. Want a flourish? Drop any ASCII/Braille
+art in `~/.config/josephine/banner.txt` and it appears above the title, tinted
+with a gradient. A ready-to-use example lives at [`resources/banner.txt`](resources/banner.txt).
 
 ## Documentation
 

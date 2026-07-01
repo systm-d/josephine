@@ -8,6 +8,7 @@ pub mod paths;
 pub mod rules;
 pub mod scheduler;
 pub mod storage;
+pub mod update;
 
 pub use check::{Check, CheckResult, Metric, Severity};
 pub use config::Config;

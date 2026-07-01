@@ -9,8 +9,8 @@ computer.
 
 <div class="features">
   <div class="feature">
-    <h3>🩺 Five checks</h3>
-    <p>CPU, memory, disk, temperature, systemd — early warnings before trouble.</p>
+    <h3>🩺 Six checks</h3>
+    <p>CPU, memory, disk, temperature, systemd and package updates — early warnings before trouble.</p>
   </div>
   <div class="feature">
     <h3>🔔 Kind notifications</h3>
@@ -19,6 +19,10 @@ computer.
   <div class="feature">
     <h3>🔒 Local &amp; private</h3>
     <p>Everything runs on your machine. No cloud, no telemetry.</p>
+  </div>
+  <div class="feature">
+    <h3>⬆️ Easy updates</h3>
+    <p><code>josephine update</code> fetches the latest release and installs it — network only when you ask.</p>
   </div>
 </div>
 
@@ -86,15 +90,24 @@ exact command to dig deeper.
 
 ## Install
 
+Grab a package from the [latest release](https://github.com/systm-d/josephine/releases/latest):
+
 ```sh
-cargo install josephine
+# Debian / Ubuntu
+sudo dpkg -i josephine_*_amd64.deb
+
+# Fedora / RHEL
+sudo rpm -i josephine-*.x86_64.rpm
 ```
+
+Or build from source (Rust 1.85+): `cargo install --git https://github.com/systm-d/josephine josephine`.
 
 ## Usage
 
 ```sh
 josephine            # quick status
 josephine doctor     # detailed diagnostics
+josephine update     # check for a new version and install it
 josephine daemon start
 ```
 

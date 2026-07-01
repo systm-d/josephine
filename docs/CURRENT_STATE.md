@@ -32,6 +32,7 @@ Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est i
 | `history` | ✅ |
 | `daemon start/stop/restart/status/logs` | ✅ |
 | `config show/validate` | ✅ |
+| `update` (`--check`, `--yes`) | ✅ |
 | `clean`, `fix`, `report` | stub |
 | `config edit` | stub |
 

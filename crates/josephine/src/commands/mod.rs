@@ -4,6 +4,7 @@ pub mod doctor_cmd;
 pub mod history_cmd;
 pub mod status_cmd;
 pub mod stub_cmd;
+pub mod update_cmd;
 
 pub use config_cmd::ConfigAction;
 pub use daemon_cmd::DaemonAction;

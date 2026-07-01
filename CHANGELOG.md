@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-07-01
+
+### Added
+
+- `josephine update`: checks GitHub Releases and, on request, downloads and
+  installs the package matching your install channel (`.deb`/`.rpm`), leaving the
+  privileged step (`sudo`) to you. The network is touched only on this explicit
+  command — never in the background. `--check` reports without installing;
+  `--yes` skips the confirmation prompt. Release artifacts now ship a `.sha256`
+  per package so the download can be integrity-checked.
+
 ## [0.2.1] - 2026-07-01
 
 ### Changed
