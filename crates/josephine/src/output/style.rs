@@ -1,7 +1,7 @@
 use std::io::IsTerminal;
 
 use colored::Colorize;
-use josephine_core::check::{Metric, Severity, metric_severity};
+use josephine_core::check::{Metric, metric_severity};
 
 pub fn is_tty() -> bool {
     std::io::stdout().is_terminal()
@@ -14,15 +14,8 @@ pub fn check_label(name: &str) -> &'static str {
         "disk" => "Disque",
         "temperature" => "Température",
         "systemd" => "Services systemd",
+        "updates" => "Mises à jour",
         _ => "Système",
-    }
-}
-
-pub fn severity_icon(severity: Severity) -> &'static str {
-    match severity {
-        Severity::Info => "✓",
-        Severity::Attention => "⚠",
-        Severity::Critique => "✗",
     }
 }
 
@@ -91,6 +84,14 @@ pub fn format_metric_value(metric: &Metric) -> String {
                 format!("{n} redémarrage")
             } else {
                 format!("{n} redémarrages")
+            }
+        }
+        "updates" => {
+            let n = metric.value as u64;
+            match n {
+                0 => "à jour".to_string(),
+                1 => "1 mise à jour".to_string(),
+                _ => format!("{n} mises à jour"),
             }
         }
         _ => format!("{:.1} {}", metric.value, metric.unit),
