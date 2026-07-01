@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New `updates` check: counts available package updates via apt / dnf / pacman.
+- Redesigned `status` screen: angel banner, per-check emoji icons, a system load
+  line (from `/proc/loadavg`), colour-coded values and a rounded advice box.
+- Customizable banner: `status` uses `<config>/banner.txt` (any ASCII/Braille
+  art, tinted with a gradient) when present, else the built-in angel.
+- `josephine doctor --verbose`: adds numeric thresholds, the top 10 processes
+  (CPU & memory) and each check's collection interval.
 - Project landing site (Zola) deployed to GitHub Pages.
 - `josephine daemon run` foreground subcommand for systemd supervision.
 - Packaging: systemd user unit, deb/rpm metadata, AUR PKGBUILD, Homebrew (Linux)
@@ -25,6 +32,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dual-licensed under MIT OR Apache-2.0.
 - Adopted the shared `rust-cli-template` conventions (toolchain, rustfmt, lints,
   release profile, integration tests).
+- Reworked the CLI copy (stubs, `config`, daemon lifecycle, status/doctor/history
+  footers) for a warmer, wittier guardian-angel voice.
+- `josephine doctor` now renders a single unified table (one row per check)
+  instead of one box per check.
+
+### Fixed
+
+- `josephine config edit` now prints a friendly "coming soon" message and exits 0,
+  instead of surfacing as an error (exit 1) like the other stub commands.
 
 ## [0.1.0] - 2026-06-30
 
