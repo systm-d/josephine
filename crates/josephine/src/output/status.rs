@@ -12,8 +12,6 @@ use super::style::{format_metric_value, is_tty, primary_metric};
 /// cursor move so emoji of varying display width never break alignment.
 const LABEL_COLUMN: usize = 6;
 
-/// Fixed width (in columns) reserved for the angel art on the left.
-const ART_WIDTH: usize = 24;
 const LABEL_WIDTH: usize = 20;
 const VALUE_WIDTH: usize = 34;
 const BOX_WIDTH: usize = 70;
@@ -48,37 +46,21 @@ pub fn state_badge(severity: Severity) -> Cell {
 }
 
 // ---------------------------------------------------------------------------
-// Header: angel art beside the title block
+// Header: sober title block
 // ---------------------------------------------------------------------------
 
 fn print_header() {
     let ts = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
-    let header = header_lines(&ts);
 
     println!();
-    match custom_banner() {
-        // A user-provided banner (e.g. large ASCII/Braille art) is stacked above
-        // the title block and tinted with an amber→violet vertical gradient.
-        Some(banner) => {
-            print_banner_gradient(&banner);
-            println!();
-            for line in &header {
-                println!("{line}");
-            }
-        }
-        // Default: the built-in angel sits beside the title block.
-        None => {
-            let art = angel_art();
-            let rows = art.len().max(header.len());
-            for i in 0..rows {
-                let left = match art.get(i) {
-                    Some((text, color)) => render_art_line(text, *color),
-                    None => " ".repeat(ART_WIDTH),
-                };
-                let right = header.get(i).cloned().unwrap_or_default();
-                println!("{left}  {right}");
-            }
-        }
+    // An optional user banner (e.g. large ASCII/Braille art) is stacked above
+    // the title block and tinted with an amber→violet vertical gradient.
+    if let Some(banner) = custom_banner() {
+        print_banner_gradient(&banner);
+        println!();
+    }
+    for line in header_lines(&ts) {
+        println!("{line}");
     }
     println!("{}", "─".repeat(72).dimmed());
     println!();
@@ -115,49 +97,9 @@ fn lerp(a: f64, b: f64, t: f64) -> u8 {
     (a + (b - a) * t).round() as u8
 }
 
-/// The angel: halo, face, spread wings, robe and a heart. Each line carries its
-/// own colour; a `♥` anywhere is always painted pink (see `render_art_line`).
-fn angel_art() -> Vec<(&'static str, Color)> {
-    let amber = Color::TrueColor {
-        r: 224,
-        g: 164,
-        b: 88,
-    };
-    let face = Color::TrueColor {
-        r: 236,
-        g: 190,
-        b: 130,
-    };
-    let wing = Color::TrueColor {
-        r: 190,
-        g: 150,
-        b: 225,
-    };
-    let body = Color::TrueColor {
-        r: 158,
-        g: 128,
-        b: 210,
-    };
-    let star = Color::BrightBlack;
-
-    vec![
-        ("      .  ✦  .      ", star),
-        ("        ___        ", amber),
-        ("       (   )       ", amber),
-        ("       (o‿o)       ", face),
-        ("    ___/     \\___    ", wing),
-        ("   /  /       \\  \\   ", wing),
-        ("  (  (    ♥    )  )  ", wing),
-        ("   \\  \\       /  /   ", wing),
-        ("    \\  `.___.'  /    ", body),
-        ("       \\_____/       ", body),
-    ]
-}
-
 fn header_lines(ts: &str) -> Vec<String> {
     let heart = "♥".truecolor(240, 96, 140);
     vec![
-        String::new(),
         format!("{}", "✨ Joséphine".truecolor(238, 108, 170).bold()),
         format!("{}", "Votre ange gardien système".truecolor(178, 148, 224)),
         String::new(),
@@ -338,25 +280,6 @@ fn pad(s: &str, width: usize) -> String {
         s.to_string()
     } else {
         format!("{s}{}", " ".repeat(width - len))
-    }
-}
-
-/// Render one angel line padded to `ART_WIDTH`; any `♥` is always painted pink,
-/// even when the surrounding line is a different colour.
-fn render_art_line(text: &str, color: Color) -> String {
-    let padded = pad(text, ART_WIDTH);
-    match padded.find('♥') {
-        Some(idx) => {
-            let (pre, rest) = padded.split_at(idx);
-            let post = &rest['♥'.len_utf8()..];
-            format!(
-                "{}{}{}",
-                pre.color(color),
-                "♥".truecolor(240, 96, 140),
-                post.color(color)
-            )
-        }
-        None => padded.color(color).to_string(),
     }
 }
 
