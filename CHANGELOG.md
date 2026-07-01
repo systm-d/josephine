@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-07-01
+
+### Changed
+
+- `status` header is now a sober title block; removed the built-in ASCII-art
+  angel avatar. A custom `<config>/banner.txt` is still honoured when present.
+
 ## [0.2.0] - 2026-07-01
 
 ### Added
