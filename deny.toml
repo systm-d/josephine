@@ -27,6 +27,9 @@ allow = [
     "Zlib",
     "MPL-2.0",
     "CC0-1.0",
+    # Mozilla CA-certificate bundle shipped by webpki-roots (via ureq → rustls),
+    # used by `josephine update` for HTTPS to the GitHub Releases API.
+    "CDLA-Permissive-2.0",
 ]
 confidence-threshold = 0.9
 
