@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-07-01
+
+### Changed
+
+- `status` disk line is easier to read: `20% de « / » (192G / 937G)` — the
+  percentage comes first (like the other checks) and the mount point is quoted
+  so it can't be mistaken for a separator.
+
 ## [0.3.0] - 2026-07-01
 
 ### Added

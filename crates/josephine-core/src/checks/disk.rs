@@ -97,7 +97,7 @@ impl Check for DiskCheck {
 
         let status_value = if worst_total > 0.0 {
             format!(
-                "{worst_mount}   {worst_usage:.0}% ({} / {})",
+                "{worst_usage:.0}% de « {worst_mount} » ({} / {})",
                 crate::check::human_size(worst_used),
                 crate::check::human_size(worst_total)
             )
