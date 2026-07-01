@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-07-01
+
+### Changed
+
+- `josephine update` stages the downloaded package under `/var/tmp` (in an
+  owner-only-writable, ownership-checked subdirectory) instead of `$HOME`, so
+  apt's sandboxed `_apt` user can read it — no more "Download is performed
+  unsandboxed" warning during install. The package stays unreadable-for-write to
+  other users, keeping the verify-then-install path safe on shared machines.
+
 ## [0.3.1] - 2026-07-01
 
 ### Changed

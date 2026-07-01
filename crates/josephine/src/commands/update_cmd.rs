@@ -5,13 +5,13 @@
 //! runs the command explicitly — never in the background (the "100 % local" rule).
 
 use std::io;
+use std::os::unix::fs::{MetadataExt, PermissionsExt};
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitStatus};
 use std::time::Duration;
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use josephine_core::messages;
-use josephine_core::paths::Paths;
 use josephine_core::update::{self, Asset, InstallPlan, ReleaseInfo, UpdateStatus};
 
 use crate::output::{confirm, print_banner};
@@ -94,7 +94,7 @@ fn apply(release: &ReleaseInfo, assume_yes: bool) -> Result<()> {
         return Ok(());
     }
 
-    let dir = Paths::new()?.data_dir.join("updates");
+    let dir = staging_dir()?;
     println!("Téléchargement de {} …", asset.name);
     let package = download(asset, &dir)?;
 
@@ -129,7 +129,6 @@ fn apply(release: &ReleaseInfo, assume_yes: bool) -> Result<()> {
 }
 
 fn download(asset: &Asset, dir: &Path) -> Result<PathBuf> {
-    std::fs::create_dir_all(dir).with_context(|| format!("création de {}", dir.display()))?;
     let dest = dir.join(&asset.name);
 
     let response = ureq::get(&asset.download_url)
@@ -140,7 +139,58 @@ fn download(asset: &Asset, dir: &Path) -> Result<PathBuf> {
     let mut file =
         std::fs::File::create(&dest).with_context(|| format!("création de {}", dest.display()))?;
     io::copy(&mut reader, &mut file).context("écriture du paquet téléchargé")?;
+
+    // World-readable so apt's sandboxed `_apt` user can read the package during
+    // install (silences the "unsandboxed" warning). The staging dir itself stays
+    // owner-only writable, so no one else can swap the file after verification.
+    std::fs::set_permissions(&dest, std::fs::Permissions::from_mode(0o644))
+        .with_context(|| format!("permissions de {}", dest.display()))?;
     Ok(dest)
+}
+
+/// A staging directory apt's sandboxed `_apt` user can read — i.e. outside
+/// `$HOME` (whose `0700` perms block it), under world-writable `/var/tmp` but as
+/// an owner-only-writable subdirectory so no other unprivileged user can swap
+/// the package between checksum verification and install.
+fn staging_dir() -> Result<PathBuf> {
+    let user = std::env::var("USER").unwrap_or_else(|_| "user".to_string());
+    let dir = PathBuf::from("/var/tmp").join(format!("josephine-{user}"));
+
+    match std::fs::create_dir(&dir) {
+        Ok(()) => {}
+        Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
+            // Reuse only if it is genuinely ours — guards against a pre-planted
+            // directory or symlink sitting in the shared /var/tmp.
+            let meta = std::fs::symlink_metadata(&dir)
+                .with_context(|| format!("inspection de {}", dir.display()))?;
+            let ours = current_uid().is_some_and(|uid| meta.uid() == uid);
+            if meta.file_type().is_symlink() || !meta.is_dir() || !ours {
+                bail!(
+                    "le dossier de préparation {} existe déjà sans m'appartenir — \
+                     par prudence, je m'arrête. Supprimez-le puis réessayez.",
+                    dir.display()
+                );
+            }
+        }
+        Err(e) => return Err(e).with_context(|| format!("création de {}", dir.display())),
+    }
+
+    std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o755))
+        .with_context(|| format!("permissions de {}", dir.display()))?;
+    Ok(dir)
+}
+
+/// The caller's real UID, read from `/proc/self/status` (Linux-only).
+fn current_uid() -> Option<u32> {
+    parse_uid(&std::fs::read_to_string("/proc/self/status").ok()?)
+}
+
+fn parse_uid(status: &str) -> Option<u32> {
+    status
+        .lines()
+        .find_map(|line| line.strip_prefix("Uid:"))
+        .and_then(|rest| rest.split_whitespace().next())
+        .and_then(|uid| uid.parse().ok())
 }
 
 /// Verify the package against its published `.sha256`, if one exists. A missing
@@ -179,4 +229,20 @@ fn run_install(command: &[String], sudo: bool) -> Result<ExitStatus> {
         .args(args)
         .status()
         .with_context(|| format!("lancement de « {} »", argv.join(" ")))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_real_uid_from_status() {
+        let sample = "Name:\tjosephine\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\n";
+        assert_eq!(parse_uid(sample), Some(1000));
+    }
+
+    #[test]
+    fn uid_absent_is_none() {
+        assert_eq!(parse_uid("Name:\tx\nGid:\t0\n"), None);
+    }
 }
