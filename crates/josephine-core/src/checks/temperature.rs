@@ -46,6 +46,7 @@ impl Check for TemperatureCheck {
                     "Vérifiez /sys/class/thermal ou installez lm-sensors.".into(),
                 ],
                 top_processes: vec![],
+                status_value: Some("Aucun capteur".into()),
             });
         }
 
@@ -74,6 +75,7 @@ impl Check for TemperatureCheck {
             }],
             details,
             top_processes: vec![format!("Capteur le plus chaud : {hottest} ({max:.1} °C)")],
+            status_value: Some(format!("{max:.0}°C")),
         })
     }
 }

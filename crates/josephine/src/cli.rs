@@ -29,7 +29,11 @@ enum Commands {
     /// Résumé rapide de l'état de la machine
     Status,
     /// Diagnostic complet
-    Doctor,
+    Doctor {
+        /// Rapport détaillé : seuils chiffrés, top 10 processus, intervalles
+        #[arg(short, long)]
+        verbose: bool,
+    },
     /// Historique des dernières 24 heures
     History,
     /// Gestion du démon de surveillance
@@ -74,7 +78,7 @@ async fn dispatch() -> Result<()> {
 
     match cli.command {
         Some(Commands::Status) => status_cmd::run()?,
-        Some(Commands::Doctor) => doctor_cmd::run()?,
+        Some(Commands::Doctor { verbose }) => doctor_cmd::run(verbose)?,
         Some(Commands::History) => history_cmd::run()?,
         Some(Commands::Daemon { action }) => daemon_cmd::run(action).await?,
         Some(Commands::Config { action }) => config_cmd::run(action)?,

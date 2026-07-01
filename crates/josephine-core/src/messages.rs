@@ -20,6 +20,7 @@ pub fn alert_message(
         "temperature" => temperature_alert(metric.value, state, metric, thresholds),
         "systemd" if metric.name == "failed_units" => systemd_failed_alert(metric.value),
         "systemd" => systemd_restarts_alert(metric.value),
+        "updates" => updates_alert(metric.value),
         other => format!(
             "Entre nous, {other} me fait un signe ({:.1} {}). \
              Rien de grave… pour l'instant. `josephine doctor` ?",
@@ -61,6 +62,9 @@ pub fn recovery_message(check_name: &str, metric: &Metric) -> String {
              La stabilité est revenue au poste.",
             metric.value
         ),
+        "updates" => "Tout est à jour — votre machine brille comme un sou neuf. \
+             Beau travail, on peut être fières."
+            .into(),
         other => format!(
             "Tout est rentré dans l'ordre pour {other} ({:.1} {}). \
              Je reprends ma veille discrète.",
@@ -155,6 +159,20 @@ fn systemd_failed_alert(count: f64) -> String {
     format!(
         "Entre nous, {services}. \
          Personne n'est parfait — sauf moi, peut-être.\n\n\
+         La liste : `josephine doctor`.",
+    )
+}
+
+fn updates_alert(count: f64) -> String {
+    let n = count as u64;
+    let (subject, verb) = if n <= 1 {
+        ("mise à jour", "vous attend")
+    } else {
+        ("mises à jour", "vous attendent")
+    };
+    format!(
+        "{n} {subject} {verb}. \
+         Un petit coup de neuf et votre machine sera parée comme un ange.\n\n\
          La liste : `josephine doctor`.",
     )
 }

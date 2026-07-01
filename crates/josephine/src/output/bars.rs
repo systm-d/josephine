@@ -1,5 +1,5 @@
 use comfy_table::Color;
-use josephine_core::check::{Metric, Severity, metric_severity};
+use josephine_core::check::Severity;
 
 pub const BAR_WIDTH: usize = 16;
 
@@ -16,18 +16,4 @@ pub fn severity_color(severity: Severity) -> Color {
         Severity::Attention => Color::Yellow,
         Severity::Critique => Color::Red,
     }
-}
-
-pub fn metric_measure_cell(metric: &Metric) -> comfy_table::Cell {
-    use comfy_table::Cell;
-
-    let severity = metric_severity(metric);
-    let scale = super::style::metric_scale(metric);
-    let bar = bar_plain(metric.value, scale, BAR_WIDTH);
-    let value = super::style::format_metric_value(metric);
-    Cell::new(format!("{bar}  {value:>10}")).fg(severity_color(severity))
-}
-
-pub fn metric_line_cell(metric: &Metric) -> comfy_table::Cell {
-    metric_measure_cell(metric)
 }

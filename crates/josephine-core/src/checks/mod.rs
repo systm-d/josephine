@@ -3,12 +3,14 @@ mod disk;
 mod memory;
 mod systemd;
 mod temperature;
+mod updates;
 
 pub use cpu::CpuCheck;
 pub use disk::DiskCheck;
 pub use memory::MemoryCheck;
 pub use systemd::SystemdCheck;
 pub use temperature::TemperatureCheck;
+pub use updates::UpdatesCheck;
 
 use crate::check::Check;
 use crate::config::ChecksConfig;
@@ -31,6 +33,9 @@ pub fn build_checks(config: &ChecksConfig) -> Vec<Box<dyn Check>> {
     if config.systemd.enabled {
         checks.push(Box::new(SystemdCheck::new(config.systemd.clone())));
     }
+    if config.updates.enabled {
+        checks.push(Box::new(UpdatesCheck::new(config.updates.clone())));
+    }
 
     checks
 }
@@ -42,6 +47,7 @@ pub fn interval_for_check(name: &str, config: &ChecksConfig) -> u64 {
         "disk" => config.disk.interval_secs,
         "temperature" => config.temperature.interval_secs,
         "systemd" => config.systemd.interval_secs,
+        "updates" => config.updates.interval_secs,
         _ => 60,
     }
 }

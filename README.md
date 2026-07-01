@@ -27,6 +27,7 @@ cargo install josephine
 josephine               # quick status summary (default)
 josephine status        # CPU, memory, disk, temperature, systemd at a glance
 josephine doctor        # detailed diagnostics, check by check
+josephine doctor -v     # verbose: thresholds, top 10 processes, intervals
 josephine history       # last 24 hours: peaks and notable events
 josephine daemon start  # run the background watcher
 josephine daemon status # daemon state (PID, uptime)
@@ -36,6 +37,10 @@ josephine --version
 
 Configuration lives at `~/.config/josephine/config.yaml` (created on first run).
 History and the daemon's state live under `~/.local/share/josephine/`.
+
+The `status` banner is customizable: drop any ASCII/Braille art in
+`~/.config/josephine/banner.txt` and it replaces the built-in angel (tinted with
+a gradient). A ready-to-use example lives at [`resources/banner.txt`](resources/banner.txt).
 
 ## Development
 

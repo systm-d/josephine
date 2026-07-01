@@ -10,7 +10,10 @@ use crate::output::{is_tty, print_banner};
 pub fn run() -> Result<()> {
     let config = Config::load_default()?;
     if !config.history.enabled {
-        println!("L'historique est désactivé dans votre configuration.");
+        println!(
+            "✨ Mon carnet de bord fait la sieste (historique désactivé). \
+             Réveillez-le dans la configuration et je noterai tout."
+        );
         return Ok(());
     }
 
@@ -48,9 +51,9 @@ pub fn run() -> Result<()> {
 
     if summary.recent_events.is_empty() {
         if is_tty() {
-            println!("Aucun événement notable — Joséphine veille en silence.\n");
+            println!("Rien à signaler — journée calme, comme je les aime. Je veille en silence.\n");
         } else {
-            println!("Aucun événement notable.\n");
+            println!("Rien à signaler — journée calme, comme je les aime.\n");
         }
         return Ok(());
     }

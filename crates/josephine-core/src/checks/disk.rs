@@ -37,6 +37,8 @@ impl Check for DiskCheck {
         let mut details = Vec::new();
         let mut worst_usage = 0.0_f64;
         let mut worst_mount = String::from("/");
+        let mut worst_used = 0.0_f64;
+        let mut worst_total = 0.0_f64;
 
         for disk in self.disks.list() {
             let fs = disk.file_system().to_string_lossy();
@@ -76,6 +78,8 @@ impl Check for DiskCheck {
             if usage_percent > worst_usage {
                 worst_usage = usage_percent;
                 worst_mount = mount;
+                worst_used = used;
+                worst_total = total;
             }
         }
 
@@ -91,6 +95,16 @@ impl Check for DiskCheck {
             details.push("Aucune partition montée détectée.".into());
         }
 
+        let status_value = if worst_total > 0.0 {
+            format!(
+                "{worst_mount}   {worst_usage:.0}% ({} / {})",
+                crate::check::human_size(worst_used),
+                crate::check::human_size(worst_total)
+            )
+        } else {
+            "Aucune partition".into()
+        };
+
         Ok(CheckResult {
             check_name: "disk".into(),
             metrics,
@@ -98,6 +112,7 @@ impl Check for DiskCheck {
             top_processes: vec![format!(
                 "Partition la plus remplie : {worst_mount} ({worst_usage:.1} %)"
             )],
+            status_value: Some(status_value),
         })
     }
 }
