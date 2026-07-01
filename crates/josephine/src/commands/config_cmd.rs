@@ -1,4 +1,4 @@
-use anyhow::{Result, bail};
+use anyhow::Result;
 use clap::Subcommand;
 use josephine_core::config::Config;
 use josephine_core::paths::Paths;
@@ -26,11 +26,12 @@ pub fn run(action: ConfigAction) -> Result<()> {
         ConfigAction::Validate => {
             let config = Config::load(&paths.config)?;
             config.validate()?;
-            println!("✨ Configuration valide.");
+            println!("✨ Configuration impeccable — pas un pli à repasser sur votre petit nuage.");
         }
         ConfigAction::Edit => {
-            bail!(
-                "Cette fonctionnalité arrive bientôt avec Joséphine.\nÉditez {} manuellement.",
+            println!("✨ L'édition guidée patiente encore au vestiaire des anges.");
+            println!(
+                "   En attendant, ouvrez {} à la main — je relirai par-dessus votre épaule.",
                 paths.config.display()
             );
         }

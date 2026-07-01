@@ -25,29 +25,29 @@ pub async fn run(action: DaemonAction) -> Result<()> {
     match action {
         DaemonAction::Start => {
             control.start()?;
-            println!("✨ Joséphine veille désormais sur votre machine.");
+            println!("✨ Me voilà à mon poste, l'œil ouvert. Vaquez tranquille, je veille.");
         }
         DaemonAction::Stop => {
             control.stop()?;
-            println!("✨ Joséphine s'est endormie. À bientôt.");
+            println!("✨ Je replie mes ailes et m'assoupis. Appelez-moi au moindre souci.");
         }
         DaemonAction::Restart => {
             control.restart()?;
-            println!("✨ Joséphine a repris son poste.");
+            println!("✨ Un battement d'ailes et me revoilà, fraîche et de nouveau de garde.");
         }
         DaemonAction::Status => match control.status()? {
             DaemonStatus::Running { pid, started_at } => {
-                println!("État : en veille (PID {pid})");
+                println!("État : de garde, l'œil ouvert (PID {pid})");
                 if let Some(t) = started_at
                     && let Ok(elapsed) = t.elapsed()
                 {
                     let mins = elapsed.as_secs() / 60;
-                    println!("Depuis : {mins} min");
+                    println!("En faction depuis : {mins} min");
                 }
             }
             DaemonStatus::Stopped => {
-                println!("État : au repos");
-                println!("Lancez `josephine daemon start` pour activer la surveillance.");
+                println!("État : assoupie, les ailes repliées.");
+                println!("Un `josephine daemon start` et je reprends la garde.");
             }
         },
         DaemonAction::Logs => {
