@@ -1,0 +1,9 @@
+# cargo-audit configuration — mirrors the advisory ignore in deny.toml.
+# (cargo-audit does not read deny.toml, hence this separate file.)
+[advisories]
+ignore = [
+    # quick-xml (RUSTSEC-2026-0194) is pulled ONLY on Windows, through
+    # notify-rust → tauri-winrt-notification (toast notifications). Joséphine is
+    # Linux-only, so this code is never compiled or executed here.
+    "RUSTSEC-2026-0194",
+]
