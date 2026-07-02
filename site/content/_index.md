@@ -3,33 +3,35 @@ title = "Joséphine"
 
 [extra]
 tagline = "Your computer's quiet guardian angel."
+lede = "She keeps a gentle eye on your Linux machine — eleven vital signs, watched in silence — and only whispers when something truly needs you. 100% local. No cloud, ever."
 cta = "View on GitHub"
+cta2 = "Install"
 +++
-
-Joséphine watches your Linux machine silently and only speaks up when it helps —
-keeping an eye on **eleven vital signs** and sending warm, plain-language desktop
-notifications. 100% local; no data ever leaves your computer.
 
 <div class="features">
   <div class="feature">
-    <h3>🩺 Eleven checks</h3>
-    <p>CPU, memory, disk, temperature, systemd, updates, network, battery, inodes, SMART disk health and kernel incidents — early warnings before trouble.</p>
+    <span class="feature__icon">🩺</span>
+    <h3>Eleven checks</h3>
+    <p>CPU, memory, disk, temperature, systemd, updates, network, battery, inodes, SMART &amp; kernel.</p>
   </div>
   <div class="feature">
-    <h3>🔔 Kind notifications</h3>
-    <p>Warm desktop messages, never alarmist — never ERROR/FATAL/PANIC.</p>
+    <span class="feature__icon">🔔</span>
+    <h3>Kind alerts</h3>
+    <p>Warm, plain-language desktop notes — never ERROR / FATAL / PANIC.</p>
   </div>
   <div class="feature">
-    <h3>🔒 Local &amp; private</h3>
-    <p>Everything runs on your machine. No cloud, no telemetry.</p>
+    <span class="feature__icon">🔒</span>
+    <h3>Fully local</h3>
+    <p>Everything runs on your machine. No cloud, no telemetry, no account.</p>
   </div>
   <div class="feature">
-    <h3>⬆️ Easy updates</h3>
-    <p><code>josephine update</code> fetches the latest release and installs it — network only when you ask.</p>
+    <span class="feature__icon">⬆️</span>
+    <h3>Self-update</h3>
+    <p><code>josephine update</code> fetches &amp; installs the latest release, on request.</p>
   </div>
 </div>
 
-## See it in action
+## 👀 See it in action
 
 Run `josephine` for a one-screen summary. Each check shows a value and a plain
 state — `OK`, `attention` or `critique`:
@@ -40,7 +42,6 @@ $ josephine
 Votre ange gardien système
 ────────────────────────────────────────────────────────────
   🖥️  Utilisation CPU     24%                               [OK]
-  📈  Charge système      1.42 (1m) 1.05 (5m) 0.98 (15m)    [OK]
   🧠  Mémoire             60% (18G / 31G)                   [OK]
   💽  Espace disque       21% de « / » (195G / 937G)        [OK]
   🌡️  Température         74°C                              [OK]
@@ -52,14 +53,14 @@ Votre ange gardien système
   🐧  Noyau               0 incident (1 h)                  [OK]
 ```
 
-`josephine doctor` then explains, check by check, with per-metric bars and the
-top processes; `josephine history` shows 24-hour min/avg/max with sparkline
-trends.
+`josephine doctor` explains it check by check, with per-metric bars and the top
+processes. `josephine history` shows 24-hour **min / avg / max** with sparkline
+trends: `▁▂▄▇▅▃`.
 
-### Notifications you'll actually read
+### 💬 Notifications you'll actually read
 
-No jargon, no panic. Joséphine speaks like a calm friend — and tells you the
-exact command to dig deeper.
+No jargon, no panic. Joséphine speaks like a calm friend — and always tells you
+the exact command to dig deeper.
 
 <div class="notifs">
   <div class="notif notif--warn">
@@ -80,11 +81,31 @@ exact command to dig deeper.
   </div>
 </div>
 
-## Install
+## 📖 Commands
+
+<ul class="commands">
+  <li><code>josephine</code><span>a one-screen summary of every check</span></li>
+  <li><code>josephine doctor</code><span>detailed diagnostics, check by check (<code>-v</code> for more)</span></li>
+  <li><code>josephine history</code><span>24-hour min/avg/max with sparkline trends</span></li>
+  <li><code>josephine report</code><span>a dated, plain-text health report (<code>-o</code> to a file)</span></li>
+  <li><code>josephine clean</code><span>preview reclaimable disk space (<code>--apply</code> to clear caches)</span></li>
+  <li><code>josephine fix</code><span>guided remediation for failed services / low disk</span></li>
+  <li><code>josephine update</code><span>check for &amp; install a newer version</span></li>
+  <li><code>josephine daemon start</code><span>run the background watcher</span></li>
+  <li><code>josephine config edit</code><span>open the config in <code>$EDITOR</code>, then re-validate</span></li>
+</ul>
+
+Deeper docs live in the repository — [Architecture](https://github.com/systm-d/josephine/blob/main/docs/ARCHITECTURE.md) ·
+[Current state](https://github.com/systm-d/josephine/blob/main/docs/CURRENT_STATE.md) ·
+[Roadmap](https://github.com/systm-d/josephine/blob/main/docs/ROADMAP.md). Your
+configuration lives at `~/.config/josephine/config.yaml` (created on first run),
+and history under `~/.local/share/josephine/`.
+
+## 🕊️ Install {#install}
 
 Grab a package from the [latest release](https://github.com/systm-d/josephine/releases/latest):
 
-```sh
+```
 # Debian / Ubuntu
 sudo dpkg -i josephine_*_amd64.deb
 
@@ -92,17 +113,18 @@ sudo dpkg -i josephine_*_amd64.deb
 sudo rpm -i josephine-*.x86_64.rpm
 ```
 
-Or build from source (Rust 1.85+): `cargo install --git https://github.com/systm-d/josephine josephine`.
+Prefer to build it yourself? `cargo install --git https://github.com/systm-d/josephine josephine` (Rust 1.85+).
 
-## Usage
+To keep Joséphine watching across reboots, enable the bundled systemd **user** unit:
 
-```sh
-josephine            # quick status
-josephine doctor     # detailed diagnostics
-josephine history    # 24h trends (min/avg/max + sparklines)
-josephine update     # check for a new version and install it
-josephine daemon start
+```
+systemctl --user enable --now josephine
 ```
 
-> Joséphine currently speaks **French** — it is part of her character. An
-> English / French language option is on the roadmap.
+<p class="callout">✨ <strong>Joséphine is a guardian angel, not a dashboard.</strong>
+She stays out of your way, keeps her voice warm, and only speaks when it helps —
+<em>made with ♥ for people who'd rather their computer simply took care of
+itself.</em></p>
+
+> The screenshots show Joséphine's French voice — part of her character. An
+> English / French language option is on the way.

@@ -2,14 +2,22 @@
 {% block title %}Joséphine — {{ section.extra.tagline }}{% endblock title %}
 {% block content %}
 <header class="hero">
+  <span class="sparkle" style="top:3rem;left:13%">✦</span>
+  <span class="sparkle" style="top:6.5rem;right:15%;animation-delay:1.4s">✧</span>
+  <span class="sparkle" style="top:12rem;left:24%;animation-delay:2.8s">˚</span>
+  <span class="sparkle" style="top:9rem;right:26%;animation-delay:2s">✦</span>
   <nav class="langs">
     <a href="{{ get_url(path='@/_index.md', lang='en') }}">EN</a>
-    <span>·</span>
     <a href="{{ get_url(path='@/_index.md', lang='fr') }}">FR</a>
   </nav>
-  <h1>✨ Joséphine</h1>
+  <div class="halo">✨</div>
+  <h1>Joséphine</h1>
   <p class="tagline">{{ section.extra.tagline }}</p>
-  <p><a class="button" href="{{ config.extra.repo_url }}">{{ section.extra.cta }}</a></p>
+  <p class="lede">{{ section.extra.lede }}</p>
+  <div class="cta">
+    <a class="button" href="{{ config.extra.repo_url }}">{{ section.extra.cta }}</a>
+    <a class="button button--ghost" href="#install">{{ section.extra.cta2 }}</a>
+  </div>
 </header>
 <main class="container">
   {{ section.content | safe }}
