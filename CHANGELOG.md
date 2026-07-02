@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-01
+
+### Added
+
+- Three new "guardian" checks, bringing the total to eleven:
+  - **inode** — flags filesystems low on inodes (a disk can be "full" on inodes
+    while still showing free space). Reads `df -iP`; runs as a normal user.
+  - **smart** — per-disk SMART self-assessment via `smartctl`, an early warning
+    of drive failure. Off by default (needs root); degrades to an informational
+    "unavailable" rather than a false alarm.
+  - **kernel** — counts recent kernel incidents (OOM kills, oops, BUG, panic)
+    from `journalctl -k`, degrading gracefully when the journal isn't readable.
+- Richer `josephine history`: per-metric **min / avg / max** and a 24-hour
+  **sparkline** trend (`▁▂▃▅▇`) for CPU, memory, disk, temperature, network and
+  battery — instead of only the daily maximum.
+
 ## [0.3.2] - 2026-07-01
 
 ### Changed

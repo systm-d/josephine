@@ -24,7 +24,7 @@ clap.workspace = true
 colored.workspace = true
 comfy-table.workspace = true
 indicatif.workspace = true
-josephine-core = { path = "../josephine-core", version = "0.3.2" }
+josephine-core = { path = "../josephine-core", version = "0.4.0" }
 serde_yaml.workspace = true
 tokio.workspace = true
 tracing.workspace = true

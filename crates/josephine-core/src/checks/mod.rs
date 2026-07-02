@@ -1,8 +1,11 @@
 mod battery;
 mod cpu;
 mod disk;
+mod inode;
+mod kernel;
 mod memory;
 mod network;
+mod smart;
 mod systemd;
 mod temperature;
 mod updates;
@@ -10,8 +13,11 @@ mod updates;
 pub use battery::BatteryCheck;
 pub use cpu::CpuCheck;
 pub use disk::DiskCheck;
+pub use inode::InodeCheck;
+pub use kernel::KernelCheck;
 pub use memory::MemoryCheck;
 pub use network::NetworkCheck;
+pub use smart::SmartCheck;
 pub use systemd::SystemdCheck;
 pub use temperature::TemperatureCheck;
 pub use updates::UpdatesCheck;
@@ -46,6 +52,15 @@ pub fn build_checks(config: &ChecksConfig) -> Vec<Box<dyn Check>> {
     if config.battery.enabled {
         checks.push(Box::new(BatteryCheck::new(config.battery.clone())));
     }
+    if config.inode.enabled {
+        checks.push(Box::new(InodeCheck::new(config.inode.clone())));
+    }
+    if config.smart.enabled {
+        checks.push(Box::new(SmartCheck::new(config.smart.clone())));
+    }
+    if config.kernel.enabled {
+        checks.push(Box::new(KernelCheck::new(config.kernel.clone())));
+    }
 
     checks
 }
@@ -60,6 +75,9 @@ pub fn interval_for_check(name: &str, config: &ChecksConfig) -> u64 {
         "updates" => config.updates.interval_secs,
         "network" => config.network.interval_secs,
         "battery" => config.battery.interval_secs,
+        "inode" => config.inode.interval_secs,
+        "smart" => config.smart.interval_secs,
+        "kernel" => config.kernel.interval_secs,
         _ => 60,
     }
 }

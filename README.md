@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="resources/social_preview-en.png" alt="Joséphine — your computer's quiet guardian angel" width="720">
+  <img src="resources/social-preview-en.png" alt="Joséphine — your computer's quiet guardian angel" width="720">
 </p>
 
 <h1 align="center">Joséphine</h1>
@@ -25,9 +25,9 @@ computer.**
 
 ## Features
 
-- **Eight built-in checks** — CPU, memory, disk, temperature, systemd services,
-  available package updates (apt / dnf / pacman), local network (gateway latency)
-  and battery.
+- **Eleven built-in checks** — CPU, memory, disk, temperature, systemd services,
+  package updates (apt / dnf / pacman), local network (gateway latency), battery,
+  inode usage, SMART disk health (opt-in) and kernel incidents (OOM / oops).
 - **Warm notifications** — plain-language desktop alerts that escalate only when
   it helps; never `ERROR` / `FATAL` / `PANIC`.
 - **Background daemon** — a lightweight systemd *user* service that watches
@@ -66,7 +66,7 @@ josephine               # quick status summary (default)
 josephine status        # CPU, memory, disk, temperature, systemd, updates at a glance
 josephine doctor        # detailed diagnostics, check by check
 josephine doctor -v     # verbose: thresholds, top 10 processes, intervals
-josephine history       # last 24 hours: peaks and notable events
+josephine history       # last 24 h: min/avg/max + sparkline trends, and events
 josephine daemon start  # run the background watcher
 josephine daemon status # daemon state (PID, uptime)
 josephine config show   # print the current configuration

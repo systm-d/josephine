@@ -33,6 +33,12 @@ pub struct ChecksConfig {
     pub network: NetworkCheckConfig,
     #[serde(default)]
     pub battery: BatteryCheckConfig,
+    #[serde(default)]
+    pub inode: CheckThresholds,
+    #[serde(default)]
+    pub smart: SmartCheckConfig,
+    #[serde(default)]
+    pub kernel: KernelCheckConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -113,6 +119,29 @@ pub struct BatteryCheckConfig {
     pub critical: f64,
 }
 
+/// SMART disk health. Off by default: `smartctl` typically needs root, so this
+/// is opt-in for users who run Joséphine (or the check) with the right rights.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct SmartCheckConfig {
+    #[serde(default)]
+    pub enabled: bool,
+    #[serde(default = "default_interval_3600")]
+    pub interval_secs: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct KernelCheckConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    #[serde(default = "default_interval_300")]
+    pub interval_secs: u64,
+    /// Number of kernel incidents (OOM kills, oops…) in the last hour.
+    #[serde(default = "default_kernel_warning")]
+    pub warning: f64,
+    #[serde(default = "default_kernel_critical")]
+    pub critical: f64,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct NotificationsConfig {
     #[serde(default = "default_true")]
@@ -173,6 +202,18 @@ fn default_batt_critical() -> f64 {
     10.0
 }
 
+fn default_interval_300() -> u64 {
+    300
+}
+
+fn default_kernel_warning() -> f64 {
+    1.0
+}
+
+fn default_kernel_critical() -> f64 {
+    3.0
+}
+
 fn default_warning() -> f64 {
     85.0
 }
@@ -229,6 +270,12 @@ impl Default for ChecksConfig {
             updates: UpdatesCheckConfig::default(),
             network: NetworkCheckConfig::default(),
             battery: BatteryCheckConfig::default(),
+            inode: CheckThresholds {
+                interval_secs: 300,
+                ..CheckThresholds::default()
+            },
+            smart: SmartCheckConfig::default(),
+            kernel: KernelCheckConfig::default(),
         }
     }
 }
@@ -262,6 +309,26 @@ impl Default for BatteryCheckConfig {
             interval_secs: 120,
             warning: default_batt_warning(),
             critical: default_batt_critical(),
+        }
+    }
+}
+
+impl Default for SmartCheckConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            interval_secs: default_interval_3600(),
+        }
+    }
+}
+
+impl Default for KernelCheckConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            interval_secs: 300,
+            warning: default_kernel_warning(),
+            critical: default_kernel_critical(),
         }
     }
 }
@@ -353,6 +420,11 @@ impl Config {
         Self::validate_updates(&self.checks.updates)?;
         Self::validate_network(&self.checks.network)?;
         Self::validate_battery(&self.checks.battery)?;
+        Self::validate_thresholds("inode", &self.checks.inode)?;
+        Self::validate_kernel(&self.checks.kernel)?;
+        if self.checks.smart.interval_secs < 5 {
+            bail!("checks.smart.interval_secs doit être ≥ 5 secondes");
+        }
 
         if self.history.retention_days == 0 {
             bail!("history.retention_days doit être supérieur à 0");
@@ -448,6 +520,19 @@ impl Config {
         // Battery thresholds are LOW-water marks: warn above critical.
         if c.critical >= c.warning {
             bail!("checks.battery.critical doit être inférieur à warning (seuils bas)");
+        }
+        Ok(())
+    }
+
+    fn validate_kernel(c: &KernelCheckConfig) -> Result<()> {
+        if c.interval_secs < 5 {
+            bail!("checks.kernel.interval_secs doit être ≥ 5 secondes");
+        }
+        if c.warning < 1.0 || c.critical < 1.0 {
+            bail!("checks.kernel.warning et critical doivent être ≥ 1");
+        }
+        if c.warning >= c.critical {
+            bail!("checks.kernel.warning doit être inférieur à critical");
         }
         Ok(())
     }

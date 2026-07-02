@@ -153,6 +153,9 @@ fn metric_label(name: &str) -> String {
         "gateway_latency_ms" => "Latence passerelle".into(),
         "charge_percent" => "Charge".into(),
         "battery_depletion_percent" => "Décharge".into(),
+        "inode_usage_percent_worst" => "Inodes (max)".into(),
+        "smart_failing" => "Disques en échec".into(),
+        "kernel_incidents" => "Incidents noyau".into(),
         other => other.replace('_', " "),
     }
 }

@@ -6,6 +6,12 @@
 # Use the default advisory database; fail on any unmaintained/vulnerable crate.
 version = 2
 yanked = "deny"
+ignore = [
+    # quick-xml (RUSTSEC-2026-0194) is pulled ONLY on Windows, through
+    # notify-rust → tauri-winrt-notification (toast notifications). Joséphine is
+    # Linux-only, so this code is never compiled or executed here.
+    { id = "RUSTSEC-2026-0194", reason = "Windows-only transitive dep (tauri-winrt-notification); never built on Joséphine's Linux target." },
+]
 
 [licenses]
 version = 2

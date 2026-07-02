@@ -60,7 +60,19 @@ Surveillance locale silencieuse de la **machine** :
 |---|---------|------|
 | 1 | `josephine fix` — actions guidées (systemd, espace disque) | ✅ |
 | 2 | `config edit` — `$EDITOR` + revalidation | ✅ |
-| 3 | Sparklines / synthèse enrichie dans `history` | à venir |
+| 3 | Sparklines / synthèse enrichie dans `history` | ✅ |
+
+---
+
+## v0.5 — Prévoyance ✅
+
+Anticiper les pannes, pas seulement les constater.
+
+| # | Feature | État |
+|---|---------|------|
+| 1 | Check **inodes** (saturation malgré de l'espace libre) | ✅ |
+| 2 | Check **SMART** (santé disque, opt-in car root requis) | ✅ |
+| 3 | Check **noyau/OOM** (incidents récents via `journalctl -k`) | ✅ |
 
 ---
 

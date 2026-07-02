@@ -23,6 +23,9 @@ pub fn alert_message(
         "updates" => updates_alert(metric.value),
         "network" => network_alert(metric.value),
         "battery" => battery_alert(metric.value),
+        "inode" => inode_alert(metric.value),
+        "smart" => smart_alert(metric.value),
+        "kernel" => kernel_alert(metric.value),
         other => format!(
             "Entre nous, {other} me fait un signe ({:.1} {}). \
              Rien de grave… pour l'instant. `josephine doctor` ?",
@@ -72,6 +75,15 @@ pub fn recovery_message(check_name: &str, metric: &Metric) -> String {
             .into(),
         "battery" => "Votre batterie a repris des forces (ou vous voilà branché). \
              Ouf — je respire mieux, moi aussi."
+            .into(),
+        "inode" => "Les inodes ont repris de l'air — le disque respire à nouveau, \
+             ses fichiers bien rangés."
+            .into(),
+        "smart" => "Vos disques affichent de nouveau une mine saine côté SMART. \
+             Je souffle un peu — vous aussi, j'espère."
+            .into(),
+        "kernel" => "Le noyau s'est calmé — plus d'incident à l'horizon. \
+             Le beau temps après l'orage."
             .into(),
         other => format!(
             "Tout est rentré dans l'ordre pour {other} ({:.1} {}). \
@@ -233,6 +245,32 @@ fn battery_alert(depletion_percent: f64) -> String {
         "Votre batterie descend à {charge:.0} %. \
          Un petit branchement et tout le monde respire — pensez au chargeur.\n\n\
          L'état complet : `josephine doctor`.",
+    )
+}
+
+fn inode_alert(percent: f64) -> String {
+    format!(
+        "Les inodes se remplissent ({percent:.0} %). \
+         Une nuée de petits fichiers étouffe le disque — même avec de l'espace libre.\n\n\
+         `josephine doctor` pour repérer la partition.",
+    )
+}
+
+fn smart_alert(failing: f64) -> String {
+    let n = failing as u64;
+    format!(
+        "{n} disque(s) signalent une faiblesse SMART. \
+         Sauvegardez sans tarder — un disque prévenu en vaut deux.\n\n\
+         Le détail : `josephine doctor`.",
+    )
+}
+
+fn kernel_alert(count: f64) -> String {
+    let n = count as u64;
+    format!(
+        "Le noyau a bronché {n} fois cette heure (OOM, oops…). \
+         Quelque chose secoue votre machine sous le capot.\n\n\
+         `josephine doctor` pour y voir plus clair.",
     )
 }
 

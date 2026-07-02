@@ -54,12 +54,12 @@ pub struct EventRecord {
 }
 
 #[derive(Debug, Clone)]
-pub struct HistorySummary {
-    pub cpu_max: Option<f64>,
-    pub memory_max: Option<f64>,
-    pub disk_max: Option<f64>,
-    pub temperature_max: Option<f64>,
-    pub recent_events: Vec<EventRecord>,
+pub struct MetricSummary {
+    pub min: f64,
+    pub avg: f64,
+    pub max: f64,
+    /// Hourly averages over the window, chronological — for a sparkline.
+    pub series: Vec<f64>,
 }
 
 impl Storage {
@@ -146,21 +146,50 @@ impl Storage {
         Ok(())
     }
 
-    pub fn history_last_24h(&self) -> Result<HistorySummary> {
+    /// Min/avg/max and an hourly-averaged series for one metric over the last
+    /// 24 h. Returns `None` when no sample was recorded in the window.
+    pub fn metric_summary_24h(&self, check: &str, metric: &str) -> Result<Option<MetricSummary>> {
         let since = (Utc::now() - Duration::hours(24)).to_rfc3339();
 
-        let cpu_max = self.max_metric("cpu", "usage_percent", &since)?;
-        let memory_max = self.max_metric("memory", "usage_percent", &since)?;
-        let disk_max = self.max_metric("disk", "usage_percent_worst", &since)?;
-        let temperature_max = self.max_metric("temperature", "temp_max_celsius", &since)?;
+        let (min, avg, max): (Option<f64>, Option<f64>, Option<f64>) = self.conn.query_row(
+            "SELECT MIN(value), AVG(value), MAX(value) FROM metrics
+             WHERE check_name = ?1 AND metric_name = ?2 AND recorded_at >= ?3",
+            params![check, metric, &since],
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+        )?;
+        let (Some(min), Some(avg), Some(max)) = (min, avg, max) else {
+            return Ok(None);
+        };
 
+        // One point per hour (buckets keyed by the RFC3339 "YYYY-MM-DDTHH" prefix).
+        let mut stmt = self.conn.prepare(
+            "SELECT AVG(value) FROM metrics
+             WHERE check_name = ?1 AND metric_name = ?2 AND recorded_at >= ?3
+             GROUP BY substr(recorded_at, 1, 13)
+             ORDER BY substr(recorded_at, 1, 13)",
+        )?;
+        let series = stmt
+            .query_map(params![check, metric, &since], |row| row.get::<_, f64>(0))?
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(Some(MetricSummary {
+            min,
+            avg,
+            max,
+            series,
+        }))
+    }
+
+    /// The most recent state-change events over the last 24 h (newest first).
+    pub fn recent_events(&self, limit: usize) -> Result<Vec<EventRecord>> {
+        let since = (Utc::now() - Duration::hours(24)).to_rfc3339();
         let mut stmt = self.conn.prepare(
             "SELECT check_name, metric_name, from_state, to_state, value, message, created_at
-             FROM events WHERE created_at >= ?1 ORDER BY created_at DESC LIMIT 10",
+             FROM events WHERE created_at >= ?1 ORDER BY created_at DESC LIMIT ?2",
         )?;
 
         let events = stmt
-            .query_map(params![since], |row| {
+            .query_map(params![since, limit as i64], |row| {
                 Ok(EventRecord {
                     check_name: row.get(0)?,
                     metric_name: row.get(1)?,
@@ -175,24 +204,7 @@ impl Storage {
                 })
             })?
             .collect::<Result<Vec<_>, _>>()?;
-
-        Ok(HistorySummary {
-            cpu_max,
-            memory_max,
-            disk_max,
-            temperature_max,
-            recent_events: events,
-        })
-    }
-
-    fn max_metric(&self, check: &str, metric: &str, since: &str) -> Result<Option<f64>> {
-        let value: Option<f64> = self.conn.query_row(
-            "SELECT MAX(value) FROM metrics
-             WHERE check_name = ?1 AND metric_name = ?2 AND recorded_at >= ?3",
-            params![check, metric, since],
-            |row| row.get(0),
-        )?;
-        Ok(value)
+        Ok(events)
     }
 }
 

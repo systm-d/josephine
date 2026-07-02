@@ -11,7 +11,7 @@ Ce document est la **source de vérité** pour l'état du dépôt. En cas de div
 
 ## Livré
 
-### Checks (8)
+### Checks (11)
 
 | Check | Métriques principales | Source |
 |-------|----------------------|--------|
@@ -23,6 +23,9 @@ Ce document est la **source de vérité** pour l'état du dépôt. En cas de div
 | `updates` | `updates_available` | `apt` / `dnf` / `pacman` |
 | `network` | `gateway_latency_ms` (LAN, 100 % local) | `/proc/net/route`, `ping` |
 | `battery` | `charge_percent`, `battery_depletion_percent` | `/sys/class/power_supply` |
+| `inode` | `inode_usage_percent_worst` | `df -iP` |
+| `smart` | `smart_failing` (opt-in, root requis) | `smartctl -H` |
+| `kernel` | `kernel_incidents` (OOM, oops…) | `journalctl -k` |
 
 Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est indépendant, configurable via YAML.
 
