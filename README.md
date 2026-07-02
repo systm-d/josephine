@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="resources/social_preview.png" alt="Joséphine — your computer's quiet guardian angel" width="720">
+  <img src="resources/social_preview-en.png" alt="Joséphine — your computer's quiet guardian angel" width="720">
 </p>
 
 <h1 align="center">Joséphine</h1>
