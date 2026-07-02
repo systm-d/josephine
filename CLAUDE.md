@@ -13,8 +13,11 @@ Local Linux system guardian. Rust workspace: `josephine-core` (pure logic) +
 
 ## Product rules
 
-- French, warm tone (*Joséphine, guardian angel*); never `ERROR`/`FATAL`/`PANIC`
-  in user-facing text.
+- **English by default, French via `language: fr` in the config** (see
+  `josephine-core/src/i18n.rs`). Warm *guardian-angel* tone in **both**
+  languages; never `ERROR`/`FATAL`/`PANIC` in user-facing text. Every
+  user-facing string must ship **English and French** — wrap literals in
+  `i18n::t(en, fr)`, or use `match i18n::lang()` for interpolated ones.
 - 100% local, no cloud.
 - Linux-only (systemd, `/sys/class/thermal`, libnotify).
 
@@ -23,7 +26,8 @@ Local Linux system guardian. Rust workspace: `josephine-core` (pure logic) +
 | Need | File |
 |------|------|
 | New check | `crates/josephine-core/src/checks/` + `config.rs` + `messages.rs` |
-| Notification text | `crates/josephine-core/src/messages.rs` |
+| Notification text | `crates/josephine-core/src/messages.rs` (EN + FR) |
+| Any user-facing string | wrap in `i18n::t(en, fr)` / `match i18n::lang()` |
 | CLI output | `crates/josephine/src/output/` |
 | CLI command | `crates/josephine/src/commands/` |
 | DB schema | `crates/josephine-core/migrations/` (versioned, `schema_version`) |

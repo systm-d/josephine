@@ -126,5 +126,6 @@ Elle reste discrète, garde une voix chaleureuse et ne parle que lorsque c'est
 utile — <em>faite avec ♥ pour celles et ceux qui préfèrent que leur ordinateur
 prenne soin de lui-même.</em></p>
 
-> Les captures montrent la voix française de Joséphine — cela fait partie de son
-> caractère. Une option de langue anglais / français arrive bientôt.
+> Joséphine parle **anglais par défaut** — mettez `language: fr` dans la config
+> pour sa voix française (les captures ci-dessus). Le ton chaleureux d'ange
+> gardien est préservé dans les deux langues.

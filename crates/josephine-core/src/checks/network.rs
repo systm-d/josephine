@@ -10,6 +10,7 @@ use anyhow::Result;
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::NetworkCheckConfig;
+use crate::i18n::{self, Lang};
 
 pub struct NetworkCheck {
     config: NetworkCheckConfig,
@@ -37,30 +38,57 @@ impl Check for NetworkCheck {
             Some(gw) => match ping_latency_ms(gw) {
                 Some(ms) => (
                     ms,
-                    format!("{ms:.0} ms (passerelle)"),
-                    format!("Passerelle {gw} — {ms:.1} ms"),
+                    match i18n::lang() {
+                        Lang::En => format!("{ms:.0} ms (gateway)"),
+                        Lang::Fr => format!("{ms:.0} ms (passerelle)"),
+                    },
+                    match i18n::lang() {
+                        Lang::En => format!("Gateway {gw} — {ms:.1} ms"),
+                        Lang::Fr => format!("Passerelle {gw} — {ms:.1} ms"),
+                    },
                 ),
                 None => (
                     self.config.warning,
-                    "Passerelle injoignable".to_string(),
-                    format!("Passerelle {gw} injoignable (ICMP filtré ou hors ligne ?)"),
+                    i18n::t("Gateway unreachable", "Passerelle injoignable").to_string(),
+                    match i18n::lang() {
+                        Lang::En => format!("Gateway {gw} unreachable (ICMP filtered or offline?)"),
+                        Lang::Fr => {
+                            format!("Passerelle {gw} injoignable (ICMP filtré ou hors ligne ?)")
+                        }
+                    },
                 ),
             },
             None => (
                 self.config.warning,
-                "Hors ligne".to_string(),
-                "Aucune passerelle par défaut (machine hors ligne ?).".to_string(),
+                i18n::t("Offline", "Hors ligne").to_string(),
+                i18n::t(
+                    "No default gateway (machine offline?).",
+                    "Aucune passerelle par défaut (machine hors ligne ?).",
+                )
+                .to_string(),
             ),
         };
 
         let mut details = vec![headline];
         if interfaces.is_empty() {
-            details.push("Aucune interface active hors loopback.".into());
+            details.push(
+                i18n::t(
+                    "No active interface beyond loopback.",
+                    "Aucune interface active hors loopback.",
+                )
+                .into(),
+            );
         } else {
-            details.push(format!("Interfaces actives : {}", interfaces.join(", ")));
+            details.push(match i18n::lang() {
+                Lang::En => format!("Active interfaces: {}", interfaces.join(", ")),
+                Lang::Fr => format!("Interfaces actives : {}", interfaces.join(", ")),
+            });
         }
         if !nameservers.is_empty() {
-            details.push(format!("DNS configurés : {}", nameservers.join(", ")));
+            details.push(match i18n::lang() {
+                Lang::En => format!("Configured DNS: {}", nameservers.join(", ")),
+                Lang::Fr => format!("DNS configurés : {}", nameservers.join(", ")),
+            });
         }
 
         Ok(CheckResult {

@@ -5,6 +5,7 @@ use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
 use josephine_core::check::CheckResult;
 use josephine_core::checks::build_checks;
 use josephine_core::config::Config;
+use josephine_core::i18n;
 
 use super::style::{check_label, is_tty};
 
@@ -33,7 +34,7 @@ pub fn run_checks_with_progress(config: &Config) -> Result<Vec<CheckResult>> {
 
     for (index, check) in checks.iter_mut().enumerate() {
         let label = check_label(check.name());
-        pb.set_message(format!("Analyse {label}"));
+        pb.set_message(format!("{} {label}", i18n::t("Checking", "Analyse")));
         results.push(check.run()?);
         pb.set_position((index + 1) as u64);
     }

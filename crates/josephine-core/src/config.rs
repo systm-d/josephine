@@ -3,10 +3,14 @@ use std::path::Path;
 use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 
+use crate::i18n::Lang;
 use crate::paths::Paths;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub struct Config {
+    /// Language for all user-facing text: `en` (default) or `fr`.
+    #[serde(default)]
+    pub language: Lang,
     #[serde(default)]
     pub checks: ChecksConfig,
     #[serde(default)]
@@ -388,16 +392,18 @@ impl Default for HistoryConfig {
 
 impl Config {
     pub fn load(path: &Path) -> Result<Self> {
-        if !path.exists() {
+        let config = if !path.exists() {
             let config = Self::default();
             config.save(path)?;
-            return Ok(config);
-        }
-
-        let content = std::fs::read_to_string(path)
-            .with_context(|| format!("lecture de {}", path.display()))?;
-        let config: Self = serde_yaml::from_str(&content)
-            .with_context(|| format!("analyse YAML de {}", path.display()))?;
+            config
+        } else {
+            let content = std::fs::read_to_string(path)
+                .with_context(|| format!("lecture de {}", path.display()))?;
+            serde_yaml::from_str(&content)
+                .with_context(|| format!("analyse YAML de {}", path.display()))?
+        };
+        // Apply the configured language before anything user-facing is produced.
+        crate::i18n::set_lang(config.language);
         config.validate()?;
         Ok(config)
     }
@@ -423,11 +429,11 @@ impl Config {
         Self::validate_thresholds("inode", &self.checks.inode)?;
         Self::validate_kernel(&self.checks.kernel)?;
         if self.checks.smart.interval_secs < 5 {
-            bail!("checks.smart.interval_secs doit être ≥ 5 secondes");
+            bail!("checks.smart.interval_secs must be ≥ 5 seconds");
         }
 
         if self.history.retention_days == 0 {
-            bail!("history.retention_days doit être supérieur à 0");
+            bail!("history.retention_days must be greater than 0");
         }
 
         Ok(())
@@ -435,104 +441,104 @@ impl Config {
 
     fn validate_thresholds(name: &str, t: &CheckThresholds) -> Result<()> {
         if t.interval_secs < 5 {
-            bail!("checks.{name}.interval_secs doit être ≥ 5 secondes");
+            bail!("checks.{name}.interval_secs must be ≥ 5 seconds");
         }
         if !(0.0..=100.0).contains(&t.warning) {
-            bail!("checks.{name}.warning doit être entre 0 et 100");
+            bail!("checks.{name}.warning must be between 0 and 100");
         }
         if !(0.0..=100.0).contains(&t.critical) {
-            bail!("checks.{name}.critical doit être entre 0 et 100");
+            bail!("checks.{name}.critical must be between 0 and 100");
         }
         if t.warning >= t.critical {
-            bail!("checks.{name}.warning doit être inférieur à critical");
+            bail!("checks.{name}.warning must be less than critical");
         }
         Ok(())
     }
 
     fn validate_temperature(t: &TemperatureThresholds) -> Result<()> {
         if t.interval_secs < 5 {
-            bail!("checks.temperature.interval_secs doit être ≥ 5 secondes");
+            bail!("checks.temperature.interval_secs must be ≥ 5 seconds");
         }
         if !(20.0..=150.0).contains(&t.warning) {
-            bail!("checks.temperature.warning doit être entre 20 et 150 °C");
+            bail!("checks.temperature.warning must be between 20 and 150 °C");
         }
         if !(20.0..=150.0).contains(&t.critical) {
-            bail!("checks.temperature.critical doit être entre 20 et 150 °C");
+            bail!("checks.temperature.critical must be between 20 and 150 °C");
         }
         if t.warning >= t.critical {
-            bail!("checks.temperature.warning doit être inférieur à critical");
+            bail!("checks.temperature.warning must be less than critical");
         }
         Ok(())
     }
 
     fn validate_systemd(c: &SystemdCheckConfig) -> Result<()> {
         if c.interval_secs < 5 {
-            bail!("checks.systemd.interval_secs doit être ≥ 5 secondes");
+            bail!("checks.systemd.interval_secs must be ≥ 5 seconds");
         }
         if c.failed_warning < 1.0 || c.failed_critical < 1.0 {
-            bail!("checks.systemd.failed_warning et failed_critical doivent être ≥ 1");
+            bail!("checks.systemd.failed_warning and failed_critical must be ≥ 1");
         }
         if c.failed_warning >= c.failed_critical {
-            bail!("checks.systemd.failed_warning doit être inférieur à failed_critical");
+            bail!("checks.systemd.failed_warning must be less than failed_critical");
         }
         if c.restarts_warning < 1.0 || c.restarts_critical < 1.0 {
-            bail!("checks.systemd.restarts_warning et restarts_critical doivent être ≥ 1");
+            bail!("checks.systemd.restarts_warning and restarts_critical must be ≥ 1");
         }
         if c.restarts_warning >= c.restarts_critical {
-            bail!("checks.systemd.restarts_warning doit être inférieur à restarts_critical");
+            bail!("checks.systemd.restarts_warning must be less than restarts_critical");
         }
         Ok(())
     }
 
     fn validate_updates(c: &UpdatesCheckConfig) -> Result<()> {
         if c.interval_secs < 5 {
-            bail!("checks.updates.interval_secs doit être ≥ 5 secondes");
+            bail!("checks.updates.interval_secs must be ≥ 5 seconds");
         }
         if c.warning < 1.0 || c.critical < 1.0 {
-            bail!("checks.updates.warning et critical doivent être ≥ 1");
+            bail!("checks.updates.warning and critical must be ≥ 1");
         }
         if c.warning >= c.critical {
-            bail!("checks.updates.warning doit être inférieur à critical");
+            bail!("checks.updates.warning must be less than critical");
         }
         Ok(())
     }
 
     fn validate_network(c: &NetworkCheckConfig) -> Result<()> {
         if c.interval_secs < 5 {
-            bail!("checks.network.interval_secs doit être ≥ 5 secondes");
+            bail!("checks.network.interval_secs must be ≥ 5 seconds");
         }
         if c.warning <= 0.0 || c.critical <= 0.0 {
-            bail!("checks.network.warning et critical doivent être positifs (ms)");
+            bail!("checks.network.warning and critical must be positive (ms)");
         }
         if c.warning >= c.critical {
-            bail!("checks.network.warning doit être inférieur à critical");
+            bail!("checks.network.warning must be less than critical");
         }
         Ok(())
     }
 
     fn validate_battery(c: &BatteryCheckConfig) -> Result<()> {
         if c.interval_secs < 5 {
-            bail!("checks.battery.interval_secs doit être ≥ 5 secondes");
+            bail!("checks.battery.interval_secs must be ≥ 5 seconds");
         }
         if !(0.0..=100.0).contains(&c.warning) || !(0.0..=100.0).contains(&c.critical) {
-            bail!("checks.battery.warning et critical doivent être entre 0 et 100 %");
+            bail!("checks.battery.warning and critical must be between 0 and 100 %");
         }
         // Battery thresholds are LOW-water marks: warn above critical.
         if c.critical >= c.warning {
-            bail!("checks.battery.critical doit être inférieur à warning (seuils bas)");
+            bail!("checks.battery.critical must be less than warning (low-water marks)");
         }
         Ok(())
     }
 
     fn validate_kernel(c: &KernelCheckConfig) -> Result<()> {
         if c.interval_secs < 5 {
-            bail!("checks.kernel.interval_secs doit être ≥ 5 secondes");
+            bail!("checks.kernel.interval_secs must be ≥ 5 seconds");
         }
         if c.warning < 1.0 || c.critical < 1.0 {
-            bail!("checks.kernel.warning et critical doivent être ≥ 1");
+            bail!("checks.kernel.warning and critical must be ≥ 1");
         }
         if c.warning >= c.critical {
-            bail!("checks.kernel.warning doit être inférieur à critical");
+            bail!("checks.kernel.warning must be less than critical");
         }
         Ok(())
     }

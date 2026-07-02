@@ -38,10 +38,13 @@ fn help_lists_core_subcommands() {
 fn clean_previews_without_deleting() {
     Command::cargo_bin("josephine")
         .unwrap()
+        .env("HOME", isolated_home("clean"))
+        .env_remove("XDG_CONFIG_HOME")
+        .env_remove("XDG_DATA_HOME")
         .arg("clean")
         .assert()
         .success()
-        .stdout(contains("aperçu"));
+        .stdout(contains("preview"));
 }
 
 #[test]

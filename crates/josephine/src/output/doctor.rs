@@ -4,6 +4,7 @@ use comfy_table::{Attribute, Cell, ColumnConstraint, ContentArrangement, Table, 
 use josephine_core::check::{CheckResult, Metric, Severity};
 use josephine_core::checks::interval_for_check;
 use josephine_core::config::Config;
+use josephine_core::i18n;
 
 use super::bars::{BAR_WIDTH, bar_plain, severity_color};
 use super::status::state_badge;
@@ -14,7 +15,10 @@ use super::style::{
 const TABLE_WIDTH: u16 = 86;
 
 pub fn print_doctor(results: &[CheckResult], config: &Config, verbose: bool) {
-    print_banner("Analyse détaillée de votre système");
+    print_banner(i18n::t(
+        "A detailed look at your system",
+        "Analyse détaillée de votre système",
+    ));
 
     let mut table = Table::new();
     table.load_preset(UTF8_FULL);
@@ -22,8 +26,8 @@ pub fn print_doctor(results: &[CheckResult], config: &Config, verbose: bool) {
     table.set_width(TABLE_WIDTH);
     table.set_header(vec![
         Cell::new("Check").add_attribute(Attribute::Bold),
-        Cell::new("État").add_attribute(Attribute::Bold),
-        Cell::new("Mesure & détails").add_attribute(Attribute::Bold),
+        Cell::new(i18n::t("State", "État")).add_attribute(Attribute::Bold),
+        Cell::new(i18n::t("Measure & details", "Mesure & détails")).add_attribute(Attribute::Bold),
     ]);
     table.set_constraints(vec![
         ColumnConstraint::Absolute(Width::Fixed(13)),
@@ -47,9 +51,15 @@ pub fn print_doctor(results: &[CheckResult], config: &Config, verbose: bool) {
     println!("{table}");
 
     if verbose {
-        print_footer("Vue condensée : `josephine doctor` (sans --verbose).");
+        print_footer(i18n::t(
+            "Condensed view: `josephine doctor` (without --verbose).",
+            "Vue condensée : `josephine doctor` (sans --verbose).",
+        ));
     } else {
-        print_footer("Tout voir (seuils, processus, intervalles) : `josephine doctor --verbose`.");
+        print_footer(i18n::t(
+            "See everything (thresholds, processes, intervals): `josephine doctor --verbose`.",
+            "Tout voir (seuils, processus, intervalles) : `josephine doctor --verbose`.",
+        ));
     }
     println!();
 }
@@ -82,8 +92,10 @@ fn detail_lines(result: &CheckResult, config: &Config, verbose: bool) -> Vec<Str
         if verbose && let (Some(w), Some(c)) = (metric.threshold_warning, metric.threshold_critical)
         {
             lines.push(format!(
-                "  seuil alerte {} · critique {}",
+                "  {} {} · {} {}",
+                i18n::t("warning", "seuil alerte"),
                 fmt_threshold(w, &metric.unit),
+                i18n::t("critical", "critique"),
                 fmt_threshold(c, &metric.unit)
             ));
         }
@@ -108,7 +120,11 @@ fn detail_lines(result: &CheckResult, config: &Config, verbose: bool) -> Vec<Str
 
     if verbose {
         let secs = interval_for_check(&result.check_name, &config.checks);
-        lines.push(format!("Collecte {}", human_interval(secs)));
+        lines.push(format!(
+            "{} {}",
+            i18n::t("Collected", "Collecte"),
+            human_interval(secs)
+        ));
     }
 
     lines
@@ -116,8 +132,11 @@ fn detail_lines(result: &CheckResult, config: &Config, verbose: bool) -> Vec<Str
 
 fn process_header(check_name: &str) -> Option<&'static str> {
     match check_name {
-        "cpu" => Some("Processus les plus actifs :"),
-        "memory" => Some("Processus les plus gourmands :"),
+        "cpu" => Some(i18n::t("Busiest processes:", "Processus les plus actifs :")),
+        "memory" => Some(i18n::t(
+            "Hungriest processes:",
+            "Processus les plus gourmands :",
+        )),
         _ => None,
     }
 }
@@ -132,30 +151,31 @@ fn fmt_threshold(value: f64, unit: &str) -> String {
 }
 
 fn human_interval(secs: u64) -> String {
+    let every = i18n::t("every", "toutes les");
     if secs >= 3600 && secs % 3600 == 0 {
-        format!("toutes les {} h", secs / 3600)
+        format!("{every} {} h", secs / 3600)
     } else if secs >= 60 && secs % 60 == 0 {
-        format!("toutes les {} min", secs / 60)
+        format!("{every} {} min", secs / 60)
     } else {
-        format!("toutes les {secs} s")
+        format!("{every} {secs} s")
     }
 }
 
 fn metric_label(name: &str) -> String {
     match name {
-        "usage_percent" => "Utilisation".into(),
+        "usage_percent" => i18n::t("Usage", "Utilisation").into(),
         "swap_percent" => "Swap".into(),
-        "usage_percent_worst" => "Disque (max)".into(),
-        "temp_max_celsius" => "Température max".into(),
-        "failed_units" => "Services en échec".into(),
-        "max_restarts" => "Redémarrages max".into(),
-        "updates_available" => "Mises à jour".into(),
-        "gateway_latency_ms" => "Latence passerelle".into(),
-        "charge_percent" => "Charge".into(),
-        "battery_depletion_percent" => "Décharge".into(),
+        "usage_percent_worst" => i18n::t("Disk (max)", "Disque (max)").into(),
+        "temp_max_celsius" => i18n::t("Max temperature", "Température max").into(),
+        "failed_units" => i18n::t("Failed services", "Services en échec").into(),
+        "max_restarts" => i18n::t("Max restarts", "Redémarrages max").into(),
+        "updates_available" => i18n::t("Updates", "Mises à jour").into(),
+        "gateway_latency_ms" => i18n::t("Gateway latency", "Latence passerelle").into(),
+        "charge_percent" => i18n::t("Charge", "Charge").into(),
+        "battery_depletion_percent" => i18n::t("Depletion", "Décharge").into(),
         "inode_usage_percent_worst" => "Inodes (max)".into(),
-        "smart_failing" => "Disques en échec".into(),
-        "kernel_incidents" => "Incidents noyau".into(),
+        "smart_failing" => i18n::t("Failing disks", "Disques en échec").into(),
+        "kernel_incidents" => i18n::t("Kernel incidents", "Incidents noyau").into(),
         other => other.replace('_', " "),
     }
 }

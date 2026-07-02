@@ -4,6 +4,7 @@ use anyhow::{Context, Result};
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::SystemdCheckConfig;
+use crate::i18n::{self, Lang};
 
 pub struct SystemdCheck {
     config: SystemdCheckConfig,
@@ -24,17 +25,29 @@ impl Check for SystemdCheck {
         let snapshot = inspect_systemd()?;
 
         let mut details = vec![
-            format!("Services en échec : {}", snapshot.failed_units.len()),
-            format!(
-                "Redémarrages max (service actif) : {}",
-                snapshot.max_restarts
-            ),
+            match i18n::lang() {
+                Lang::En => format!("Failed services: {}", snapshot.failed_units.len()),
+                Lang::Fr => format!("Services en échec : {}", snapshot.failed_units.len()),
+            },
+            match i18n::lang() {
+                Lang::En => format!("Max restarts (running service): {}", snapshot.max_restarts),
+                Lang::Fr => format!(
+                    "Redémarrages max (service actif) : {}",
+                    snapshot.max_restarts
+                ),
+            },
         ];
 
         if snapshot.failed_units.is_empty() {
-            details.push("Aucun service systemd en échec.".into());
+            details.push(
+                i18n::t(
+                    "No failed systemd services.",
+                    "Aucun service systemd en échec.",
+                )
+                .into(),
+            );
         } else {
-            details.push("Services en échec :".into());
+            details.push(i18n::t("Failed services:", "Services en échec :").into());
             for unit in &snapshot.failed_units {
                 details.push(format!("  • {unit}"));
             }
@@ -43,22 +56,34 @@ impl Check for SystemdCheck {
         if let Some((unit, count)) = &snapshot.max_restart_unit
             && *count > 0
         {
-            details.push(format!("  • {unit} : {count} redémarrage(s)"));
+            details.push(match i18n::lang() {
+                Lang::En => format!("  • {unit}: {count} restart(s)"),
+                Lang::Fr => format!("  • {unit} : {count} redémarrage(s)"),
+            });
         }
 
         if !snapshot.systemd_available {
-            details.push("systemctl indisponible — check systemd ignoré.".into());
+            details.push(
+                i18n::t(
+                    "systemctl unavailable — systemd check skipped.",
+                    "systemctl indisponible — check systemd ignoré.",
+                )
+                .into(),
+            );
         }
 
         let failed_count = snapshot.failed_units.len();
         let status_value = if !snapshot.systemd_available {
-            "systemctl indisponible".to_string()
+            i18n::t("systemctl unavailable", "systemctl indisponible").to_string()
         } else if failed_count == 0 {
-            "Tous les services fonctionnent".to_string()
+            i18n::t("All services running", "Tous les services fonctionnent").to_string()
         } else if failed_count == 1 {
-            "1 service en échec".to_string()
+            i18n::t("1 failed service", "1 service en échec").to_string()
         } else {
-            format!("{failed_count} services en échec")
+            match i18n::lang() {
+                Lang::En => format!("{failed_count} failed services"),
+                Lang::Fr => format!("{failed_count} services en échec"),
+            }
         };
 
         Ok(CheckResult {

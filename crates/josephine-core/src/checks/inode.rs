@@ -7,6 +7,7 @@ use anyhow::Result;
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::CheckThresholds;
+use crate::i18n::{self, Lang};
 
 pub struct InodeCheck {
     thresholds: CheckThresholds,
@@ -39,9 +40,15 @@ fn build_result(readings: &[InodeReading], thresholds: &CheckThresholds) -> Chec
         return CheckResult {
             check_name: "inode".into(),
             metrics: vec![],
-            details: vec!["Information sur les inodes indisponible.".into()],
+            details: vec![
+                i18n::t(
+                    "Inode information unavailable.",
+                    "Information sur les inodes indisponible.",
+                )
+                .into(),
+            ],
             top_processes: vec![],
-            status_value: Some("Indisponible".into()),
+            status_value: Some(i18n::t("Unavailable", "Indisponible").into()),
         };
     }
 
@@ -52,7 +59,10 @@ fn build_result(readings: &[InodeReading], thresholds: &CheckThresholds) -> Chec
 
     let details = readings
         .iter()
-        .map(|r| format!("{} : {:.0} % d'inodes utilisés", r.mount, r.usage_percent))
+        .map(|r| match i18n::lang() {
+            Lang::En => format!("{}: {:.0} % inodes used", r.mount, r.usage_percent),
+            Lang::Fr => format!("{} : {:.0} % d'inodes utilisés", r.mount, r.usage_percent),
+        })
         .collect();
 
     CheckResult {
@@ -66,10 +76,10 @@ fn build_result(readings: &[InodeReading], thresholds: &CheckThresholds) -> Chec
         }],
         details,
         top_processes: vec![],
-        status_value: Some(format!(
-            "{:.0}% de « {} »",
-            worst.usage_percent, worst.mount
-        )),
+        status_value: Some(match i18n::lang() {
+            Lang::En => format!("{:.0}% of “{}”", worst.usage_percent, worst.mount),
+            Lang::Fr => format!("{:.0}% de « {} »", worst.usage_percent, worst.mount),
+        }),
     }
 }
 
@@ -145,7 +155,7 @@ btrfsdev             -      -       -     -  /data
     #[test]
     fn worst_drives_status_and_severity() {
         let result = build_result(&parse_df_inodes(SAMPLE), &thresholds());
-        assert_eq!(result.status_value.as_deref(), Some("9% de « / »"));
+        assert_eq!(result.status_value.as_deref(), Some("9% of “/”"));
         assert_eq!(result.worst_severity(), crate::check::Severity::Info);
     }
 

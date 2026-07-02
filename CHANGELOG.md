@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-07-02
+
+### Added
+
+- **Internationalisation.** Every user-facing string now ships in **English and
+  French**: notifications, `status` / `doctor` / `history` output, all commands,
+  check values, and config-validation errors. Set `language: fr` in the config
+  for the French voice. The warm guardian-angel tone is preserved in both.
+
+### Changed
+
+- **English is now the default language** (Joséphine was French-only). French is
+  one `language: fr` config line away. `CLAUDE.md`, README and docs updated.
+- Landing site redesigned — warmer, livelier (halo hero, gradient feature cards,
+  a commands reference, terminal chrome) and bilingual (EN default + FR), with
+  real, anonymised example output.
+
 ## [0.4.1] - 2026-07-02
 
 ### Fixed

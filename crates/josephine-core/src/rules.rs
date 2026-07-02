@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::check::{Metric, Severity, metric_severity};
 use crate::config::CheckThresholds;
+use crate::i18n::Lang;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AlertState {
@@ -54,11 +55,12 @@ impl RulesEngine {
         check_name: &str,
         metrics: &[Metric],
         thresholds: &CheckThresholds,
+        lang: Lang,
     ) -> Vec<StateTransition> {
         metrics
             .iter()
             .filter(|m| m.threshold_warning.is_some())
-            .filter_map(|metric| self.evaluate_metric(check_name, metric, thresholds))
+            .filter_map(|metric| self.evaluate_metric(check_name, metric, thresholds, lang))
             .collect()
     }
 
@@ -67,6 +69,7 @@ impl RulesEngine {
         check_name: &str,
         metric: &Metric,
         thresholds: &CheckThresholds,
+        lang: Lang,
     ) -> Option<StateTransition> {
         let key = (check_name.to_string(), metric.name.clone());
         let previous = self.states.get(&key).copied().unwrap_or(AlertState::Normal);
@@ -94,9 +97,9 @@ impl RulesEngine {
         }
 
         let message = if recovered {
-            crate::messages::recovery_message(check_name, metric)
+            crate::messages::recovery_message(check_name, metric, lang)
         } else {
-            crate::messages::alert_message(check_name, metric, thresholds, to)
+            crate::messages::alert_message(check_name, metric, thresholds, to, lang)
         };
 
         Some(StateTransition {
@@ -150,10 +153,10 @@ mod tests {
         let t = thresholds();
         let m = metric(90.0, 85.0, 95.0);
 
-        let first = engine.evaluate_check("cpu", std::slice::from_ref(&m), &t);
+        let first = engine.evaluate_check("cpu", std::slice::from_ref(&m), &t, Lang::En);
         assert_eq!(first.len(), 1);
 
-        let second = engine.evaluate_check("cpu", &[m], &t);
+        let second = engine.evaluate_check("cpu", &[m], &t, Lang::En);
         assert!(second.is_empty());
     }
 
@@ -162,8 +165,8 @@ mod tests {
         let mut engine = RulesEngine::new();
         let t = thresholds();
 
-        engine.evaluate_check("cpu", &[metric(90.0, 85.0, 95.0)], &t);
-        let recovery = engine.evaluate_check("cpu", &[metric(50.0, 85.0, 95.0)], &t);
+        engine.evaluate_check("cpu", &[metric(90.0, 85.0, 95.0)], &t, Lang::En);
+        let recovery = engine.evaluate_check("cpu", &[metric(50.0, 85.0, 95.0)], &t, Lang::En);
 
         assert_eq!(recovery.len(), 1);
         assert!(recovery[0].recovered);
@@ -174,8 +177,8 @@ mod tests {
         let mut engine = RulesEngine::new();
         let t = thresholds();
 
-        engine.evaluate_check("cpu", &[metric(86.0, 85.0, 95.0)], &t);
-        let critical = engine.evaluate_check("cpu", &[metric(96.0, 85.0, 95.0)], &t);
+        engine.evaluate_check("cpu", &[metric(86.0, 85.0, 95.0)], &t, Lang::En);
+        let critical = engine.evaluate_check("cpu", &[metric(96.0, 85.0, 95.0)], &t, Lang::En);
 
         assert_eq!(critical.len(), 1);
         assert_eq!(critical[0].to, AlertState::Critical);

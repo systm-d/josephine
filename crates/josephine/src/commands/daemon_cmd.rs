@@ -1,20 +1,21 @@
 use anyhow::Result;
 use clap::Subcommand;
 use josephine_core::daemon::{DaemonControl, DaemonStatus};
+use josephine_core::i18n;
 
 #[derive(Subcommand)]
 pub enum DaemonAction {
-    /// Démarre le démon de surveillance
+    /// Start the monitoring daemon
     Start,
-    /// Arrête le démon
+    /// Stop the daemon
     Stop,
-    /// Redémarre le démon
+    /// Restart the daemon
     Restart,
-    /// Affiche l'état du démon
+    /// Show the daemon's status
     Status,
-    /// Affiche les derniers logs
+    /// Show the latest logs
     Logs,
-    /// Exécute le watcher en avant-plan (utilisé par systemd `--user`)
+    /// Run the watcher in the foreground (used by the systemd `--user` unit)
     Run,
 }
 
@@ -25,29 +26,68 @@ pub async fn run(action: DaemonAction) -> Result<()> {
     match action {
         DaemonAction::Start => {
             control.start()?;
-            println!("✨ Me voilà à mon poste, l'œil ouvert. Vaquez tranquille, je veille.");
+            println!(
+                "{}",
+                i18n::t(
+                    "✨ Here I am at my post, eyes open. Go about your day — I'm watching.",
+                    "✨ Me voilà à mon poste, l'œil ouvert. Vaquez tranquille, je veille.",
+                )
+            );
         }
         DaemonAction::Stop => {
             control.stop()?;
-            println!("✨ Je replie mes ailes et m'assoupis. Appelez-moi au moindre souci.");
+            println!(
+                "{}",
+                i18n::t(
+                    "✨ I fold my wings and doze off. Call me at the slightest trouble.",
+                    "✨ Je replie mes ailes et m'assoupis. Appelez-moi au moindre souci.",
+                )
+            );
         }
         DaemonAction::Restart => {
             control.restart()?;
-            println!("✨ Un battement d'ailes et me revoilà, fraîche et de nouveau de garde.");
+            println!(
+                "{}",
+                i18n::t(
+                    "✨ A flap of the wings and here I am again, fresh and back on watch.",
+                    "✨ Un battement d'ailes et me revoilà, fraîche et de nouveau de garde.",
+                )
+            );
         }
         DaemonAction::Status => match control.status()? {
             DaemonStatus::Running { pid, started_at } => {
-                println!("État : de garde, l'œil ouvert (PID {pid})");
+                println!(
+                    "{} (PID {pid})",
+                    i18n::t(
+                        "State: on watch, eyes open",
+                        "État : de garde, l'œil ouvert"
+                    )
+                );
                 if let Some(t) = started_at
                     && let Ok(elapsed) = t.elapsed()
                 {
                     let mins = elapsed.as_secs() / 60;
-                    println!("En faction depuis : {mins} min");
+                    println!(
+                        "{} {mins} min",
+                        i18n::t("On duty for:", "En faction depuis :")
+                    );
                 }
             }
             DaemonStatus::Stopped => {
-                println!("État : assoupie, les ailes repliées.");
-                println!("Un `josephine daemon start` et je reprends la garde.");
+                println!(
+                    "{}",
+                    i18n::t(
+                        "State: dozing, wings folded.",
+                        "État : assoupie, les ailes repliées."
+                    )
+                );
+                println!(
+                    "{}",
+                    i18n::t(
+                        "A `josephine daemon start` and I'm back on guard.",
+                        "Un `josephine daemon start` et je reprends la garde.",
+                    )
+                );
             }
         },
         DaemonAction::Logs => {

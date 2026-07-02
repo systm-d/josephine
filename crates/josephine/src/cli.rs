@@ -9,35 +9,33 @@ use crate::commands::{
     fix_cmd, history_cmd, notify_cmd, report_cmd, status_cmd, update_cmd,
 };
 
-/// L'ange gardien de votre ordinateur
+/// Your computer's guardian angel
 #[derive(Parser)]
-#[command(
-    name = "josephine",
-    about = "L'ange gardien de votre ordinateur",
-    version
-)]
+#[command(name = "josephine", about = "Your computer's guardian angel", version)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
 
-    /// Mode interne — lancé par `josephine daemon start`
+    /// Internal mode — spawned by `josephine daemon start`
     #[arg(long = "__daemon__", hide = true)]
     daemon_internal: bool,
 }
 
+// clap help is always in English (the runtime language option covers command
+// output; localising --help would mean building the Command tree dynamically).
 #[derive(Subcommand)]
 enum Commands {
-    /// Résumé rapide de l'état de la machine
+    /// Quick summary of your machine's health
     Status,
-    /// Diagnostic complet
+    /// Full diagnostics
     Doctor {
-        /// Rapport détaillé : seuils chiffrés, top 10 processus, intervalles
+        /// Detailed report: numeric thresholds, top 10 processes, intervals
         #[arg(short, long)]
         verbose: bool,
     },
-    /// Historique des dernières 24 heures
+    /// The last 24 hours
     History,
-    /// Gestion du démon de surveillance
+    /// Manage the monitoring daemon
     Daemon {
         #[command(subcommand)]
         action: DaemonAction,
@@ -47,43 +45,49 @@ enum Commands {
         #[command(subcommand)]
         action: ConfigAction,
     },
-    /// Fait le point sur l'espace récupérable (aperçu par défaut)
+    /// Report reclaimable disk space (preview by default)
     Clean {
-        /// Nettoie réellement les miniatures au lieu du simple aperçu
+        /// Actually clear the thumbnail cache instead of just previewing
         #[arg(long)]
         apply: bool,
     },
-    /// Corrections guidées : ce qui cloche et comment y remédier
+    /// Guided fixes: what's wrong and how to remedy it
     Fix,
-    /// Rapport système daté, à l'écran ou dans un fichier
+    /// Dated system report, to the screen or a file
     Report {
-        /// Écrit le rapport dans ce fichier au lieu de l'afficher
+        /// Write the report to this file instead of printing it
         #[arg(short, long)]
         output: Option<PathBuf>,
     },
-    /// Notifications de bureau
+    /// Desktop notifications
     Notify {
         #[command(subcommand)]
         action: NotifyAction,
     },
-    /// Vérifie et installe la dernière version de Joséphine
+    /// Check for and install the latest version of Joséphine
     Update {
-        /// Signale une nouvelle version sans l'installer
+        /// Report a new version without installing it
         #[arg(long)]
         check: bool,
-        /// N'attend pas de confirmation avant d'installer
+        /// Don't wait for confirmation before installing
         #[arg(short = 'y', long = "yes")]
         yes: bool,
     },
 }
 
 /// Entry point: parse, dispatch, and map errors to a process exit code.
-/// The warm French tone is intentional and preserved.
 pub async fn run() -> ExitCode {
+    use josephine_core::i18n::{self, Lang};
     match dispatch().await {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
-            eprintln!("✨ Joséphine a rencontré un souci : {e}");
+            eprintln!(
+                "{}",
+                match i18n::lang() {
+                    Lang::En => format!("✨ Joséphine ran into a snag: {e}"),
+                    Lang::Fr => format!("✨ Joséphine a rencontré un souci : {e}"),
+                }
+            );
             ExitCode::from(1)
         }
     }
@@ -94,6 +98,11 @@ async fn dispatch() -> Result<()> {
 
     if cli.daemon_internal {
         return josephine_core::daemon::run_daemon_foreground().await;
+    }
+
+    // Apply the configured language up front so every command renders alike.
+    if let Ok(config) = josephine_core::config::Config::load_default() {
+        josephine_core::i18n::set_lang(config.language);
     }
 
     match cli.command {

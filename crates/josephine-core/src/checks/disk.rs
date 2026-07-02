@@ -3,6 +3,7 @@ use sysinfo::{DiskKind, Disks};
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::CheckThresholds;
+use crate::i18n::{self, Lang};
 
 pub struct DiskCheck {
     thresholds: CheckThresholds,
@@ -56,15 +57,18 @@ impl Check for DiskCheck {
             let usage_percent = (used / total) * 100.0;
             let mount = disk.mount_point().to_string_lossy().to_string();
 
-            details.push(format!(
-                "{mount} ({fs}) : {:.1} % utilisé ({:.1} / {:.1} Go)",
-                usage_percent,
-                used / 1_073_741_824.0,
-                total / 1_073_741_824.0
-            ));
+            let used_gb = used / 1_073_741_824.0;
+            let total_gb = total / 1_073_741_824.0;
+            details.push(match i18n::lang() {
+                Lang::En => format!("{mount} ({fs}): {usage_percent:.1} % used ({used_gb:.1} / {total_gb:.1} GB)"),
+                Lang::Fr => format!("{mount} ({fs}) : {usage_percent:.1} % utilisé ({used_gb:.1} / {total_gb:.1} Go)"),
+            });
 
             if disk.kind() == DiskKind::SSD {
-                details.push(format!("  └ SSD détecté sur {mount}"));
+                details.push(match i18n::lang() {
+                    Lang::En => format!("  └ SSD detected on {mount}"),
+                    Lang::Fr => format!("  └ SSD détecté sur {mount}"),
+                });
             }
 
             metrics.push(Metric {
@@ -92,26 +96,36 @@ impl Check for DiskCheck {
         });
 
         if details.is_empty() {
-            details.push("Aucune partition montée détectée.".into());
+            details.push(
+                i18n::t(
+                    "No mounted partition detected.",
+                    "Aucune partition montée détectée.",
+                )
+                .into(),
+            );
         }
 
         let status_value = if worst_total > 0.0 {
-            format!(
-                "{worst_usage:.0}% de « {worst_mount} » ({} / {})",
-                crate::check::human_size(worst_used),
-                crate::check::human_size(worst_total)
-            )
+            let u = crate::check::human_size(worst_used);
+            let t = crate::check::human_size(worst_total);
+            match i18n::lang() {
+                Lang::En => format!("{worst_usage:.0}% of “{worst_mount}” ({u} / {t})"),
+                Lang::Fr => format!("{worst_usage:.0}% de « {worst_mount} » ({u} / {t})"),
+            }
         } else {
-            "Aucune partition".into()
+            i18n::t("No partition", "Aucune partition").into()
+        };
+
+        let fullest = match i18n::lang() {
+            Lang::En => format!("Fullest partition: {worst_mount} ({worst_usage:.1} %)"),
+            Lang::Fr => format!("Partition la plus remplie : {worst_mount} ({worst_usage:.1} %)"),
         };
 
         Ok(CheckResult {
             check_name: "disk".into(),
             metrics,
             details,
-            top_processes: vec![format!(
-                "Partition la plus remplie : {worst_mount} ({worst_usage:.1} %)"
-            )],
+            top_processes: vec![fullest],
             status_value: Some(status_value),
         })
     }

@@ -19,9 +19,9 @@ pending updates, detects trouble early, and sends warm, plain-language desktop
 notifications — never intrusive, always local. **No data ever leaves your
 computer.**
 
-> User-facing messages and notifications are intentionally in **French** — that
-> is part of Joséphine's character. See [`docs/README.fr.md`](docs/README.fr.md)
-> for the French product guide.
+> Joséphine speaks **English by default**; set `language: fr` in
+> `~/.config/josephine/config.yaml` for her French voice. The warm
+> guardian-angel tone is preserved in both.
 
 ## Features
 
@@ -38,6 +38,8 @@ computer.**
 - **Self-update** — `josephine update` checks GitHub Releases and installs the
   package matching your install (`.deb` / `.rpm`); reaches the network only when
   you ask.
+- **Bilingual** — English by default, French with `language: fr` in the config;
+  warm, never alarmist, in both.
 - **100% local** — no cloud, no telemetry, Linux-native (systemd, `/sys`,
   libnotify).
 

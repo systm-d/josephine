@@ -8,6 +8,7 @@ use anyhow::Result;
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::KernelCheckConfig;
+use crate::i18n::{self, Lang};
 
 pub struct KernelCheck {
     config: KernelCheckConfig,
@@ -33,17 +34,29 @@ impl Check for KernelCheck {
 }
 
 fn build_result(incidents: usize, config: &KernelCheckConfig) -> CheckResult {
-    let status_value = match incidents {
-        0 => "0 incident (1 h)".to_string(),
-        1 => "1 incident (1 h)".to_string(),
-        n => format!("{n} incidents (1 h)"),
+    let status_value = match (i18n::lang(), incidents) {
+        (Lang::En, 1) => "1 incident (1 h)".to_string(),
+        (Lang::En, n) => format!("{n} incidents (1 h)"),
+        (Lang::Fr, 1) => "1 incident (1 h)".to_string(),
+        (Lang::Fr, n) => format!("{n} incidents (1 h)"),
     };
 
-    let mut details = vec![format!(
-        "{incidents} incident(s) noyau dans la dernière heure (OOM, oops, BUG…)"
-    )];
+    let mut details = vec![match i18n::lang() {
+        Lang::En => {
+            format!("{incidents} kernel incident(s) in the last hour (OOM, oops, BUG…)")
+        }
+        Lang::Fr => {
+            format!("{incidents} incident(s) noyau dans la dernière heure (OOM, oops, BUG…)")
+        }
+    }];
     if incidents == 0 {
-        details.push("Le noyau ronronne — rien à signaler.".into());
+        details.push(
+            i18n::t(
+                "The kernel is purring — nothing to report.",
+                "Le noyau ronronne — rien à signaler.",
+            )
+            .into(),
+        );
     }
 
     CheckResult {
@@ -65,9 +78,15 @@ fn unavailable() -> CheckResult {
     CheckResult {
         check_name: "kernel".into(),
         metrics: vec![],
-        details: vec!["Journal noyau inaccessible (groupe `systemd-journal` requis ?).".into()],
+        details: vec![
+            i18n::t(
+                "Kernel journal unreadable (systemd-journal group required?).",
+                "Journal noyau inaccessible (groupe `systemd-journal` requis ?).",
+            )
+            .into(),
+        ],
         top_processes: vec![],
-        status_value: Some("Journal inaccessible".into()),
+        status_value: Some(i18n::t("Journal unreadable", "Journal inaccessible").into()),
     }
 }
 
@@ -139,7 +158,7 @@ audit: type=1400
     fn calm_kernel_is_info() {
         let result = build_result(0, &config());
         assert_eq!(result.worst_severity(), crate::check::Severity::Info);
-        assert_eq!(result.status_value.as_deref(), Some("0 incident (1 h)"));
+        assert_eq!(result.status_value.as_deref(), Some("0 incidents (1 h)"));
     }
 
     #[test]

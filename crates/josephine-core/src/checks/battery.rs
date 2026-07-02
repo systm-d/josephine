@@ -10,6 +10,7 @@ use anyhow::Result;
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::BatteryCheckConfig;
+use crate::i18n::{self, Lang};
 
 pub struct BatteryCheck {
     config: BatteryCheckConfig,
@@ -49,9 +50,15 @@ fn build_result(batteries: &[BatteryReading], config: &BatteryCheckConfig) -> Ch
         return CheckResult {
             check_name: "battery".into(),
             metrics: vec![],
-            details: vec!["Aucune batterie détectée (poste fixe ?).".into()],
+            details: vec![
+                i18n::t(
+                    "No battery detected (desktop?).",
+                    "Aucune batterie détectée (poste fixe ?).",
+                )
+                .into(),
+            ],
             top_processes: vec![],
-            status_value: Some("Pas de batterie".into()),
+            status_value: Some(i18n::t("No battery", "Pas de batterie").into()),
         };
     };
 
@@ -84,12 +91,15 @@ fn build_result(batteries: &[BatteryReading], config: &BatteryCheckConfig) -> Ch
         },
     ];
 
-    let mut details = vec![format!(
-        "{} : {:.0} % — {}",
-        batt.name, batt.capacity, state
-    )];
+    let mut details = vec![match i18n::lang() {
+        Lang::En => format!("{}: {:.0} % — {}", batt.name, batt.capacity, state),
+        Lang::Fr => format!("{} : {:.0} % — {}", batt.name, batt.capacity, state),
+    }];
     if let Some(health) = batt.health {
-        details.push(format!("Santé : {health:.0} % de la capacité d'origine"));
+        details.push(match i18n::lang() {
+            Lang::En => format!("Health: {health:.0} % of design capacity"),
+            Lang::Fr => format!("Santé : {health:.0} % de la capacité d'origine"),
+        });
     }
 
     CheckResult {
@@ -103,11 +113,11 @@ fn build_result(batteries: &[BatteryReading], config: &BatteryCheckConfig) -> Ch
 
 fn translate_status(status: &str) -> &'static str {
     match status.trim() {
-        "Charging" => "en charge",
-        "Discharging" => "sur batterie",
-        "Full" => "pleine",
-        "Not charging" => "branchée",
-        _ => "état inconnu",
+        "Charging" => i18n::t("charging", "en charge"),
+        "Discharging" => i18n::t("on battery", "sur batterie"),
+        "Full" => i18n::t("full", "pleine"),
+        "Not charging" => i18n::t("plugged in", "branchée"),
+        _ => i18n::t("unknown state", "état inconnu"),
     }
 }
 
@@ -185,7 +195,7 @@ mod tests {
     fn no_battery_is_informational() {
         let result = build_result(&[], &config());
         assert_eq!(result.worst_severity(), crate::check::Severity::Info);
-        assert_eq!(result.status_value.as_deref(), Some("Pas de batterie"));
+        assert_eq!(result.status_value.as_deref(), Some("No battery"));
     }
 
     #[test]

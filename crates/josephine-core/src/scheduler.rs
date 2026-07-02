@@ -52,6 +52,7 @@ impl Scheduler {
             let check_name = check.name().to_string();
             let interval = interval_for_check(&check_name, &config.checks);
             let thresholds = thresholds_for(&check_name, &config);
+            let lang = config.language;
             let engine = Arc::clone(&engine);
             let storage = Arc::clone(&storage);
 
@@ -81,8 +82,12 @@ impl Scheduler {
 
                             {
                                 let mut rules = engine.lock().await;
-                                let transitions =
-                                    rules.evaluate_check(&check_name, &result.metrics, &thresholds);
+                                let transitions = rules.evaluate_check(
+                                    &check_name,
+                                    &result.metrics,
+                                    &thresholds,
+                                    lang,
+                                );
 
                                 for transition in transitions {
                                     let store = storage.lock().await;

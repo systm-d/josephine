@@ -4,6 +4,7 @@ use anyhow::Result;
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::UpdatesCheckConfig;
+use crate::i18n::{self, Lang};
 
 pub struct UpdatesCheck {
     config: UpdatesCheckConfig,
@@ -47,23 +48,40 @@ impl Check for UpdatesCheck {
 
         let mut details = Vec::new();
         match manager {
-            Some(m) => details.push(format!("Gestionnaire : {}", m.label())),
-            None => details.push("Aucun gestionnaire de paquets reconnu (apt/dnf/pacman).".into()),
+            Some(m) => details.push(match i18n::lang() {
+                Lang::En => format!("Manager: {}", m.label()),
+                Lang::Fr => format!("Gestionnaire : {}", m.label()),
+            }),
+            None => details.push(
+                i18n::t(
+                    "No recognised package manager (apt/dnf/pacman).",
+                    "Aucun gestionnaire de paquets reconnu (apt/dnf/pacman).",
+                )
+                .into(),
+            ),
         }
-        details.push(format!("Mises à jour disponibles : {count}"));
+        details.push(match i18n::lang() {
+            Lang::En => format!("Available updates: {count}"),
+            Lang::Fr => format!("Mises à jour disponibles : {count}"),
+        });
         if !names.is_empty() {
             names.truncate(10);
-            details.push("Paquets concernés :".into());
+            details.push(i18n::t("Packages concerned:", "Paquets concernés :").into());
             for name in &names {
                 details.push(format!("  • {name}"));
             }
         }
 
         let status_value = match manager {
-            None => "Gestionnaire inconnu".to_string(),
-            Some(_) if count == 0 => "À jour".to_string(),
-            Some(_) if count == 1 => "1 mise à jour disponible".to_string(),
-            Some(_) => format!("{count} mises à jour disponibles"),
+            None => i18n::t("Unknown manager", "Gestionnaire inconnu").to_string(),
+            Some(_) if count == 0 => i18n::t("Up to date", "À jour").to_string(),
+            Some(_) if count == 1 => {
+                i18n::t("1 update available", "1 mise à jour disponible").to_string()
+            }
+            Some(_) => match i18n::lang() {
+                Lang::En => format!("{count} updates available"),
+                Lang::Fr => format!("{count} mises à jour disponibles"),
+            },
         };
 
         Ok(CheckResult {

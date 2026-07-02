@@ -3,15 +3,16 @@ use std::process::Command;
 use anyhow::{Context, Result};
 use clap::Subcommand;
 use josephine_core::config::Config;
+use josephine_core::i18n;
 use josephine_core::paths::Paths;
 
 #[derive(Subcommand)]
 pub enum ConfigAction {
-    /// Affiche la configuration actuelle
+    /// Show the current configuration
     Show,
-    /// Valide la configuration
+    /// Validate the configuration
     Validate,
-    /// Ouvre la configuration dans $EDITOR puis la revalide
+    /// Open the configuration in $EDITOR, then re-validate it
     Edit,
 }
 
@@ -23,12 +24,22 @@ pub fn run(action: ConfigAction) -> Result<()> {
         ConfigAction::Show => {
             let config = Config::load(&paths.config)?;
             println!("{}", serde_yaml::to_string(&config)?);
-            println!("# Fichier : {}", paths.config.display());
+            println!(
+                "{} {}",
+                i18n::t("# File:", "# Fichier :"),
+                paths.config.display()
+            );
         }
         ConfigAction::Validate => {
             let config = Config::load(&paths.config)?;
             config.validate()?;
-            println!("✨ Configuration impeccable — pas un pli à repasser sur votre petit nuage.");
+            println!(
+                "{}",
+                i18n::t(
+                    "✨ Configuration spotless — not a crease to iron on your little cloud.",
+                    "✨ Configuration impeccable — pas un pli à repasser sur votre petit nuage.",
+                )
+            );
         }
         ConfigAction::Edit => {
             // Make sure the file exists (creates a default) before editing.
@@ -41,23 +52,42 @@ pub fn run(action: ConfigAction) -> Result<()> {
             let status = Command::new(&editor)
                 .arg(&paths.config)
                 .status()
-                .with_context(|| format!("lancement de l'éditeur « {editor} »"))?;
+                .with_context(|| format!("launching editor `{editor}`"))?;
 
             if !status.success() {
-                println!("✨ L'éditeur s'est refermé sans conclure — je n'ai touché à rien.");
+                println!(
+                    "{}",
+                    i18n::t(
+                        "✨ The editor closed without finishing — I touched nothing.",
+                        "✨ L'éditeur s'est refermé sans conclure — je n'ai touché à rien.",
+                    )
+                );
                 return Ok(());
             }
 
             match Config::load(&paths.config) {
-                Ok(_) => {
-                    println!("✨ Configuration relue et validée — pas un pli de travers.")
-                }
+                Ok(_) => println!(
+                    "{}",
+                    i18n::t(
+                        "✨ Configuration re-read and validated — not a fold out of place.",
+                        "✨ Configuration relue et validée — pas un pli de travers.",
+                    )
+                ),
                 Err(e) => {
-                    println!("✨ Hmm, votre configuration a un petit accroc :");
+                    println!(
+                        "{}",
+                        i18n::t(
+                            "✨ Hmm, your configuration has a little snag:",
+                            "✨ Hmm, votre configuration a un petit accroc :",
+                        )
+                    );
                     println!("   {e}");
                     println!(
-                        "   Relancez `josephine config edit` pour la remettre d'aplomb — \
-                         vos réglages sont conservés tels quels."
+                        "{}",
+                        i18n::t(
+                            "   Run `josephine config edit` again to set it straight — your settings are kept as-is.",
+                            "   Relancez `josephine config edit` pour la remettre d'aplomb — vos réglages sont conservés tels quels.",
+                        )
                     );
                 }
             }

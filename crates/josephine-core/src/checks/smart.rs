@@ -11,6 +11,7 @@ use anyhow::Result;
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::SmartCheckConfig;
+use crate::i18n::{self, Lang};
 
 pub struct SmartCheck {
     #[allow(dead_code)]
@@ -37,9 +38,10 @@ impl Check for SmartCheck {
 
     fn run(&mut self) -> Result<CheckResult> {
         if !tool_available() {
-            return Ok(unavailable(
+            return Ok(unavailable(i18n::t(
+                "smartmontools not installed (`smartmontools` package)",
                 "smartmontools non installé (paquet `smartmontools`)",
-            ));
+            )));
         }
 
         let devices = block_devices();
@@ -51,27 +53,40 @@ impl Check for SmartCheck {
             match device_health(device) {
                 Health::Passed => {
                     readable += 1;
-                    details.push(format!("{device} : sain (SMART OK)"));
+                    details.push(match i18n::lang() {
+                        Lang::En => format!("{device}: healthy (SMART OK)"),
+                        Lang::Fr => format!("{device} : sain (SMART OK)"),
+                    });
                 }
                 Health::Failing => {
                     readable += 1;
                     failing += 1;
-                    details.push(format!("{device} : ⚠ SMART en échec — sauvegardez !"));
+                    details.push(match i18n::lang() {
+                        Lang::En => format!("{device}: ⚠ SMART failing — back up!"),
+                        Lang::Fr => format!("{device} : ⚠ SMART en échec — sauvegardez !"),
+                    });
                 }
                 Health::Unknown => {}
             }
         }
 
         if readable == 0 {
-            return Ok(unavailable(
+            return Ok(unavailable(i18n::t(
+                "SMART status unreadable (root required, or disks without SMART)",
                 "état SMART illisible (droits root requis, ou disques sans SMART)",
-            ));
+            )));
         }
 
         let status_value = if failing == 0 {
-            format!("{readable} disque(s) sain(s)")
+            match i18n::lang() {
+                Lang::En => format!("{readable} healthy disk(s)"),
+                Lang::Fr => format!("{readable} disque(s) sain(s)"),
+            }
         } else {
-            format!("⚠ {failing} disque(s) en alerte")
+            match i18n::lang() {
+                Lang::En => format!("⚠ {failing} disk(s) at risk"),
+                Lang::Fr => format!("⚠ {failing} disque(s) en alerte"),
+            }
         };
 
         Ok(CheckResult {
@@ -96,7 +111,7 @@ fn unavailable(reason: &str) -> CheckResult {
         metrics: vec![],
         details: vec![reason.to_string()],
         top_processes: vec![],
-        status_value: Some("Indisponible".into()),
+        status_value: Some(i18n::t("Unavailable", "Indisponible").into()),
     }
 }
 

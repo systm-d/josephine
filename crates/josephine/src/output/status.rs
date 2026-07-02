@@ -3,6 +3,7 @@ use colored::{Color, Colorize};
 use comfy_table::{Attribute, Cell};
 
 use josephine_core::check::{CheckResult, Severity};
+use josephine_core::i18n;
 use josephine_core::paths::Paths;
 
 use super::bars::severity_color;
@@ -99,14 +100,24 @@ fn lerp(a: f64, b: f64, t: f64) -> u8 {
 
 fn header_lines(ts: &str) -> Vec<String> {
     let heart = "♥".truecolor(240, 96, 140);
+    let subtitle = i18n::t("Your system's guardian angel", "Votre ange gardien système");
+    let line1 = i18n::t(
+        "I watch over your machine and let you know",
+        "Je veille sur votre machine et vous préviens",
+    );
+    let line2 = i18n::t(
+        "when something's not right.",
+        "quand quelque chose ne va pas.",
+    );
+    let last = i18n::t("Last check: ", "Dernière vérification : ");
     vec![
         format!("{}", "✨ Joséphine".truecolor(238, 108, 170).bold()),
-        format!("{}", "Votre ange gardien système".truecolor(178, 148, 224)),
+        format!("{}", subtitle.truecolor(178, 148, 224)),
         String::new(),
-        "Je veille sur votre machine et vous préviens".to_string(),
-        format!("quand quelque chose ne va pas. {heart}"),
+        line1.to_string(),
+        format!("{line2} {heart}"),
         String::new(),
-        format!("{}", format!("Dernière vérification : {ts}").dimmed()),
+        format!("{}", format!("{last}{ts}").dimmed()),
     ]
 }
 
@@ -167,7 +178,7 @@ fn load_row() -> Option<Row> {
 
     Some(Row {
         icon: "📈",
-        label: "Charge système",
+        label: i18n::t("System load", "Charge système"),
         value: format!("{one:.2} (1m) {five:.2} (5m) {fifteen:.2} (15m)"),
         severity,
     })
@@ -185,18 +196,18 @@ fn read_loadavg() -> Option<(f64, f64, f64)> {
 /// Emoji icon (rendered without a special font) and French label per check.
 fn check_style(name: &str) -> (&'static str, &'static str) {
     match name {
-        "cpu" => ("🖥️", "Utilisation CPU"),
-        "memory" => ("🧠", "Mémoire"),
-        "disk" => ("💽", "Espace disque"),
-        "temperature" => ("🌡️", "Température"),
-        "systemd" => ("🛡️", "Services critiques"),
-        "updates" => ("🔄", "Mises à jour"),
-        "network" => ("🌐", "Réseau"),
-        "battery" => ("🔋", "Batterie"),
+        "cpu" => ("🖥️", i18n::t("CPU usage", "Utilisation CPU")),
+        "memory" => ("🧠", i18n::t("Memory", "Mémoire")),
+        "disk" => ("💽", i18n::t("Disk space", "Espace disque")),
+        "temperature" => ("🌡️", i18n::t("Temperature", "Température")),
+        "systemd" => ("🛡️", i18n::t("Critical services", "Services critiques")),
+        "updates" => ("🔄", i18n::t("Updates", "Mises à jour")),
+        "network" => ("🌐", i18n::t("Network", "Réseau")),
+        "battery" => ("🔋", i18n::t("Battery", "Batterie")),
         "inode" => ("🗂️", "Inodes"),
-        "smart" => ("💿", "Santé disque"),
-        "kernel" => ("🐧", "Noyau"),
-        _ => ("•", "Système"),
+        "smart" => ("💿", i18n::t("Disk health", "Santé disque")),
+        "kernel" => ("🐧", i18n::t("Kernel", "Noyau")),
+        _ => ("•", i18n::t("System", "Système")),
     }
 }
 
@@ -228,8 +239,8 @@ fn value_color(severity: Severity) -> Color {
 fn badge_text(severity: Severity) -> &'static str {
     match severity {
         Severity::Info => "[OK]",
-        Severity::Attention => "[!] ATTENTION",
-        Severity::Critique => "[✗] CRITIQUE",
+        Severity::Attention => i18n::t("[!] WARNING", "[!] ATTENTION"),
+        Severity::Critique => i18n::t("[✗] CRITICAL", "[✗] CRITIQUE"),
     }
 }
 
@@ -239,15 +250,18 @@ fn badge_text(severity: Severity) -> &'static str {
 
 fn print_advice(global: Severity) {
     let message = match global {
-        Severity::Info => {
-            "Tout roule — votre machine file un parfait bonheur. Belle journée à vous !"
-        }
-        Severity::Attention => {
-            "Rien de grave pour le moment, mais gardons un œil sur certaines choses."
-        }
-        Severity::Critique => {
-            "Un point mérite votre attention — `josephine doctor` vous dira tout."
-        }
+        Severity::Info => i18n::t(
+            "All good — your machine is perfectly happy. Have a lovely day!",
+            "Tout roule — votre machine file un parfait bonheur. Belle journée à vous !",
+        ),
+        Severity::Attention => i18n::t(
+            "Nothing serious for now, but let's keep an eye on a few things.",
+            "Rien de grave pour le moment, mais gardons un œil sur certaines choses.",
+        ),
+        Severity::Critique => i18n::t(
+            "One thing deserves your attention — `josephine doctor` will tell you all.",
+            "Un point mérite votre attention — `josephine doctor` vous dira tout.",
+        ),
     };
 
     let inner = BOX_WIDTH - 2;

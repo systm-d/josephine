@@ -3,6 +3,7 @@ use sysinfo::{ProcessesToUpdate, System};
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::CheckThresholds;
+use crate::i18n::{self, Lang};
 
 pub struct CpuCheck {
     thresholds: CheckThresholds,
@@ -53,11 +54,20 @@ impl Check for CpuCheck {
             .collect();
 
         let details = vec![
-            format!("Utilisation CPU : {:.1} %", usage),
-            format!(
-                "Charge moyenne : {:.2} / {:.2} / {:.2} (1/5/15 min)",
-                load.one, load.five, load.fifteen
-            ),
+            match i18n::lang() {
+                Lang::En => format!("CPU usage: {usage:.1} %"),
+                Lang::Fr => format!("Utilisation CPU : {usage:.1} %"),
+            },
+            match i18n::lang() {
+                Lang::En => format!(
+                    "Load average: {:.2} / {:.2} / {:.2} (1/5/15 min)",
+                    load.one, load.five, load.fifteen
+                ),
+                Lang::Fr => format!(
+                    "Charge moyenne : {:.2} / {:.2} / {:.2} (1/5/15 min)",
+                    load.one, load.five, load.fifteen
+                ),
+            },
         ];
 
         Ok(CheckResult {

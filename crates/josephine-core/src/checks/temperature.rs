@@ -5,6 +5,7 @@ use anyhow::{Context, Result};
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::TemperatureThresholds;
+use crate::i18n::{self, Lang};
 
 #[derive(Debug, Clone)]
 pub struct ThermalReading {
@@ -42,11 +43,19 @@ impl Check for TemperatureCheck {
                     threshold_critical: Some(self.thresholds.critical),
                 }],
                 details: vec![
-                    "Aucun capteur de température détecté.".into(),
-                    "Vérifiez /sys/class/thermal ou installez lm-sensors.".into(),
+                    i18n::t(
+                        "No temperature sensor detected.",
+                        "Aucun capteur de température détecté.",
+                    )
+                    .into(),
+                    i18n::t(
+                        "Check /sys/class/thermal or install lm-sensors.",
+                        "Vérifiez /sys/class/thermal ou installez lm-sensors.",
+                    )
+                    .into(),
                 ],
                 top_processes: vec![],
-                status_value: Some("Aucun capteur".into()),
+                status_value: Some(i18n::t("No sensor", "Aucun capteur").into()),
             });
         }
 
@@ -58,8 +67,11 @@ impl Check for TemperatureCheck {
             .map(|r| r.label.clone())
             .unwrap_or_default();
 
-        let mut details = vec![format!("Température maximale : {max:.1} °C ({hottest})")];
-        details.push("Capteurs :".into());
+        let mut details = vec![match i18n::lang() {
+            Lang::En => format!("Max temperature: {max:.1} °C ({hottest})"),
+            Lang::Fr => format!("Température maximale : {max:.1} °C ({hottest})"),
+        }];
+        details.push(i18n::t("Sensors:", "Capteurs :").into());
         for reading in &readings {
             details.push(format!("  • {} : {:.1} °C", reading.label, reading.celsius));
         }
@@ -74,7 +86,10 @@ impl Check for TemperatureCheck {
                 threshold_critical: Some(self.thresholds.critical),
             }],
             details,
-            top_processes: vec![format!("Capteur le plus chaud : {hottest} ({max:.1} °C)")],
+            top_processes: vec![match i18n::lang() {
+                Lang::En => format!("Hottest sensor: {hottest} ({max:.1} °C)"),
+                Lang::Fr => format!("Capteur le plus chaud : {hottest} ({max:.1} °C)"),
+            }],
             status_value: Some(format!("{max:.0}°C")),
         })
     }

@@ -8,62 +8,133 @@ use std::process::Command;
 
 use anyhow::{Context, Result};
 use josephine_core::check::human_size;
+use josephine_core::i18n::{self, Lang};
 
 use crate::output::confirm;
 
 pub fn run(apply: bool) -> Result<()> {
-    println!("✨ Joséphine — grand ménage {}\n", mode_label(apply));
+    println!(
+        "{} {}\n",
+        i18n::t("✨ Joséphine — big clean-up", "✨ Joséphine — grand ménage"),
+        mode_label(apply)
+    );
 
     let cache = cache_dir();
     let thumbnails = cache.join("thumbnails");
     let thumb_size = dir_size(&thumbnails);
 
-    row("Cache utilisateur (~/.cache)", dir_size(&cache), "aperçu");
-    row("  ↳ Miniatures", thumb_size, "nettoyable en sécurité");
     row(
-        "Fichiers temporaires (/tmp)",
+        i18n::t("User cache (~/.cache)", "Cache utilisateur (~/.cache)"),
+        dir_size(&cache),
+        i18n::t("preview", "aperçu"),
+    );
+    row(
+        i18n::t("  ↳ Thumbnails", "  ↳ Miniatures"),
+        thumb_size,
+        i18n::t("safe to clear", "nettoyable en sécurité"),
+    );
+    row(
+        i18n::t("Temporary files (/tmp)", "Fichiers temporaires (/tmp)"),
         dir_size(Path::new("/tmp")),
-        "géré par le système",
+        i18n::t("system-managed", "géré par le système"),
     );
     if let Some(bytes) = journal_usage() {
-        row("Journaux systemd", bytes, "`journalctl --vacuum-time=7d`");
+        row(
+            i18n::t("systemd journals", "Journaux systemd"),
+            bytes,
+            "`journalctl --vacuum-time=7d`",
+        );
     }
     println!();
 
     if !apply {
-        println!("Aperçu seulement — rien n'a été supprimé.");
-        println!("Pour vider les miniatures : `josephine clean --apply`.");
-        println!("À lancer vous-même pour le reste :");
-        println!("  • Journaux : sudo journalctl --vacuum-time=7d");
-        println!("  • Paquets  : sudo apt clean   (ou dnf clean all / pacman -Sc)");
+        println!(
+            "{}",
+            i18n::t(
+                "Preview only — nothing was deleted.",
+                "Aperçu seulement — rien n'a été supprimé."
+            )
+        );
+        println!(
+            "{}",
+            i18n::t(
+                "To clear thumbnails: `josephine clean --apply`.",
+                "Pour vider les miniatures : `josephine clean --apply`."
+            )
+        );
+        println!(
+            "{}",
+            i18n::t(
+                "Run yourself for the rest:",
+                "À lancer vous-même pour le reste :"
+            )
+        );
+        println!(
+            "  • {}: sudo journalctl --vacuum-time=7d",
+            i18n::t("Journals", "Journaux")
+        );
+        println!(
+            "  • {}: sudo apt clean   (or dnf clean all / pacman -Sc)",
+            i18n::t("Packages", "Paquets")
+        );
         return Ok(());
     }
 
     if thumb_size == 0 {
-        println!("Rien à nettoyer du côté des miniatures — c'est déjà tout propre.");
+        println!(
+            "{}",
+            i18n::t(
+                "Nothing to clear in thumbnails — already spotless.",
+                "Rien à nettoyer du côté des miniatures — c'est déjà tout propre."
+            )
+        );
         return Ok(());
     }
-    let question = format!(
-        "Vider {} ({}) ?",
-        thumbnails.display(),
-        human_size(thumb_size as f64)
-    );
+    let size = human_size(thumb_size as f64);
+    let dir = thumbnails.display();
+    let question = match i18n::lang() {
+        Lang::En => format!("Clear {dir} ({size})?"),
+        Lang::Fr => format!("Vider {dir} ({size}) ?"),
+    };
     if !confirm(&question)? {
-        println!("Entendu, je laisse tout en place.");
+        println!(
+            "{}",
+            i18n::t(
+                "Understood, I'll leave everything in place.",
+                "Entendu, je laisse tout en place."
+            )
+        );
         return Ok(());
     }
 
     clear_dir_contents(&thumbnails)?;
     println!(
-        "✨ {} rendus à votre disque — les miniatures se régénéreront toutes seules.",
-        human_size(thumb_size as f64)
+        "{}",
+        match i18n::lang() {
+            Lang::En => format!(
+                "✨ {size} returned to your disk — thumbnails will regenerate on their own."
+            ),
+            Lang::Fr => format!(
+                "✨ {size} rendus à votre disque — les miniatures se régénéreront toutes seules."
+            ),
+        }
     );
-    println!("Pour les journaux et paquets, les commandes ci-dessus restent à votre main.");
+    println!(
+        "{}",
+        i18n::t(
+            "For journals and packages, the commands above are yours to run.",
+            "Pour les journaux et paquets, les commandes ci-dessus restent à votre main."
+        )
+    );
     Ok(())
 }
 
 fn mode_label(apply: bool) -> &'static str {
-    if apply { "" } else { "(aperçu)" }
+    if apply {
+        ""
+    } else {
+        i18n::t("(preview)", "(aperçu)")
+    }
 }
 
 fn row(label: &str, bytes: u64, note: &str) {
@@ -110,7 +181,7 @@ fn clear_dir_contents(path: &Path) -> Result<()> {
         let target = entry.path();
         let meta = target
             .symlink_metadata()
-            .with_context(|| format!("lecture de {}", target.display()))?;
+            .with_context(|| format!("reading {}", target.display()))?;
         if meta.is_dir() && !meta.file_type().is_symlink() {
             let _ = fs::remove_dir_all(&target);
         } else {

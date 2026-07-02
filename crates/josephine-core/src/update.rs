@@ -233,20 +233,37 @@ pub fn install_plan(channel: InstallChannel, package: &Path) -> InstallPlan {
             sudo: true,
         },
         InstallChannel::Pacman => InstallPlan::Manual(
-            "Sur Arch, la mise à jour passe par l'AUR : `yay -S josephine` \
-             (ou l'assistant AUR de votre choix)."
-                .into(),
+            crate::i18n::t(
+                "On Arch, updates go through the AUR: `yay -S josephine` (or your AUR helper of choice).",
+                "Sur Arch, la mise à jour passe par l'AUR : `yay -S josephine` (ou l'assistant AUR de votre choix).",
+            )
+            .into(),
         ),
-        InstallChannel::Homebrew => {
-            InstallPlan::Manual("Via Homebrew : `brew upgrade josephine`.".into())
+        InstallChannel::Homebrew => InstallPlan::Manual(
+            crate::i18n::t(
+                "With Homebrew: `brew upgrade josephine`.",
+                "Via Homebrew : `brew upgrade josephine`.",
+            )
+            .into(),
+        ),
+        InstallChannel::Cargo => InstallPlan::Manual(match crate::i18n::lang() {
+            crate::i18n::Lang::En => {
+                format!("With cargo: `cargo install --git https://github.com/{REPO} josephine`.")
+            }
+            crate::i18n::Lang::Fr => {
+                format!("Via cargo : `cargo install --git https://github.com/{REPO} josephine`.")
+            }
+        }),
+        InstallChannel::Tarball | InstallChannel::Unknown => {
+            InstallPlan::Manual(match crate::i18n::lang() {
+                crate::i18n::Lang::En => format!(
+                    "Grab the latest archive from https://github.com/{REPO}/releases/latest and replace your binary."
+                ),
+                crate::i18n::Lang::Fr => format!(
+                    "Récupérez la dernière archive sur https://github.com/{REPO}/releases/latest et remplacez votre binaire."
+                ),
+            })
         }
-        InstallChannel::Cargo => InstallPlan::Manual(format!(
-            "Via cargo : `cargo install --git https://github.com/{REPO} josephine`."
-        )),
-        InstallChannel::Tarball | InstallChannel::Unknown => InstallPlan::Manual(format!(
-            "Récupérez la dernière archive sur \
-             https://github.com/{REPO}/releases/latest et remplacez votre binaire."
-        )),
     }
 }
 

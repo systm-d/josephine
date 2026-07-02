@@ -79,6 +79,9 @@ Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est i
 
 Fichier : `~/.config/josephine/config.yaml`
 
+**Langue :** `language: en` (défaut) ou `fr` — tout le texte user-facing est
+bilingue (voir `i18n.rs`). L'anglais est la langue par défaut depuis la v0.5.0.
+
 Structures notables :
 
 - `CheckThresholds` — cpu, memory, disk (%, intervalles)

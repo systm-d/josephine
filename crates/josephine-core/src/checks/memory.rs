@@ -3,6 +3,7 @@ use sysinfo::{ProcessesToUpdate, System};
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::CheckThresholds;
+use crate::i18n::{self, Lang};
 
 pub struct MemoryCheck {
     thresholds: CheckThresholds,
@@ -51,22 +52,30 @@ impl Check for MemoryCheck {
             .take(10)
             .map(|p| {
                 format!(
-                    "{} (PID {}) — {:.1} Mo",
+                    "{} (PID {}) — {:.1} {}",
                     p.name().to_string_lossy(),
                     p.pid(),
-                    p.memory() as f64 / 1_048_576.0
+                    p.memory() as f64 / 1_048_576.0,
+                    i18n::t("MB", "Mo")
                 )
             })
             .collect();
 
+        let used_gb = used / 1_073_741_824.0;
+        let total_gb = total / 1_073_741_824.0;
         let details = vec![
-            format!(
-                "Mémoire utilisée : {:.1} % ({:.1} / {:.1} Go)",
-                usage_percent,
-                used / 1_073_741_824.0,
-                total / 1_073_741_824.0
-            ),
-            format!("Swap utilisé : {:.1} %", swap_percent),
+            match i18n::lang() {
+                Lang::En => {
+                    format!("Memory used: {usage_percent:.1} % ({used_gb:.1} / {total_gb:.1} GB)")
+                }
+                Lang::Fr => format!(
+                    "Mémoire utilisée : {usage_percent:.1} % ({used_gb:.1} / {total_gb:.1} Go)"
+                ),
+            },
+            match i18n::lang() {
+                Lang::En => format!("Swap used: {swap_percent:.1} %"),
+                Lang::Fr => format!("Swap utilisé : {swap_percent:.1} %"),
+            },
         ];
 
         Ok(CheckResult {
