@@ -1,10 +1,15 @@
 {% extends "base.html" %}
-{% block title %}{{ config.title }} — {{ config.description }}{% endblock title %}
+{% block title %}Joséphine — {{ section.extra.tagline }}{% endblock title %}
 {% block content %}
 <header class="hero">
-  <h1>✨ {{ config.title }}</h1>
-  <p class="tagline">{{ config.description }}</p>
-  <p><a class="button" href="{{ config.extra.repo_url }}">View on GitHub</a></p>
+  <nav class="langs">
+    <a href="{{ get_url(path='@/_index.md', lang='en') }}">EN</a>
+    <span>·</span>
+    <a href="{{ get_url(path='@/_index.md', lang='fr') }}">FR</a>
+  </nav>
+  <h1>✨ Joséphine</h1>
+  <p class="tagline">{{ section.extra.tagline }}</p>
+  <p><a class="button" href="{{ config.extra.repo_url }}">{{ section.extra.cta }}</a></p>
 </header>
 <main class="container">
   {{ section.content | safe }}

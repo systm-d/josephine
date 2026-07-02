@@ -17,6 +17,9 @@ a { color: $brand; }
   padding: 5rem 1rem 3rem;
   background: linear-gradient(180deg, rgba($brand, 0.14), transparent);
 }
+.langs { font-size: .9rem; margin-bottom: 1.25rem; letter-spacing: .06em; }
+.langs a { text-decoration: none; font-weight: 700; }
+.langs span { color: #cbb79a; margin: 0 .35rem; }
 .hero h1 { font-size: 3rem; margin: 0; }
 .hero .tagline { font-size: 1.3rem; color: #6b6b6b; margin-top: .5rem; }
 
