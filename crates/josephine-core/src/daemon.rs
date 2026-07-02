@@ -34,7 +34,7 @@ impl DaemonControl {
 
     pub fn status(&self) -> Result<DaemonStatus> {
         match read_pid(&self.paths.pid_file) {
-            Some(pid) if process_alive(pid) => {
+            Some(pid) if is_our_daemon(pid) => {
                 let started_at = fs::metadata(&self.paths.pid_file)
                     .ok()
                     .and_then(|m| m.modified().ok());
@@ -164,4 +164,43 @@ fn read_pid(path: &Path) -> Option<u32> {
 
 fn process_alive(pid: u32) -> bool {
     Path::new(&format!("/proc/{pid}")).exists()
+}
+
+/// True only if `pid` is a live Joséphine daemon — guards against a stale pid
+/// file whose PID has since been recycled by an unrelated process (e.g. after a
+/// crash or logout, the same number handed to a browser tab).
+fn is_our_daemon(pid: u32) -> bool {
+    match fs::read(format!("/proc/{pid}/cmdline")) {
+        Ok(raw) => cmdline_is_daemon(&String::from_utf8_lossy(&raw)),
+        Err(_) => false,
+    }
+}
+
+/// Match a `/proc/<pid>/cmdline` (NUL-separated argv) against our daemon's
+/// invocation (`josephine … --__daemon__`).
+fn cmdline_is_daemon(cmdline: &str) -> bool {
+    cmdline.contains("josephine") && cmdline.contains("--__daemon__")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::cmdline_is_daemon;
+
+    #[test]
+    fn recognises_the_daemon() {
+        assert!(cmdline_is_daemon("/usr/bin/josephine\0--__daemon__\0"));
+    }
+
+    #[test]
+    fn rejects_a_recycled_pid() {
+        assert!(!cmdline_is_daemon(
+            "/opt/google/chrome/chrome\0--type=renderer\0"
+        ));
+        assert!(!cmdline_is_daemon(""));
+    }
+
+    #[test]
+    fn rejects_josephine_without_the_daemon_flag() {
+        assert!(!cmdline_is_daemon("/usr/bin/josephine\0status\0"));
+    }
 }
