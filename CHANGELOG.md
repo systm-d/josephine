@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Each release now ships ready-to-use packaging recipes as assets: a Homebrew
+  formula (`josephine.rb`) and an AUR `PKGBUILD`. The release workflow fills in
+  the tag's version and the source tarball's real `sha256` in both, so on Linux
+  you can
+  `brew install https://github.com/systm-d/josephine/releases/latest/download/josephine.rb`
+  (or `makepkg` from the attached `PKGBUILD`).
+
 ## [0.5.0] - 2026-07-02
 
 ### Added

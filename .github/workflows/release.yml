@@ -39,6 +39,30 @@ jobs:
           for pkg in target/debian/*.deb target/generate-rpm/*.rpm; do
             ( cd "$(dirname "$pkg")" && sha256sum "$(basename "$pkg")" | tee "$(basename "$pkg").sha256" )
           done
+      - name: Render Homebrew formula and AUR PKGBUILD
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          SRC_URL="https://github.com/${GITHUB_REPOSITORY}/archive/refs/tags/${TAG}.tar.gz"
+          # The source archive exists as soon as the tag is pushed; its checksum
+          # is stable, so both recipes can build from source reproducibly.
+          curl -fsSL "$SRC_URL" -o source.tar.gz
+          SRC_SHA="$(sha256sum source.tar.gz | cut -d' ' -f1)"
+          # Homebrew formula
+          sed \
+            -e "s|url \".*\"|url \"${SRC_URL}\"|" \
+            -e "s|sha256 \"[0-9a-f]*\"|sha256 \"${SRC_SHA}\"|" \
+            -e "/# Placeholder: release.yml/d" \
+            packaging/homebrew/josephine.rb > josephine.rb
+          # AUR PKGBUILD (same source tarball, so same checksum)
+          sed \
+            -e "s|^pkgver=.*|pkgver=${VERSION}|" \
+            -e "s|^sha256sums=('[0-9a-f]*')|sha256sums=('${SRC_SHA}')|" \
+            -e "/# Fill with the real checksum/d" \
+            -e "/# release tarball's sha256/d" \
+            packaging/aur/PKGBUILD > PKGBUILD
+          echo "Rendered josephine.rb and PKGBUILD for ${TAG} (sha256 ${SRC_SHA}):"
+          cat josephine.rb PKGBUILD
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v3
         with:
@@ -50,6 +74,8 @@ jobs:
             target/debian/*.deb.sha256
             target/generate-rpm/*.rpm
             target/generate-rpm/*.rpm.sha256
+            josephine.rb
+            PKGBUILD
 
   crates-io:
     name: publish to crates.io

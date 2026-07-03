@@ -55,6 +55,12 @@ sudo dpkg -i josephine_*_amd64.deb
 sudo rpm -i josephine-*.x86_64.rpm
 ```
 
+With [Homebrew](https://brew.sh/) on Linux (builds from source, requires Rust):
+
+```sh
+brew install https://github.com/systm-d/josephine/releases/latest/download/josephine.rb
+```
+
 Or build from source (requires Rust 1.85+):
 
 ```sh
