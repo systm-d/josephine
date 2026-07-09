@@ -121,6 +121,31 @@ fn status_json_prints_a_json_array_on_stdout() {
 }
 
 #[test]
+fn help_about_follows_the_configured_language() {
+    // English by default (isolated, empty config home → no config file).
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .env("XDG_CONFIG_HOME", isolated_home("help-en"))
+        .arg("--help")
+        .assert()
+        .success()
+        .stdout(contains("guardian angel"));
+
+    // French when the config sets `language: fr`.
+    let fr = isolated_home("help-fr");
+    let cfg = fr.join("josephine");
+    std::fs::create_dir_all(&cfg).unwrap();
+    std::fs::write(cfg.join("config.yaml"), "language: fr\n").unwrap();
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .env("XDG_CONFIG_HOME", fr)
+        .arg("--help")
+        .assert()
+        .success()
+        .stdout(contains("ange gardien"));
+}
+
+#[test]
 fn completions_generates_a_script() {
     // Completions are generated from the static command tree — no config needed.
     Command::cargo_bin("josephine")

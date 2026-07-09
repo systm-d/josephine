@@ -548,6 +548,18 @@ impl Config {
         paths.ensure_dirs()?;
         Self::load(&paths.config)
     }
+
+    /// Read only the configured language, without creating or touching any
+    /// files — so `--help` / `--version` stay side-effect-free on a fresh
+    /// system. Falls back to the default language when no config exists yet.
+    pub fn language_or_default() -> crate::i18n::Lang {
+        Paths::new()
+            .ok()
+            .and_then(|paths| std::fs::read_to_string(&paths.config).ok())
+            .and_then(|raw| serde_yaml::from_str::<Config>(&raw).ok())
+            .map(|config| config.language)
+            .unwrap_or_default()
+    }
 }
 
 #[cfg(test)]

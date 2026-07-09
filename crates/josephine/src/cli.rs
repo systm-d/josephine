@@ -21,8 +21,8 @@ struct Cli {
     daemon_internal: bool,
 }
 
-// clap help is always in English (the runtime language option covers command
-// output; localising --help would mean building the Command tree dynamically).
+// `--help` / `--version` follow the configured `language`: `dispatch` post-
+// processes this derived tree via `localize_help_fr` when the language is French.
 #[derive(Subcommand)]
 enum Commands {
     /// Quick summary of your machine's health
@@ -108,14 +108,55 @@ pub async fn run() -> ExitCode {
     }
 }
 
+/// Localise the top-level and per-subcommand `--help` text to French.
+fn localize_help_fr(command: clap::Command) -> clap::Command {
+    command
+        .about("L'ange gardien de votre ordinateur")
+        .mut_subcommand("status", |c| {
+            c.about("Résumé rapide de la santé de votre machine")
+        })
+        .mut_subcommand("doctor", |c| c.about("Diagnostic complet"))
+        .mut_subcommand("history", |c| c.about("Les dernières 24 heures"))
+        .mut_subcommand("daemon", |c| c.about("Gérer le démon de surveillance"))
+        .mut_subcommand("config", |c| c.about("Configuration"))
+        .mut_subcommand("clean", |c| {
+            c.about("Espace disque récupérable (aperçu par défaut)")
+        })
+        .mut_subcommand("fix", |c| {
+            c.about("Réparations guidées : ce qui ne va pas et comment y remédier")
+        })
+        .mut_subcommand("report", |c| {
+            c.about("Rapport système daté, à l'écran ou dans un fichier")
+        })
+        .mut_subcommand("notify", |c| c.about("Notifications desktop"))
+        .mut_subcommand("update", |c| {
+            c.about("Vérifier et installer la dernière version de Joséphine")
+        })
+        .mut_subcommand("completions", |c| {
+            c.about("Générer les complétions shell (bash, zsh, fish…)")
+        })
+}
+
 async fn dispatch() -> Result<()> {
-    let cli = Cli::parse();
+    use clap::{CommandFactory, FromArgMatches};
+    use josephine_core::i18n::Lang;
+
+    // Read the configured language WITHOUT creating anything on disk, then build
+    // the CLI so `--help` / `--version` render in that language — side-effect-free
+    // on a fresh system.
+    josephine_core::i18n::set_lang(josephine_core::config::Config::language_or_default());
+    let mut command = Cli::command();
+    if matches!(josephine_core::i18n::lang(), Lang::Fr) {
+        command = localize_help_fr(command);
+    }
+    let cli = Cli::from_arg_matches(&command.get_matches()).unwrap_or_else(|e| e.exit());
 
     if cli.daemon_internal {
         return josephine_core::daemon::run_daemon_foreground().await;
     }
 
-    // Apply the configured language up front so every command renders alike.
+    // A real command is running: ensure the config exists (first run) and
+    // re-apply its language.
     if let Ok(config) = josephine_core::config::Config::load_default() {
         josephine_core::i18n::set_lang(config.language);
     }
