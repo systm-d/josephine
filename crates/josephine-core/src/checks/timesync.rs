@@ -92,11 +92,7 @@ fn unavailable() -> CheckResult {
 
 fn timedatectl_show() -> Option<String> {
     let output = Command::new("timedatectl")
-        .args([
-            "show",
-            "--property=NTPSynchronized",
-            "--property=NTP",
-        ])
+        .args(["show", "--property=NTPSynchronized", "--property=NTP"])
         .output()
         .ok()?;
     if !output.status.success() {
@@ -130,18 +126,12 @@ mod tests {
 
     #[test]
     fn ntp_synchronized_yes_is_synced() {
-        assert_eq!(
-            parse_clock_unsynced("NTPSynchronized=yes\nNTP=yes\n"),
-            0
-        );
+        assert_eq!(parse_clock_unsynced("NTPSynchronized=yes\nNTP=yes\n"), 0);
     }
 
     #[test]
     fn ntp_synchronized_no_is_unsynced() {
-        assert_eq!(
-            parse_clock_unsynced("NTPSynchronized=no\nNTP=no\n"),
-            1
-        );
+        assert_eq!(parse_clock_unsynced("NTPSynchronized=no\nNTP=no\n"), 1);
     }
 
     #[test]

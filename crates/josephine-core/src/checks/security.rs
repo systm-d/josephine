@@ -46,8 +46,9 @@ fn build_result(count: usize, config: &SecurityCheckConfig) -> CheckResult {
     let mut details = vec![match (i18n::lang(), count) {
         (Lang::En, 0) => "No failed authentication attempts in the last hour.".to_string(),
         (Lang::En, n) => format!("{n} failed authentication attempt(s) in the last hour."),
-        (Lang::Fr, 0) => "Aucune tentative d'authentification échouée sur la dernière heure."
-            .to_string(),
+        (Lang::Fr, 0) => {
+            "Aucune tentative d'authentification échouée sur la dernière heure.".to_string()
+        }
         (Lang::Fr, n) => {
             format!("{n} tentative(s) d'authentification échouée(s) sur la dernière heure.")
         }
@@ -95,14 +96,7 @@ fn unavailable() -> CheckResult {
 
 fn recent_auth_log() -> Option<String> {
     let output = Command::new("journalctl")
-        .args([
-            "--since",
-            "1 hour ago",
-            "-o",
-            "cat",
-            "-q",
-            "--no-pager",
-        ])
+        .args(["--since", "1 hour ago", "-o", "cat", "-q", "--no-pager"])
         .output()
         .ok()?;
     if !output.status.success() {
@@ -113,11 +107,7 @@ fn recent_auth_log() -> Option<String> {
 
 /// Count lines matching common failed-auth patterns (case-insensitive).
 fn count_failed_auths(log: &str) -> usize {
-    const PATTERNS: &[&str] = &[
-        "failed password",
-        "authentication failure",
-        "invalid user",
-    ];
+    const PATTERNS: &[&str] = &["failed password", "authentication failure", "invalid user"];
     log.lines()
         .filter(|line| {
             let lower = line.to_lowercase();
