@@ -1,10 +1,12 @@
 mod bars;
 mod doctor;
+mod json;
 mod runner;
 mod status;
 mod style;
 
 pub use doctor::print_doctor;
+pub use json::print_checks as print_checks_json;
 pub use runner::run_checks_with_progress;
 pub use status::print_status_table;
 

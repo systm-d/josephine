@@ -10,11 +10,18 @@ use josephine_core::config::Config;
 use josephine_core::i18n::{self, Lang};
 use josephine_core::scheduler::run_all_checks;
 
-use crate::output::{check_label, format_metric_value, primary_metric};
+use crate::output::{check_label, format_metric_value, primary_metric, print_checks_json};
 
-pub fn run(output: Option<PathBuf>) -> Result<()> {
+pub fn run(output: Option<PathBuf>, json: bool) -> Result<()> {
     let config = Config::load_default()?;
     let results = run_all_checks(&config)?;
+
+    // `--json` always prints to stdout; `--output` is a rendered-text-only
+    // concern and is ignored when `--json` is set.
+    if json {
+        print_checks_json(&results);
+        return Ok(());
+    }
 
     let generated = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
     let report = render_report(&results, &generated, &hostname());

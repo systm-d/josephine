@@ -1,13 +1,16 @@
 use anyhow::Result;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize)]
 pub enum Severity {
+    #[serde(rename = "ok")]
     Info,
+    #[serde(rename = "warning")]
     Attention,
+    #[serde(rename = "critical")]
     Critique,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct Metric {
     pub name: String,
     pub value: f64,
@@ -16,7 +19,7 @@ pub struct Metric {
     pub threshold_critical: Option<f64>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct CheckResult {
     pub check_name: String,
     pub metrics: Vec<Metric>,
@@ -71,4 +74,22 @@ pub fn metric_severity(metric: &Metric) -> Severity {
 pub trait Check: Send {
     fn name(&self) -> &str;
     fn run(&mut self) -> Result<CheckResult>;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn severity_serialises_to_lowercase_labels() {
+        assert_eq!(serde_json::to_string(&Severity::Info).unwrap(), "\"ok\"");
+        assert_eq!(
+            serde_json::to_string(&Severity::Attention).unwrap(),
+            "\"warning\""
+        );
+        assert_eq!(
+            serde_json::to_string(&Severity::Critique).unwrap(),
+            "\"critical\""
+        );
+    }
 }

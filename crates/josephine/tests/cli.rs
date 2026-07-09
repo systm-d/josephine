@@ -103,3 +103,19 @@ fn daemon_help_lists_run() {
         .success()
         .stdout(contains("run"));
 }
+
+#[test]
+fn status_json_prints_a_json_array_on_stdout() {
+    let output = Command::cargo_bin("josephine")
+        .unwrap()
+        .env("HOME", isolated_home("status-json"))
+        .env_remove("XDG_CONFIG_HOME")
+        .env_remove("XDG_DATA_HOME")
+        .args(["status", "--json"])
+        .assert()
+        .success()
+        .get_output()
+        .clone();
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(value.is_array());
+}

@@ -26,12 +26,19 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// Quick summary of your machine's health
-    Status,
+    Status {
+        /// Print machine-readable JSON to stdout instead of the rendered view
+        #[arg(long)]
+        json: bool,
+    },
     /// Full diagnostics
     Doctor {
         /// Detailed report: numeric thresholds, top 10 processes, intervals
         #[arg(short, long)]
         verbose: bool,
+        /// Print machine-readable JSON to stdout instead of the rendered view
+        #[arg(long)]
+        json: bool,
     },
     /// The last 24 hours
     History,
@@ -58,6 +65,9 @@ enum Commands {
         /// Write the report to this file instead of printing it
         #[arg(short, long)]
         output: Option<PathBuf>,
+        /// Print machine-readable JSON to stdout (implies stdout; ignores `--output`)
+        #[arg(long)]
+        json: bool,
     },
     /// Desktop notifications
     Notify {
@@ -106,17 +116,17 @@ async fn dispatch() -> Result<()> {
     }
 
     match cli.command {
-        Some(Commands::Status) => status_cmd::run()?,
-        Some(Commands::Doctor { verbose }) => doctor_cmd::run(verbose)?,
+        Some(Commands::Status { json }) => status_cmd::run(json)?,
+        Some(Commands::Doctor { verbose, json }) => doctor_cmd::run(verbose, json)?,
         Some(Commands::History) => history_cmd::run()?,
         Some(Commands::Daemon { action }) => daemon_cmd::run(action).await?,
         Some(Commands::Config { action }) => config_cmd::run(action)?,
         Some(Commands::Clean { apply }) => clean_cmd::run(apply)?,
         Some(Commands::Fix) => fix_cmd::run()?,
-        Some(Commands::Report { output }) => report_cmd::run(output)?,
+        Some(Commands::Report { output, json }) => report_cmd::run(output, json)?,
         Some(Commands::Notify { action }) => notify_cmd::run(action)?,
         Some(Commands::Update { check, yes }) => update_cmd::run(check, yes)?,
-        None => status_cmd::run()?,
+        None => status_cmd::run(false)?,
     }
 
     Ok(())
