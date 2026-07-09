@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Sober CLI redesign ("Constellation sobre").** `status`, `doctor` and
+  `history` drop the ASCII-angel banner, per-check emoji, hearts and the rounded
+  advice box for a cleaner layout: a discreet `✦` header, status carried by
+  coloured shape-glyphs (`●` ok · `▲` attention · `✕` critical, degrading to
+  `[ok]/[!]/[x]` off a terminal), aligned columns and a one-line footer. The
+  guardian-angel voice stays warm but becomes direct and concise, in both
+  English and French — including the desktop notifications. A custom
+  `banner.txt` is still honoured.
+
 ## [0.6.0] - 2026-07-03
 
 ### Added
