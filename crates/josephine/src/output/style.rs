@@ -57,7 +57,8 @@ pub fn status_glyph(severity: Severity) -> String {
     if is_tty() {
         severity_paint(glyph, severity)
     } else {
-        plain.to_string()
+        // Uniform width so non-TTY rows stay column-aligned across severities.
+        format!("{plain:<4}")
     }
 }
 
@@ -332,11 +333,14 @@ mod tests {
 
     #[test]
     fn status_glyph_is_ascii_off_tty() {
-        // `cargo test` stdout is not a terminal, so we get the plain fallback —
-        // and it must differ per severity by shape, not colour alone.
         use josephine_core::check::Severity;
+        // Off a terminal (as in `cargo test`) the glyph degrades to an ASCII tag,
+        // padded to a uniform width so rows stay column-aligned across severities.
         assert_eq!(status_glyph(Severity::Info), "[ok]");
-        assert_eq!(status_glyph(Severity::Attention), "[!]");
-        assert_eq!(status_glyph(Severity::Critique), "[x]");
+        assert_eq!(status_glyph(Severity::Attention), "[!] ");
+        assert_eq!(status_glyph(Severity::Critique), "[x] ");
+        let w = status_glyph(Severity::Info).chars().count();
+        assert_eq!(status_glyph(Severity::Attention).chars().count(), w);
+        assert_eq!(status_glyph(Severity::Critique).chars().count(), w);
     }
 }
