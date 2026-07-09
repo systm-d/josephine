@@ -1,6 +1,6 @@
 # Joséphine — Roadmap
 
-**Baseline actuelle :** v0.3.0 — voir [CURRENT_STATE.md](CURRENT_STATE.md)
+**Baseline actuelle :** v0.7.0 — voir [CURRENT_STATE.md](CURRENT_STATE.md)
 
 ---
 
@@ -21,7 +21,7 @@ Surveillance locale silencieuse de la **machine** :
 |-------|----------|
 | **Docker** | Non — outils dédiés, hors mission « gardien machine » |
 | **TUI / `watch`** | Non — contraire au principe « invisible par défaut » |
-| **Logo ASCII** | Reporté |
+| **Logo ASCII** | Retiré au profit d'un en-tête sobre `✦` (v0.7.0) ; `banner.txt` personnalisé toujours possible |
 | **Cloud / comptes** | Non — 100 % local |
 | **IA pour la surveillance** | Non — observation déterministe uniquement |
 | **API REST / interface web** | Piste lointaine (v1.0+) |
@@ -76,6 +76,28 @@ Anticiper les pannes, pas seulement les constater.
 
 ---
 
+## Machine complète, diffusée — v0.5.0 à v0.7.0 ✅
+
+Entre la « Prévoyance » ci-dessus et la baseline actuelle : internationalisation
+(anglais par défaut, français via `language: fr` — v0.5.0), packaging Homebrew
++ AUR livré en assets de release (v0.6.0), puis la **refonte du rendu CLI**
+« Constellation sobre » — en-tête `✦` discret, statut porté par des glyphes de
+forme et couleur (`●`/`▲`/`✕`, dégradés `[ok]/[!]/[x]` hors TTY), colonnes
+alignées, ton détoné « chaleur sobre » en anglais et en français, sur
+`status`/`doctor`/`history` et les notifications desktop (v0.7.0).
+
+**Programme d'increments CLI** (ordre A → C → B → D, voir
+[superpowers/specs/2026-07-08-josephine-cli-render-tone-design.md](superpowers/specs/2026-07-08-josephine-cli-render-tone-design.md)) :
+
+| Increment | Contenu | État |
+|---|---|---|
+| A — rendu & ton | `status`/`doctor`/`history` + notifications passés au sobre | ✅ livré (v0.7.0) |
+| C — solidité & finitions | bascule de `report`/`clean`/`fix`/`update` sur l'habillage sobre, pied de page unifié, nettoyage de copie EN/FR, docs à jour | 🚧 en cours (`feat/cli-increment-c`) |
+| B — sortie machine & canaux | `--json`, complétions shell, `--help` localisé, canal de notification terminal | ⏳ planifié |
+| D — nouveaux checks/commandes | hors périmètre de la refonte CLI | ⏳ planifié |
+
+---
+
 ## v1.0+ — Écosystème (non planifié en détail)
 
 - Plugins internes (postgres, nginx…)
@@ -105,3 +127,5 @@ Si non → autre outil.
 | 2026-06-29 | Docker et TUI sortis du scope |
 | 2026-06-29 | Messages notifications : ton série *ange gardien* |
 | 2026-06-29 | Logo ASCII reporté |
+| 2026-07-08 | Refonte CLI « Constellation sobre » (ton *chaleur sobre*, increment A) actée |
+| 2026-07-09 | v0.7.0 : increment A livré (rendu + notifications) ; increment C (finitions) démarré |

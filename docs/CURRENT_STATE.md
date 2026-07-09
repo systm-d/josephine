@@ -1,7 +1,7 @@
 # Joséphine — État actuel du code
 
-**Version :** 0.3.0  
-**Dernière mise à jour :** 2026-07-01  
+**Version :** 0.7.0  
+**Dernière mise à jour :** 2026-07-09  
 **Langage :** Rust (workspace Cargo)  
 **Cible :** Linux (Debian 13+ recommandé)
 
@@ -23,9 +23,13 @@ Ce document est la **source de vérité** pour l'état du dépôt. En cas de div
 | `updates` | `updates_available` | `apt` / `dnf` / `pacman` |
 | `network` | `gateway_latency_ms` (LAN, 100 % local) | `/proc/net/route`, `ping` |
 | `battery` | `charge_percent`, `battery_depletion_percent` | `/sys/class/power_supply` |
-| `inode` | `inode_usage_percent_worst` | `df -iP` |
+| `inode` | `inode_usage_percent_worst` | `df -iPT`* |
 | `smart` | `smart_failing` (opt-in, root requis) | `smartctl -H` |
 | `kernel` | `kernel_incidents` (OOM, oops…) | `journalctl -k` |
+
+\* Le `T` ajoute le type de filesystem à la sortie de `df`, pour ignorer les
+montages en lecture seule de type image (`squashfs`, `iso9660`, `erofs` — ex.
+snaps), toujours à 100 % d'inodes par construction et jamais actionnables.
 
 Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est indépendant, configurable via YAML.
 
@@ -44,6 +48,19 @@ Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est i
 
 **Supprimé du scope :** `watch` (TUI), check Docker.
 
+### Rendu CLI — « Constellation sobre » (depuis 0.7.0)
+
+`status`, `doctor` et `history` sont rendus dans un langage visuel sobre : un
+en-tête discret `✦ Joséphine`, le statut porté par des glyphes de forme *et*
+de couleur (`●` ok, `▲` attention, `✕` critique — dégradés en
+`[ok]/[!]/[x]` hors TTY), des colonnes alignées, et un texte détoné
+(bilingue, ton « chaleur sobre » : direct et rassurant, sans mascotte ni
+emoji). Un `banner.txt` personnalisé (`~/.config/josephine/banner.txt`) reste
+honoré au-dessus de l'en-tête. Les notifications desktop
+(`messages.rs`) suivent le même détonage. `report`, `clean`, `fix` et
+`update` conservent encore l'ancien habillage `✨` — bascule prévue par
+l'increment C en cours (voir [ROADMAP.md](ROADMAP.md)).
+
 ### Démon
 
 - Binaire unique : `josephine --__daemon__` (flag interne)
@@ -55,7 +72,9 @@ Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est i
 
 - États : NORMAL → WARNING → CRITICAL → RECOVERED
 - Anti-spam : pas de notification si l'état ne change pas
-- Messages : module `messages.rs`, ton « Joséphine ange gardien » (humour bienveillant, jamais alarmiste)
+- Messages : module `messages.rs`, ton « chaleur sobre » depuis 0.7.0 —
+  direct, calme, rassurant, jamais alarmiste (identité ange gardien
+  conservée, sans mascotte ni emoji)
 - Canal : desktop via `notify-rust` / libnotify
 - `notifications.terminal` : présent en config, **non implémenté**
 
@@ -69,9 +88,16 @@ Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est i
 
 - Module `josephine/src/output/` : `bars`, `status`, `doctor`, `runner`, `style`
 - `indicatif` : progression pendant les checks (`status`, `doctor`)
-- `comfy-table` + couleurs via API table (pas d'ANSI dans les cellules)
-- Mode plain si sortie non-TTY
-- **Pas de logo ASCII** (reporté)
+- `style.rs` : primitives partagées « Constellation sobre » (glyphes de
+  statut, en-tête, accent) ; `bars` : mini-barres, utilisées par `doctor`
+  uniquement
+- `comfy-table` : encore utilisé pour les tableaux de `history` (tendance,
+  événements) ; `status`/`doctor` sont passés aux colonnes alignées sobres
+  (plus de tableau encadré) — couleurs toujours via l'API table, jamais
+  d'ANSI brut dans les cellules
+- Mode plain si sortie non-TTY (glyphes `[ok]/[!]/[x]`, pas de couleur)
+- **Pas de logo ASCII par défaut** — en-tête sobre `✦ Joséphine` ;
+  `banner.txt` personnalisé toujours possible
 
 ---
 
@@ -129,9 +155,9 @@ Commande : `cargo test --workspace`
 | Langage | Rust (pas Python du PVD original) |
 | Docker | Hors périmètre |
 | TUI / `watch` | Hors périmètre |
-| Logo ASCII | Reporté |
+| Logo ASCII | Retiré au profit d'un en-tête sobre `✦` (0.7.0) ; `banner.txt` personnalisé toujours possible |
 | Notifications | Démon uniquement, pas le CLI interactif |
-| Ton | Français, bienveillant, référence série *ange gardien* |
+| Ton | Bilingue (anglais par défaut, français en option) ; identité ange gardien conservée, sucre visuel retiré — « chaleur sobre » depuis 0.7.0 |
 
 ---
 
@@ -159,4 +185,8 @@ crates/josephine/src/
 
 ## Prochaine étape documentée
 
-Voir [ROADMAP.md](ROADMAP.md) et [superpowers/specs/2026-06-29-josephine-v02-design.md](superpowers/specs/2026-06-29-josephine-v02-design.md).
+Voir [ROADMAP.md](ROADMAP.md) et le programme d'increments CLI en cours :
+[superpowers/specs/2026-07-08-josephine-cli-render-tone-design.md](superpowers/specs/2026-07-08-josephine-cli-render-tone-design.md)
+(increment A, livré) et
+[superpowers/plans/2026-07-09-josephine-cli-increment-c.md](superpowers/plans/2026-07-09-josephine-cli-increment-c.md)
+(increment C, en cours).
