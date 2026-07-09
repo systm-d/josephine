@@ -25,9 +25,10 @@ computer.**
 
 ## Features
 
-- **Eleven built-in checks** — CPU, memory, disk, temperature, systemd services,
+- **Fourteen built-in checks** — CPU, memory, disk, temperature, systemd services,
   package updates (apt / dnf / pacman), local network (gateway latency), battery,
-  inode usage, SMART disk health (opt-in) and kernel incidents (OOM / oops).
+  inode usage, SMART disk health (opt-in), kernel incidents (OOM / oops),
+  read-only filesystem remounts, NTP clock sync and recent failed logins.
 - **Warm notifications** — plain-language desktop alerts that escalate only when
   it helps; never `ERROR` / `FATAL` / `PANIC`.
 - **Background daemon** — a lightweight systemd *user* service that watches
@@ -35,6 +36,7 @@ computer.**
 - **At-a-glance `status`** — colour-coded summary with a **customizable banner**.
 - **Detailed `doctor`** — check-by-check diagnostics; `--verbose` adds thresholds,
   the top 10 processes and each check's collection interval.
+- **`explain`** — what each check watches, why it matters, and how to act.
 - **Self-update** — `josephine update` checks GitHub Releases and installs the
   package matching your install (`.deb` / `.rpm`); reaches the network only when
   you ask.
@@ -82,6 +84,8 @@ josephine config edit   # edit the config in $EDITOR, then re-validate
 josephine report        # dated plain-text health report (-o writes to a file)
 josephine clean         # preview reclaimable disk space (--apply clears caches)
 josephine fix           # guided remediation for failed services / low disk
+josephine explain       # what each check watches and how to act
+josephine explain disk  # full explanation for one check
 josephine notify test   # send a test desktop notification
 josephine update        # check GitHub for a newer version and install it
 josephine --version

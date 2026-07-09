@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`filesystem` check** — flags writable filesystems unexpectedly remounted
+  read-only (early sign of disk failure or corruption).
+- **`timesync` check** — NTP clock synchronisation via `timedatectl`.
+- **`security` check** — surfaces repeated failed login attempts in the last hour.
+- **`josephine explain`** — bilingual what/why/remedy for all fourteen checks.
+
 ## [0.8.0] - 2026-07-09
 
 ### Added

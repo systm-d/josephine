@@ -4,21 +4,21 @@ title = "Joséphine"
 [extra]
 eyebrow = "Local Linux guardian"
 tagline = "Your machine, watched over — quietly."
-lede = "She keeps an eye on eleven vital signs of your Linux machine and speaks up only when something needs you. Direct, calm, and entirely local — no cloud, ever."
+lede = "She keeps an eye on fourteen vital signs of your Linux machine and speaks up only when something needs you. Direct, calm, and entirely local — no cloud, ever."
 cta = "View on GitHub"
 cta2 = "Install"
-readout_alt = "Example josephine status output: eleven checks, one flagged for attention"
+readout_alt = "Example josephine status output: fourteen checks, one flagged for attention"
 +++
 
 <section>
 <p class="eyebrow">What she watches</p>
 
-## Eleven vital signs
+## Fourteen vital signs
 
 <p class="section__lede">Each check is independent, configurable, and read straight from the kernel and <code>/sys</code> — nothing ever leaves the machine.</p>
 
 <div class="signs">
-  <div class="sign"><h3><span class="mark">✦</span> Eleven checks</h3><p>CPU, memory, disk, temperature, systemd, updates, network, battery, inodes, SMART &amp; kernel.</p></div>
+  <div class="sign"><h3><span class="mark">✦</span> Fourteen checks</h3><p>CPU, memory, disk, temperature, systemd, updates, network, battery, inodes, SMART, kernel, filesystem, clock &amp; security.</p></div>
   <div class="sign"><h3><span class="mark">✦</span> Direct alerts</h3><p>Plain-language desktop notes, calm and to the point — never <code>ERROR</code> / <code>FATAL</code> / <code>PANIC</code>.</p></div>
   <div class="sign"><h3><span class="mark">✦</span> Fully local</h3><p>Everything runs on your machine. No cloud, no telemetry, no account.</p></div>
   <div class="sign"><h3><span class="mark">✦</span> Machine-readable</h3><p><code>--json</code> for scripting, shell completions, and a self-update from GitHub releases.</p></div>
@@ -34,7 +34,7 @@ readout_alt = "Example josephine status output: eleven checks, one flagged for a
 <p class="section__lede">Severity is carried by shape <em>and</em> colour — <span class="g-ok">●</span> ok, <span class="g-warn">▲</span> attention, <span class="g-crit">✕</span> critical — so it reads even in a pipe (<code>[ok] [!] [x]</code> off a terminal). <code>josephine doctor</code> explains it check by check; <code>josephine history</code> shows 24-hour min / avg / max with sparkline trends <code>▁▂▄▇▅▃</code>.</p>
 
 <div class="term"><div class="term__bar"><span class="term__dot"></span><span class="term__dot"></span><span class="term__dot"></span><span class="term__title">josephine doctor</span></div><pre><span class="dim">✦ Joséphine · diagnostic                        14:40</span>
-11 checks · 1 to look at
+14 checks · 1 to look at
 <span class="rule">──────────────────────────────────────────────────</span>
  <span class="g-warn">▲</span>  Updates · <span class="g-warn">attention</span>                    30 available
     ▓▓▓▓▓▓▓░░░░░░░  apt: 30 package updates pending
@@ -72,6 +72,7 @@ readout_alt = "Example josephine status output: eleven checks, one flagged for a
   <li><code>josephine report</code><span>a dated, plain-text health report (<code>--json</code> too)</span></li>
   <li><code>josephine clean</code><span>preview reclaimable disk space (<code>--apply</code> to clear caches)</span></li>
   <li><code>josephine fix</code><span>guided remediation for failed services / low disk</span></li>
+  <li><code>josephine explain</code><span>what each check watches and how to act</span></li>
   <li><code>josephine completions</code><span>shell completions for bash, zsh, fish</span></li>
   <li><code>josephine daemon start</code><span>run the background watcher</span></li>
 </ul>

@@ -1,6 +1,6 @@
 # Joséphine — État actuel du code
 
-**Version :** 0.7.0  
+**Version :** 0.8.0 (increment D en cours)  
 **Dernière mise à jour :** 2026-07-09  
 **Langage :** Rust (workspace Cargo)  
 **Cible :** Linux (Debian 13+ recommandé)
@@ -11,7 +11,7 @@ Ce document est la **source de vérité** pour l'état du dépôt. En cas de div
 
 ## Livré
 
-### Checks (11)
+### Checks (14)
 
 | Check | Métriques principales | Source |
 |-------|----------------------|--------|
@@ -26,6 +26,9 @@ Ce document est la **source de vérité** pour l'état du dépôt. En cas de div
 | `inode` | `inode_usage_percent_worst` | `df -iPT`* |
 | `smart` | `smart_failing` (opt-in, root requis) | `smartctl -H` |
 | `kernel` | `kernel_incidents` (OOM, oops…) | `journalctl -k` |
+| `filesystem` | `readonly_mounts` | `/proc/mounts` |
+| `timesync` | `clock_unsynced` | `timedatectl` |
+| `security` | `failed_auths` | `journalctl` |
 
 \* Le `T` ajoute le type de filesystem à la sortie de `df`, pour ignorer les
 montages en lecture seule de type image (`squashfs`, `iso9660`, `erofs` — ex.
@@ -46,6 +49,7 @@ Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est i
 | `notify test` | ✅ |
 | `update` (`--check`, `--yes`) | ✅ |
 | `completions <bash\|zsh\|fish…>` | ✅ |
+| `explain` (`<check>` optionnel) | ✅ |
 
 **Supprimé du scope :** `watch` (TUI), check Docker.
 
@@ -123,6 +127,7 @@ bilingue (voir `i18n.rs`). L'anglais est la langue par défaut depuis la v0.5.0.
 Structures notables :
 
 - `CheckThresholds` — cpu, memory, disk (%, intervalles)
+- `FilesystemCheckConfig`, `TimesyncCheckConfig`, `SecurityCheckConfig` — seuils dédiés (pas les défauts 85/95)
 - `TemperatureThresholds` — seuils en °C (20–150)
 - `SystemdCheckConfig` — seuils `failed_*` et `restarts_*` (comptes entiers ≥ 1)
 

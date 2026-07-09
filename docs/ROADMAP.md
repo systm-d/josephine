@@ -94,7 +94,7 @@ alignées, ton détoné « chaleur sobre » en anglais et en français, sur
 | A — rendu & ton | `status`/`doctor`/`history` + notifications passés au sobre | ✅ livré (v0.7.0) |
 | C — solidité & finitions | bascule de `report`/`clean`/`fix`/`update` sur l'habillage sobre, pied de page unifié, nettoyage de copie EN/FR, docs à jour | ✅ livré (v0.7.1) |
 | B — sortie machine & canaux | `--json`, complétions shell, `--help` localisé, canal de notification terminal | ✅ livré (v0.8.0) |
-| D — nouveaux checks/commandes | hors périmètre de la refonte CLI | ⏳ planifié |
+| D — nouveaux checks/commandes | filesystem, timesync, security + `josephine explain` | ✅ livré (branche `feat/cli-increment-d`) |
 
 ---
 
@@ -103,7 +103,6 @@ alignées, ton détoné « chaleur sobre » en anglais et en français, sur
 - Plugins internes (postgres, nginx…)
 - API REST locale
 - Interface web localhost
-- `josephine explain` (couche explication, pas surveillance)
 
 ---
 

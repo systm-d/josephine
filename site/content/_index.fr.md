@@ -4,21 +4,21 @@ title = "Joséphine"
 [extra]
 eyebrow = "Gardien Linux local"
 tagline = "Votre machine, sous bonne garde — en silence."
-lede = "Elle veille sur onze signes vitaux de votre machine Linux et ne parle que lorsque quelque chose vous concerne. Directe, calme, et 100 % locale — jamais de cloud."
+lede = "Elle veille sur quatorze signes vitaux de votre machine Linux et ne parle que lorsque quelque chose vous concerne. Directe, calme, et 100 % locale — jamais de cloud."
 cta = "Voir sur GitHub"
 cta2 = "Installer"
-readout_alt = "Exemple de sortie josephine status : onze contrôles, un à surveiller"
+readout_alt = "Exemple de sortie josephine status : quatorze contrôles, un à surveiller"
 +++
 
 <section>
 <p class="eyebrow">Ce qu'elle surveille</p>
 
-## Onze signes vitaux
+## Quatorze signes vitaux
 
 <p class="section__lede">Chaque contrôle est indépendant, configurable, et lu directement dans le noyau et <code>/sys</code> — rien ne quitte jamais la machine.</p>
 
 <div class="signs">
-  <div class="sign"><h3><span class="mark">✦</span> Onze contrôles</h3><p>CPU, mémoire, disque, température, systemd, mises à jour, réseau, batterie, inodes, SMART &amp; noyau.</p></div>
+  <div class="sign"><h3><span class="mark">✦</span> Quatorze contrôles</h3><p>CPU, mémoire, disque, température, systemd, mises à jour, réseau, batterie, inodes, SMART, noyau, système de fichiers, horloge &amp; sécurité.</p></div>
   <div class="sign"><h3><span class="mark">✦</span> Alertes directes</h3><p>Des notes desktop en clair, calmes et précises — jamais <code>ERROR</code> / <code>FATAL</code> / <code>PANIC</code>.</p></div>
   <div class="sign"><h3><span class="mark">✦</span> 100 % locale</h3><p>Tout tourne sur votre machine. Pas de cloud, pas de télémétrie, pas de compte.</p></div>
   <div class="sign"><h3><span class="mark">✦</span> Lisible par machine</h3><p><code>--json</code> pour le scripting, complétions shell, et mise à jour depuis les releases GitHub.</p></div>
@@ -34,7 +34,7 @@ readout_alt = "Exemple de sortie josephine status : onze contrôles, un à surve
 <p class="section__lede">La gravité est portée par la forme <em>et</em> la couleur — <span class="g-ok">●</span> ok, <span class="g-warn">▲</span> attention, <span class="g-crit">✕</span> critique — lisible même dans un pipe (<code>[ok] [!] [x]</code> hors terminal). <code>josephine doctor</code> détaille contrôle par contrôle ; <code>josephine history</code> montre les min / moy / max sur 24 h avec des sparklines <code>▁▂▄▇▅▃</code>.</p>
 
 <div class="term"><div class="term__bar"><span class="term__dot"></span><span class="term__dot"></span><span class="term__dot"></span><span class="term__title">josephine doctor</span></div><pre><span class="dim">✦ Joséphine · diagnostic                        14:40</span>
-11 contrôles · 1 à regarder
+14 contrôles · 1 à regarder
 <span class="rule">──────────────────────────────────────────────────</span>
  <span class="g-warn">▲</span>  Mises à jour · <span class="g-warn">attention</span>             30 dispo.
     ▓▓▓▓▓▓▓░░░░░░░  apt : 30 paquets à mettre à jour
@@ -72,6 +72,7 @@ readout_alt = "Exemple de sortie josephine status : onze contrôles, un à surve
   <li><code>josephine report</code><span>un rapport texte daté (<code>--json</code> aussi)</span></li>
   <li><code>josephine clean</code><span>aperçu de l'espace disque récupérable (<code>--apply</code> pour vider les caches)</span></li>
   <li><code>josephine fix</code><span>remédiation guidée pour services en échec / disque plein</span></li>
+  <li><code>josephine explain</code><span>ce que chaque check surveille et comment agir</span></li>
   <li><code>josephine completions</code><span>complétions shell pour bash, zsh, fish</span></li>
   <li><code>josephine daemon start</code><span>lance le veilleur en arrière-plan</span></li>
 </ul>
