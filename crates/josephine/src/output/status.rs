@@ -7,8 +7,6 @@ use josephine_core::i18n;
 use super::bars::severity_color;
 use super::style::{format_metric_value, primary_metric};
 
-const LABEL_WIDTH: usize = 14;
-
 pub fn print_status_table(results: &[CheckResult]) {
     super::style::sober_header(
         None,
@@ -17,8 +15,15 @@ pub fn print_status_table(results: &[CheckResult]) {
             "Votre machine, sous bonne garde.",
         )),
     );
-    for row in build_rows(results) {
-        print_row(&row);
+    let rows = build_rows(results);
+    let label_w = rows
+        .iter()
+        .map(|r| r.label.chars().count())
+        .max()
+        .unwrap_or(0)
+        + 2;
+    for row in &rows {
+        print_row(row, label_w);
     }
     println!("{}", "─".repeat(super::style::HEADER_WIDTH).dimmed());
     print_footer_line(results);
@@ -91,7 +96,7 @@ fn load_row() -> Option<Row> {
 
     Some(Row {
         label: i18n::t("Load", "Charge").to_string(),
-        value: format!("{one:.2} (1m) {five:.2} (5m) {fifteen:.2} (15m)"),
+        value: format!("{one:.2} · {five:.2} · {fifteen:.2}"),
         severity,
     })
 }
@@ -105,9 +110,9 @@ fn read_loadavg() -> Option<(f64, f64, f64)> {
     Some((one, five, fifteen))
 }
 
-fn print_row(row: &Row) {
+fn print_row(row: &Row, label_w: usize) {
     let glyph = super::style::status_glyph(row.severity);
-    let label = pad(&row.label, LABEL_WIDTH);
+    let label = pad(&row.label, label_w);
     let value = super::style::severity_paint(&row.value, row.severity);
     println!(" {glyph}  {label}{value}");
 }
@@ -116,25 +121,29 @@ fn print_row(row: &Row) {
 // Footer
 // ---------------------------------------------------------------------------
 
+fn footer_message(count: usize) -> String {
+    use josephine_core::i18n::{self, Lang};
+    if count == 0 {
+        return i18n::t("All clear.", "Tout est au vert.").to_string();
+    }
+    match i18n::lang() {
+        Lang::En => format!(
+            "{count} thing{} to look at → josephine doctor",
+            if count > 1 { "s" } else { "" }
+        ),
+        Lang::Fr => format!(
+            "{count} point{} à regarder → josephine doctor",
+            if count > 1 { "s" } else { "" }
+        ),
+    }
+}
+
 fn print_footer_line(results: &[CheckResult]) {
-    let n = results
+    let count = results
         .iter()
         .filter(|r| r.worst_severity() != Severity::Info)
         .count();
-    let msg = if n == 0 {
-        i18n::t("All clear.", "Tout est au vert.").to_string()
-    } else {
-        match i18n::lang() {
-            josephine_core::i18n::Lang::En => format!(
-                "{n} thing{} to look at → josephine doctor",
-                if n > 1 { "s" } else { "" }
-            ),
-            josephine_core::i18n::Lang::Fr => format!(
-                "{n} point{} à regarder → josephine doctor",
-                if n > 1 { "s" } else { "" }
-            ),
-        }
-    };
+    let msg = footer_message(count);
     println!(
         " {}",
         if super::style::is_tty() {
@@ -156,5 +165,19 @@ fn pad(s: &str, width: usize) -> String {
         s.to_string()
     } else {
         format!("{s}{}", " ".repeat(width - len))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn footer_message_pluralizes() {
+        use josephine_core::i18n::{self, Lang};
+        i18n::set_lang(Lang::En);
+        assert_eq!(footer_message(0), "All clear.");
+        assert!(footer_message(1).starts_with("1 thing to look at"));
+        assert!(footer_message(3).starts_with("3 things to look at"));
     }
 }
