@@ -1,5 +1,7 @@
 //! Inode check — a filesystem can be "full" on inodes while still showing free
-//! space (lots of tiny files). Reads `df -iP`; runs fine as a normal user.
+//! space (lots of tiny files). Reads `df -iPT` (the `T` adds the filesystem
+//! type, so we can skip read-only image mounts like snaps); runs fine as a
+//! normal user.
 
 use std::process::Command;
 
@@ -84,7 +86,7 @@ fn build_result(readings: &[InodeReading], thresholds: &CheckThresholds) -> Chec
 }
 
 fn read_inode_usage() -> Vec<InodeReading> {
-    match Command::new("df").args(["-iP"]).output() {
+    match Command::new("df").args(["-iPT"]).output() {
         Ok(output) if output.status.success() => {
             parse_df_inodes(&String::from_utf8_lossy(&output.stdout))
         }
@@ -92,22 +94,25 @@ fn read_inode_usage() -> Vec<InodeReading> {
     }
 }
 
-/// Parse `df -iP` output, keeping only real filesystems with inode accounting.
+/// Parse `df -iPT` output, keeping only real, writable filesystems with inode
+/// accounting. Columns are: Filesystem, Type, Inodes, IUsed, IFree, IUse%,
+/// Mounted on.
 fn parse_df_inodes(stdout: &str) -> Vec<InodeReading> {
     stdout
         .lines()
         .skip(1)
         .filter_map(|line| {
             let fields: Vec<&str> = line.split_whitespace().collect();
-            if fields.len() < 6 {
+            if fields.len() < 7 {
                 return None;
             }
-            let mount = fields[5];
-            if is_pseudo_mount(mount) {
+            let fstype = fields[1];
+            let mount = fields[6];
+            if is_pseudo_mount(mount) || is_readonly_image_fs(fstype) {
                 return None;
             }
             // Filesystems without inode concept report "-" for the counts.
-            let usage_percent: f64 = fields[4].trim_end_matches('%').parse().ok()?;
+            let usage_percent: f64 = fields[5].trim_end_matches('%').parse().ok()?;
             Some(InodeReading {
                 mount: mount.to_string(),
                 usage_percent,
@@ -124,6 +129,16 @@ fn is_pseudo_mount(mount: &str) -> bool {
         || mount.starts_with("/snap")
 }
 
+/// Read-only image filesystems (snaps, AppImages, mounted ISOs) are packed to
+/// exactly their file count, so they *always* report 100 % inode usage. That's
+/// by design and never actionable — and since snapd mounts them under
+/// `/var/lib/snapd/snap/…` (not `/snap`) on many distros, matching by path
+/// misses them. Filtering by type catches every one, wherever it mounts, so a
+/// few dozen snaps can't bury the real writable filesystems under false alarms.
+fn is_readonly_image_fs(fstype: &str) -> bool {
+    matches!(fstype, "squashfs" | "iso9660" | "erofs")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -138,11 +153,13 @@ mod tests {
     }
 
     const SAMPLE: &str = "\
-Filesystem      Inodes  IUsed   IFree IUse% Mounted on
-/dev/sda2      6111232 512345 5598887    9% /
-tmpfs          4055820    123 4055697    1% /dev/shm
-/dev/sda3     12222464 300000 11922464    3% /home
-btrfsdev             -      -       -     -  /data
+Filesystem     Type       Inodes  IUsed   IFree IUse% Mounted on
+/dev/sda2      ext4      6111232 512345 5598887    9% /
+tmpfs          tmpfs     4055820    123 4055697    1% /dev/shm
+/dev/sda3      ext4     12222464 300000 11922464    3% /home
+btrfsdev       btrfs           -      -       -     -  /data
+/dev/loop0     squashfs    23329  23329       0  100% /var/lib/snapd/snap/core24/1587
+/dev/loop1     squashfs       29     29       0  100% /snap/bare/5
 ";
 
     #[test]
@@ -150,6 +167,17 @@ btrfsdev             -      -       -     -  /data
         let readings = parse_df_inodes(SAMPLE);
         let mounts: Vec<&str> = readings.iter().map(|r| r.mount.as_str()).collect();
         assert_eq!(mounts, vec!["/", "/home"]);
+    }
+
+    #[test]
+    fn skips_read_only_image_filesystems() {
+        // Snaps mount squashfs images that are always 100 % inodes by design.
+        // They must never leak into the check — wherever snapd mounts them
+        // (`/var/lib/snapd/snap/…` on most distros, not just `/snap`) — or they
+        // bury the real filesystems under false criticals.
+        let readings = parse_df_inodes(SAMPLE);
+        assert!(readings.iter().all(|r| !r.mount.contains("snap")));
+        assert!(readings.iter().all(|r| r.usage_percent < 100.0));
     }
 
     #[test]

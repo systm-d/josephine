@@ -18,6 +18,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   English and French — including the desktop notifications. A custom
   `banner.txt` is still honoured.
 
+### Fixed
+
+- The **inode** check no longer raises a false `critical` from snap mounts. Snaps
+  are read-only `squashfs` images, always packed to 100 % inode usage by design;
+  on most distros snapd mounts them under `/var/lib/snapd/snap/…`, which the old
+  path-based filter (matching only `/snap`) missed, so a machine with many snaps
+  would drown the real writable filesystems under dozens of 100 % lines. The
+  check now reads `df -iPT` and skips read-only image filesystems by *type*
+  (`squashfs` / `iso9660` / `erofs`), wherever they mount.
+
 ## [0.6.0] - 2026-07-03
 
 ### Added
