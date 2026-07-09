@@ -44,7 +44,7 @@ pub struct ChecksConfig {
     #[serde(default)]
     pub kernel: KernelCheckConfig,
     #[serde(default)]
-    pub filesystem: CheckThresholds,
+    pub filesystem: FilesystemCheckConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -148,6 +148,27 @@ pub struct KernelCheckConfig {
     pub critical: f64,
 }
 
+/// Unlike the generic [`CheckThresholds`], this check's own defaults
+/// (warning = critical = 1: any read-only remount is critical) must win on
+/// *every* deserialization path — including a pre-existing config file that
+/// has no `filesystem:` key at all, where serde falls back to
+/// `#[serde(default)]` on the field, i.e. `FilesystemCheckConfig::default()`.
+/// A bare `#[serde(default)]` pointing at the generic `CheckThresholds`
+/// (85/95) would silently defeat the "any read-only mount is critical"
+/// intent on upgraded installs.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct FilesystemCheckConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    #[serde(default = "default_filesystem_interval")]
+    pub interval_secs: u64,
+    /// Number of unexpectedly read-only mounts.
+    #[serde(default = "default_filesystem_warning")]
+    pub warning: f64,
+    #[serde(default = "default_filesystem_critical")]
+    pub critical: f64,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct NotificationsConfig {
     #[serde(default = "default_true")]
@@ -220,6 +241,18 @@ fn default_kernel_critical() -> f64 {
     3.0
 }
 
+fn default_filesystem_interval() -> u64 {
+    120
+}
+
+fn default_filesystem_warning() -> f64 {
+    1.0
+}
+
+fn default_filesystem_critical() -> f64 {
+    1.0
+}
+
 fn default_warning() -> f64 {
     85.0
 }
@@ -282,12 +315,7 @@ impl Default for ChecksConfig {
             },
             smart: SmartCheckConfig::default(),
             kernel: KernelCheckConfig::default(),
-            filesystem: CheckThresholds {
-                enabled: true,
-                interval_secs: 120,
-                warning: 1.0,
-                critical: 1.0,
-            },
+            filesystem: FilesystemCheckConfig::default(),
         }
     }
 }
@@ -341,6 +369,17 @@ impl Default for KernelCheckConfig {
             interval_secs: 300,
             warning: default_kernel_warning(),
             critical: default_kernel_critical(),
+        }
+    }
+}
+
+impl Default for FilesystemCheckConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            interval_secs: default_filesystem_interval(),
+            warning: default_filesystem_warning(),
+            critical: default_filesystem_critical(),
         }
     }
 }
@@ -556,7 +595,7 @@ impl Config {
     /// the filesystem check's default is warning = critical = 1 (any
     /// read-only remount is critical — there's no intermediate "worth a
     /// look" state for a filesystem that may be silently corrupting data).
-    fn validate_filesystem(c: &CheckThresholds) -> Result<()> {
+    fn validate_filesystem(c: &FilesystemCheckConfig) -> Result<()> {
         if c.interval_secs < 5 {
             bail!("checks.filesystem.interval_secs must be ≥ 5 seconds");
         }
@@ -602,5 +641,29 @@ mod tests {
         let mut config = Config::default();
         config.checks.cpu.warning = 96.0;
         assert!(config.validate().is_err());
+    }
+
+    /// Regression test for a pre-existing config file (written before the
+    /// `filesystem` check existed) that has no `filesystem:` key at all. On
+    /// this "field absent" deserialization path, serde falls back to
+    /// `FilesystemCheckConfig`'s own `#[serde(default = "…")]` functions —
+    /// NOT to `ChecksConfig`'s manual `Default` impl. Both must agree on
+    /// warning = critical = 1.0, or an upgraded install silently gets the
+    /// generic 85/95 thresholds and the alert never fires for a read-only
+    /// remount (count = 1 is nowhere near 85).
+    #[test]
+    fn upgraded_config_without_filesystem_key_still_defaults_to_1_and_1() {
+        let yaml = "\
+checks:
+  cpu:
+    warning: 80
+    critical: 90
+";
+        let config: Config = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(config.checks.filesystem.warning, 1.0);
+        assert_eq!(config.checks.filesystem.critical, 1.0);
+        assert!(config.checks.filesystem.enabled);
+        assert_eq!(config.checks.filesystem.interval_secs, 120);
+        config.validate().unwrap();
     }
 }

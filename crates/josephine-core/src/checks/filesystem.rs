@@ -6,7 +6,7 @@
 use anyhow::Result;
 
 use crate::check::{Check, CheckResult, Metric};
-use crate::config::CheckThresholds;
+use crate::config::FilesystemCheckConfig;
 use crate::i18n::{self, Lang};
 
 /// Filesystem types that are normally mounted read-write. A mount using one
@@ -19,12 +19,12 @@ const WRITABLE_FSTYPES: &[&str] = &[
 ];
 
 pub struct FilesystemCheck {
-    thresholds: CheckThresholds,
+    config: FilesystemCheckConfig,
 }
 
 impl FilesystemCheck {
-    pub fn new(thresholds: CheckThresholds) -> Self {
-        Self { thresholds }
+    pub fn new(config: FilesystemCheckConfig) -> Self {
+        Self { config }
     }
 }
 
@@ -37,14 +37,11 @@ impl Check for FilesystemCheck {
         let Ok(content) = std::fs::read_to_string("/proc/mounts") else {
             return Ok(unavailable());
         };
-        Ok(build_result(
-            &find_readonly_mounts(&content),
-            &self.thresholds,
-        ))
+        Ok(build_result(&find_readonly_mounts(&content), &self.config))
     }
 }
 
-fn build_result(flagged: &[String], thresholds: &CheckThresholds) -> CheckResult {
+fn build_result(flagged: &[String], config: &FilesystemCheckConfig) -> CheckResult {
     let count = flagged.len();
 
     let status_value = match (i18n::lang(), count) {
@@ -78,8 +75,8 @@ fn build_result(flagged: &[String], thresholds: &CheckThresholds) -> CheckResult
             name: "readonly_mounts".into(),
             value: count as f64,
             unit: "mounts".into(),
-            threshold_warning: Some(thresholds.warning),
-            threshold_critical: Some(thresholds.critical),
+            threshold_warning: Some(config.warning),
+            threshold_critical: Some(config.critical),
         }],
         details,
         top_processes: vec![],
@@ -105,8 +102,12 @@ fn unavailable() -> CheckResult {
 
 /// Parse `/proc/mounts` (fields: device, mount point, fstype, options, …) and
 /// return the mount points that are unexpectedly read-only: a real
-/// read-write-class filesystem (not a pseudo mount, not an inherently
-/// read-only image type) whose options contain the whole-word `ro` flag.
+/// read-write-class filesystem (not an inherently read-only image type) whose
+/// options contain the whole-word `ro` flag.
+///
+/// We filter by fstype only — not by mount path. Pseudo filesystems (`proc`,
+/// `sysfs`, `tmpfs`, …) never appear in [`WRITABLE_FSTYPES`], so a blanket
+/// `/run` prefix skip would miss USB sticks under `/run/media/…`.
 fn find_readonly_mounts(content: &str) -> Vec<String> {
     content
         .lines()
@@ -118,7 +119,7 @@ fn find_readonly_mounts(content: &str) -> Vec<String> {
             let mount_point = fields[1];
             let fstype = fields[2];
             let options = fields[3];
-            if is_pseudo_mount(mount_point) || !WRITABLE_FSTYPES.contains(&fstype) {
+            if !WRITABLE_FSTYPES.contains(&fstype) {
                 return None;
             }
             has_ro_option(options).then(|| mount_point.to_string())
@@ -132,24 +133,13 @@ fn has_ro_option(options: &str) -> bool {
     options.split(',').any(|opt| opt == "ro")
 }
 
-fn is_pseudo_mount(mount_point: &str) -> bool {
-    mount_point.starts_with("/proc")
-        || mount_point.starts_with("/sys")
-        || mount_point.starts_with("/run")
-        || mount_point.starts_with("/dev")
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::FilesystemCheckConfig;
 
-    fn thresholds() -> CheckThresholds {
-        CheckThresholds {
-            enabled: true,
-            interval_secs: 120,
-            warning: 1.0,
-            critical: 1.0,
-        }
+    fn config() -> FilesystemCheckConfig {
+        FilesystemCheckConfig::default()
     }
 
     const ONE_READONLY: &str = "\
@@ -194,16 +184,26 @@ proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
         assert!(flagged.is_empty());
     }
 
+    const USB_READONLY: &str = "\
+/dev/sdb1 /run/media/alice/USB vfat ro,relatime,fmask=0022,dmask=0022 0 0
+";
+
+    #[test]
+    fn readonly_usb_under_run_media_is_flagged() {
+        let flagged = find_readonly_mounts(USB_READONLY);
+        assert_eq!(flagged, vec!["/run/media/alice/USB".to_string()]);
+    }
+
     #[test]
     fn one_readonly_mount_is_critical() {
-        let result = build_result(&find_readonly_mounts(ONE_READONLY), &thresholds());
+        let result = build_result(&find_readonly_mounts(ONE_READONLY), &config());
         assert_eq!(result.worst_severity(), crate::check::Severity::Critique);
         assert_eq!(result.status_value.as_deref(), Some("1 read-only: “/home”"));
     }
 
     #[test]
     fn all_writable_is_info() {
-        let result = build_result(&find_readonly_mounts(ALL_READWRITE), &thresholds());
+        let result = build_result(&find_readonly_mounts(ALL_READWRITE), &config());
         assert_eq!(result.worst_severity(), crate::check::Severity::Info);
         assert_eq!(result.status_value.as_deref(), Some("all read-write"));
     }
