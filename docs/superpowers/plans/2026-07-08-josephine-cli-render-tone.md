@@ -107,9 +107,9 @@ pub fn status_glyph(severity: Severity) -> String {
 Run: `cargo test -p josephine --lib status_glyph_is_ascii_off_tty`
 Expected: PASS.
 
-- [ ] **Step 5: Add `sober_header` and move banner helpers into `style.rs`**
+- [ ] **Step 5: Add `sober_header` and the banner helpers into `style.rs`**
 
-Move `custom_banner`, `print_banner_gradient`, `lerp` out of `status.rs` into `style.rs` (make them private module functions there), then add:
+Add private copies of `custom_banner`, `print_banner_gradient`, `lerp` to `style.rs` (as private module functions). **Do not modify `status.rs` in this task** — its `print_header` still uses its own copies, so leaving them keeps every commit compiling; Task 2 deletes the originals from `status.rs` when it removes `print_header`. Then add:
 
 ```rust
 use chrono::Local;
@@ -124,7 +124,7 @@ pub fn sober_header(suffix: Option<&str>, tagline: Option<&str>) {
         println!();
     }
     let clock = Local::now().format("%H:%M").to_string();
-    let mut title = format!("✦ Joséphine");
+    let mut title = String::from("✦ Joséphine");
     if let Some(s) = suffix {
         title.push_str(&format!(" · {s}"));
     }
