@@ -1,67 +1,67 @@
-use comfy_table::presets::UTF8_FULL;
-use comfy_table::{Attribute, Cell, ColumnConstraint, ContentArrangement, Table, Width};
-
 use josephine_core::check::{CheckResult, Metric, Severity};
 use josephine_core::checks::interval_for_check;
 use josephine_core::config::Config;
 use josephine_core::i18n;
 
-use super::bars::{BAR_WIDTH, bar_plain, severity_color};
-use super::status::state_badge;
-use super::style::{
-    check_label, format_metric_value, metric_scale, primary_metric, print_banner, print_footer,
-};
-
-const TABLE_WIDTH: u16 = 86;
+use super::bars::{BAR_WIDTH, bar_plain};
+use super::style::{check_label, format_metric_value, metric_scale, primary_metric, print_footer};
 
 pub fn print_doctor(results: &[CheckResult], config: &Config, verbose: bool) {
-    print_banner(i18n::t(
-        "A detailed look at your system",
-        "Analyse détaillée de votre système",
-    ));
-
-    let mut table = Table::new();
-    table.load_preset(UTF8_FULL);
-    table.set_content_arrangement(ContentArrangement::Dynamic);
-    table.set_width(TABLE_WIDTH);
-    table.set_header(vec![
-        Cell::new("Check").add_attribute(Attribute::Bold),
-        Cell::new(i18n::t("State", "État")).add_attribute(Attribute::Bold),
-        Cell::new(i18n::t("Measure & details", "Mesure & détails")).add_attribute(Attribute::Bold),
-    ]);
-    table.set_constraints(vec![
-        ColumnConstraint::Absolute(Width::Fixed(13)),
-        ColumnConstraint::Absolute(Width::Fixed(7)),
-        ColumnConstraint::LowerBoundary(Width::Fixed(48)),
-    ]);
-
+    super::style::sober_header(
+        Some(i18n::t("diagnostic", "diagnostic")),
+        Some(&summary_line(results)),
+    );
     for result in results {
-        let severity = result.worst_severity();
-        let mut detail_cell = Cell::new(detail_lines(result, config, verbose).join("\n"));
-        if severity != Severity::Info {
-            detail_cell = detail_cell.fg(severity_color(severity));
-        }
-        table.add_row(vec![
-            Cell::new(check_label(&result.check_name)),
-            state_badge(severity),
-            detail_cell,
-        ]);
-    }
-
-    println!("{table}");
-
-    if verbose {
-        print_footer(i18n::t(
-            "Condensed view: `josephine doctor` (without --verbose).",
-            "Vue condensée : `josephine doctor` (sans --verbose).",
-        ));
-    } else {
-        print_footer(i18n::t(
-            "See everything (thresholds, processes, intervals): `josephine doctor --verbose`.",
-            "Tout voir (seuils, processus, intervalles) : `josephine doctor --verbose`.",
-        ));
+        print_check_block(result, config, verbose);
     }
     println!();
+    print_footer(footer_hint(verbose));
+    println!();
+}
+
+fn summary_line(results: &[CheckResult]) -> String {
+    let total = results.len();
+    let n = results
+        .iter()
+        .filter(|r| r.worst_severity() != Severity::Info)
+        .count();
+    match i18n::lang() {
+        i18n::Lang::En => format!("{total} checks · {n} to look at"),
+        i18n::Lang::Fr => format!("{total} contrôles · {n} à regarder"),
+    }
+}
+
+fn state_word(severity: Severity) -> String {
+    let w = match severity {
+        Severity::Info => i18n::t("ok", "ok"),
+        Severity::Attention => i18n::t("attention", "attention"),
+        Severity::Critique => i18n::t("critical", "critique"),
+    };
+    super::style::severity_paint(w, severity)
+}
+
+fn print_check_block(result: &CheckResult, config: &Config, verbose: bool) {
+    let severity = result.worst_severity();
+    let glyph = super::style::status_glyph(severity);
+    let label = check_label(&result.check_name);
+    println!(" {glyph}  {label} · {}", state_word(severity));
+    for line in detail_lines(result, config, verbose) {
+        println!("    {line}");
+    }
+}
+
+fn footer_hint(verbose: bool) -> &'static str {
+    if verbose {
+        i18n::t(
+            "Condensed view: `josephine doctor` (without --verbose).",
+            "Vue condensée : `josephine doctor` (sans --verbose).",
+        )
+    } else {
+        i18n::t(
+            "See everything (thresholds, processes, intervals): `josephine doctor --verbose`.",
+            "Tout voir (seuils, processus, intervalles) : `josephine doctor --verbose`.",
+        )
+    }
 }
 
 /// Compose the multi-line "Mesure & détails" cell for one check.

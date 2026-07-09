@@ -1,10 +1,8 @@
 use colored::Colorize;
-use comfy_table::{Attribute, Cell};
 
 use josephine_core::check::{CheckResult, Severity};
 use josephine_core::i18n;
 
-use super::bars::severity_color;
 use super::style::{format_metric_value, primary_metric};
 
 pub fn print_status_table(results: &[CheckResult]) {
@@ -27,18 +25,6 @@ pub fn print_status_table(results: &[CheckResult]) {
     }
     println!("{}", "─".repeat(super::style::HEADER_WIDTH).dimmed());
     print_footer_line(results);
-}
-
-/// Badge cell used by the `doctor` detailed table (kept for that view).
-pub fn state_badge(severity: Severity) -> Cell {
-    let label = match severity {
-        Severity::Info => " ok ",
-        Severity::Attention => "alert",
-        Severity::Critique => "crit",
-    };
-    Cell::new(label)
-        .fg(severity_color(severity))
-        .add_attribute(Attribute::Bold)
 }
 
 // ---------------------------------------------------------------------------
