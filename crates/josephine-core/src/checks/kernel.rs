@@ -52,8 +52,8 @@ fn build_result(incidents: usize, config: &KernelCheckConfig) -> CheckResult {
     if incidents == 0 {
         details.push(
             i18n::t(
-                "The kernel is purring — nothing to report.",
-                "Le noyau ronronne — rien à signaler.",
+                "No kernel incidents in the last hour.",
+                "Aucun incident noyau sur la dernière heure.",
             )
             .into(),
         );

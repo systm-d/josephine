@@ -1,5 +1,5 @@
-//! Notification messages — Joséphine's guardian-angel voice, in English (default)
-//! and French. Warm, direct, a touch of celestial humour. Never alarmist.
+//! Notification messages, in English (default) and French. Direct, calm,
+//! reassuring. Never alarmist.
 
 use crate::check::Metric;
 use crate::config::CheckThresholds;
@@ -29,13 +29,13 @@ pub fn alert_message(
         "kernel" => kernel_alert(metric.value, lang),
         other => match lang {
             Lang::En => format!(
-                "Between us, {other} is signalling ({:.1} {}). \
-                 Nothing serious… for now. `josephine doctor`?",
+                "{other} is out of range ({:.1} {}). \
+                 Nothing serious yet — `josephine doctor`?",
                 metric.value, metric.unit
             ),
             Lang::Fr => format!(
-                "Entre nous, {other} me fait un signe ({:.1} {}). \
-                 Rien de grave… pour l'instant. `josephine doctor` ?",
+                "{other} sort de sa plage ({:.1} {}). \
+                 Rien de grave pour l'instant — `josephine doctor` ?",
                 metric.value, metric.unit
             ),
         },
@@ -45,137 +45,81 @@ pub fn alert_message(
 pub fn recovery_message(check_name: &str, metric: &Metric, lang: Lang) -> String {
     match check_name {
         "cpu" => match lang {
-            Lang::En => "Phew! Your processor is breathing again. \
-                 I'll fold a wing back — all good."
-                .into(),
-            Lang::Fr => "Ouf ! Votre processeur respire à nouveau. \
-                 Je retire une aile du ventilateur — c'est bon."
-                .into(),
+            Lang::En => "Your processor is breathing again — CPU load is back to normal.".into(),
+            Lang::Fr => {
+                "Votre processeur respire à nouveau — la charge CPU est revenue à la normale."
+                    .into()
+            }
         },
         "memory" if metric.name == "swap_percent" => match lang {
-            Lang::En => format!(
-                "Swap is settling ({:.0} %). Your machine stops leaning on its \
-                 reserves — thanks on its behalf.",
-                metric.value
-            ),
-            Lang::Fr => format!(
-                "Le swap se calme ({:.0} %). Votre machine arrête de compter \
-                 sur ses réserves — merci pour elle.",
-                metric.value
-            ),
+            Lang::En => format!("Swap is back to normal ({:.0} %).", metric.value),
+            Lang::Fr => format!("Le swap est revenu à la normale ({:.0} %).", metric.value),
         },
         "memory" => match lang {
-            Lang::En => format!(
-                "Your memory is relaxing ({:.0} %). Everyone can breathe out, \
-                 myself included.",
-                metric.value
-            ),
+            Lang::En => format!("Memory usage is back to normal ({:.0} %).", metric.value),
             Lang::Fr => format!(
-                "Votre mémoire se détend ({:.0} %). \
-                 Tout le monde peut souffler, moi y compris.",
+                "L'utilisation mémoire est revenue à la normale ({:.0} %).",
                 metric.value
             ),
         },
         "disk" => match lang {
-            Lang::En => format!(
-                "Your disk has room again ({:.0} %). Even angels appreciate a \
-                 little free space.",
-                metric.value
-            ),
+            Lang::En => format!("Your disk has room again ({:.0} %).", metric.value),
             Lang::Fr => format!(
-                "Votre disque a de l'air ({:.0} %). \
-                 Même les anges apprécient un peu d'espace libre.",
+                "Votre disque a de nouveau de la place ({:.0} %).",
                 metric.value
             ),
         },
         "temperature" => match lang {
-            Lang::En => format!(
-                "The temperature is coming down ({:.0} °C). No more furnace — \
-                 your machine thanks me.",
-                metric.value
-            ),
-            Lang::Fr => format!(
-                "La température redescend ({:.0} °C). \
-                 Fini la fournaise — votre machine me remercie.",
-                metric.value
-            ),
+            Lang::En => format!("The temperature is coming down ({:.0} °C).", metric.value),
+            Lang::Fr => format!("La température redescend ({:.0} °C).", metric.value),
         },
         "systemd" if metric.name == "failed_units" => match lang {
-            Lang::En => "All your services are back on their feet. \
-                 I never doubted — well, almost."
-                .into(),
-            Lang::Fr => "Tous vos services sont remis sur pied. \
-                 Moi, je n'ai jamais douté — enfin, presque."
-                .into(),
+            Lang::En => "All your services are back up.".into(),
+            Lang::Fr => "Tous vos services sont de nouveau opérationnels.".into(),
         },
         "systemd" => match lang {
             Lang::En => format!(
-                "The restarts have gone quiet ({:.0}). Stability is back on duty.",
+                "Restarts have stopped ({:.0}). Stability is back.",
                 metric.value
             ),
             Lang::Fr => format!(
-                "Les redémarrages se taisent ({:.0}). \
-                 La stabilité est revenue au poste.",
+                "Les redémarrages se sont arrêtés ({:.0}). La stabilité est revenue.",
                 metric.value
             ),
         },
         "updates" => match lang {
-            Lang::En => "Everything's up to date — your machine is shining like new. \
-                 Well done, we can be proud."
-                .into(),
-            Lang::Fr => "Tout est à jour — votre machine brille comme un sou neuf. \
-                 Beau travail, on peut être fières."
-                .into(),
+            Lang::En => "Everything is up to date.".into(),
+            Lang::Fr => "Tout est à jour.".into(),
         },
         "network" => match lang {
-            Lang::En => "The network is back, smooth and steady. \
-                 I'll put my feathers away — everything's talking again."
-                .into(),
-            Lang::Fr => "Le réseau est revenu, fluide et vaillant. \
-                 Je range mes plumes — tout communique de nouveau."
-                .into(),
+            Lang::En => "The network is back, stable and steady.".into(),
+            Lang::Fr => "Le réseau est revenu, stable et fluide.".into(),
         },
         "battery" => match lang {
-            Lang::En => "Your battery is back to strength (or you're plugged in). \
-                 Phew — I breathe easier too."
-                .into(),
-            Lang::Fr => "Votre batterie a repris des forces (ou vous voilà branché). \
-                 Ouf — je respire mieux, moi aussi."
-                .into(),
+            Lang::En => "Your battery is back to a healthy level (or you're plugged in).".into(),
+            Lang::Fr => {
+                "Votre batterie est revenue à un niveau correct (ou vous êtes branché).".into()
+            }
         },
         "inode" => match lang {
-            Lang::En => "The inodes have room again — the disk breathes, its files \
-                 neatly filed."
-                .into(),
-            Lang::Fr => "Les inodes ont repris de l'air — le disque respire à nouveau, \
-                 ses fichiers bien rangés."
-                .into(),
+            Lang::En => "Inodes have room again on the disk.".into(),
+            Lang::Fr => "Les inodes ont de nouveau de la place sur le disque.".into(),
         },
         "smart" => match lang {
-            Lang::En => "Your disks look healthy again on the SMART front. \
-                 I'll take a breather — you too, I hope."
-                .into(),
-            Lang::Fr => "Vos disques affichent de nouveau une mine saine côté SMART. \
-                 Je souffle un peu — vous aussi, j'espère."
-                .into(),
+            Lang::En => "Your disks look healthy again on the SMART front.".into(),
+            Lang::Fr => "Vos disques sont de nouveau sains côté SMART.".into(),
         },
         "kernel" => match lang {
-            Lang::En => "The kernel has calmed — no more incidents on the horizon. \
-                 Clear skies after the storm."
-                .into(),
-            Lang::Fr => "Le noyau s'est calmé — plus d'incident à l'horizon. \
-                 Le beau temps après l'orage."
-                .into(),
+            Lang::En => "No more kernel incidents in the last hour.".into(),
+            Lang::Fr => "Plus aucun incident noyau sur la dernière heure.".into(),
         },
         other => match lang {
             Lang::En => format!(
-                "All's back to normal for {other} ({:.1} {}). \
-                 I return to my quiet watch.",
+                "{other} is back to normal ({:.1} {}).",
                 metric.value, metric.unit
             ),
             Lang::Fr => format!(
-                "Tout est rentré dans l'ordre pour {other} ({:.1} {}). \
-                 Je reprends ma veille discrète.",
+                "{other} est revenu à la normale ({:.1} {}).",
                 metric.value, metric.unit
             ),
         },
@@ -186,79 +130,55 @@ pub fn recovery_message(check_name: &str, metric: &Metric, lang: Lang) -> String
 
 pub fn update_up_to_date(version: &str, lang: Lang) -> String {
     match lang {
-        Lang::En => format!(
-            "You're already on the latest version ({version}). Everything's fresh — \
-             nothing for me to do, and I'm quite happy with that."
-        ),
-        Lang::Fr => format!(
-            "Vous avez déjà la dernière version ({version}). \
-             Tout est neuf, je n'ai rien à faire — et ça me va très bien."
-        ),
+        Lang::En => format!("You're already on the latest version ({version})."),
+        Lang::Fr => format!("Vous avez déjà la dernière version ({version})."),
     }
 }
 
 pub fn update_ahead(current: &str, latest: &str, lang: Lang) -> String {
     match lang {
-        Lang::En => format!(
-            "Your version ({current}) is ahead of the latest published one ({latest}). \
-             You've got a head start — I like the daring."
-        ),
-        Lang::Fr => format!(
-            "Votre version ({current}) devance la dernière publiée ({latest}). \
-             Vous avez une longueur d'avance — j'aime cette audace."
-        ),
+        Lang::En => {
+            format!("Your version ({current}) is ahead of the latest published one ({latest}).")
+        }
+        Lang::Fr => format!("Votre version ({current}) devance la dernière publiée ({latest})."),
     }
 }
 
 pub fn update_available(version: &str, lang: Lang) -> String {
     match lang {
-        Lang::En => format!(
-            "A new version is waiting for you: {version}. A little refresh and your \
-             angel will wear her finest feathers."
-        ),
-        Lang::Fr => format!(
-            "Une nouvelle version vous attend : {version}. \
-             Un petit coup de neuf et votre ange portera ses plus belles plumes."
-        ),
+        Lang::En => format!("A new version is available: {version}."),
+        Lang::Fr => format!("Une nouvelle version est disponible : {version}."),
     }
 }
 
 pub fn update_done(version: &str, lang: Lang) -> String {
     match lang {
-        Lang::En => format!(
-            "There we go, Joséphine is now on {version}. Thank you for your trust — \
-             I'm back on watch, fresh and chipper."
-        ),
-        Lang::Fr => format!(
-            "Voilà, Joséphine est passée en {version}. \
-             Merci de votre confiance — je reprends ma veille, fraîche et pimpante."
-        ),
+        Lang::En => format!("Update complete — Joséphine is now on {version}."),
+        Lang::Fr => {
+            format!("Mise à jour terminée — Joséphine est maintenant en version {version}.")
+        }
     }
 }
 
 fn cpu_alert(value: f64, state: AlertState, thresholds: &CheckThresholds, lang: Lang) -> String {
     match (state, lang) {
         (AlertState::Critical, Lang::En) => format!(
-            "Goodness… {value:.0}% CPU. Your machine is running faster than I can \
-             flap my wings — and that's no compliment.\n\n\
-             `josephine doctor`, quick."
+            "CPU usage is at {value:.0}% — critical. Your machine is under heavy load.\n\n\
+             `josephine doctor`, now."
         ),
         (AlertState::Critical, Lang::Fr) => format!(
-            "Mon cher… {value:.0} % de CPU. \
-             Votre machine court plus vite que moi avec mes ailes — \
-             et ce n'est pas un compliment.\n\n\
-             `josephine doctor`, vite."
+            "Le CPU est à {value:.0} % — critique. \
+             Votre machine est sous forte charge.\n\n\
+             `josephine doctor`, maintenant."
         ),
         (AlertState::Warning, Lang::En) => format!(
-            "Well now, {value:.0}% CPU (threshold: {:.0}%). \
-             Something's stirring under the hood.\n\n\
-             A quick `josephine doctor`?",
+            "CPU usage is at {value:.0}% (threshold: {:.0}%). Worth a look.\n\n\
+             `josephine doctor`?",
             thresholds.warning
         ),
         (AlertState::Warning, Lang::Fr) => format!(
-            "Alors là, {value:.0} % de CPU (seuil : {:.0} %). \
-             Quelque chose s'agite sous le capot.\n\n\
-             Un petit `josephine doctor` ?",
+            "Le CPU est à {value:.0} % (seuil : {:.0} %). Ça mérite un coup d'œil.\n\n\
+             `josephine doctor` ?",
             thresholds.warning
         ),
         (AlertState::Normal, _) => unreachable!(),
@@ -268,15 +188,12 @@ fn cpu_alert(value: f64, state: AlertState, thresholds: &CheckThresholds, lang: 
 fn memory_alert(value: f64, lang: Lang) -> String {
     match lang {
         Lang::En => format!(
-            "Your memory is at {value:.0}% — nearly full. Something's nibbling at \
-             your resources, and it isn't me during my nap.\n\n\
-             `josephine doctor` to see who?"
+            "Memory is at {value:.0}% — nearly full.\n\n\
+             `josephine doctor` to see what's using it."
         ),
         Lang::Fr => format!(
-            "Votre mémoire est à {value:.0} % — presque pleine. \
-             Quelque chose grignote vos ressources, \
-             et ce n'est pas moi pendant ma sieste.\n\n\
-             `josephine doctor` pour voir qui ?"
+            "La mémoire est à {value:.0} % — presque pleine.\n\n\
+             `josephine doctor` pour voir ce qui l'utilise."
         ),
     }
 }
@@ -284,15 +201,12 @@ fn memory_alert(value: f64, lang: Lang) -> String {
 fn swap_alert(value: f64, lang: Lang) -> String {
     match lang {
         Lang::En => format!(
-            "Swap is racing ({value:.0}%). Your machine is cramming its thoughts \
-             into a tight corner — not ideal for thinking.\n\n\
-             `josephine doctor` can clear things up."
+            "Swap usage is high ({value:.0}%).\n\n\
+             `josephine doctor` for more detail."
         ),
         Lang::Fr => format!(
-            "Le swap s'emballe ({value:.0} %). \
-             Votre machine compresse ses idées dans un coin étroit — \
-             pas idéal pour réfléchir.\n\n\
-             `josephine doctor` peut éclaircir tout ça."
+            "L'utilisation du swap est élevée ({value:.0} %).\n\n\
+             `josephine doctor` pour en savoir plus."
         ),
     }
 }
@@ -300,14 +214,12 @@ fn swap_alert(value: f64, lang: Lang) -> String {
 fn disk_alert(value: f64, lang: Lang) -> String {
     match lang {
         Lang::En => format!(
-            "Your disk is at {value:.0}% — it's coughing a little. Even in heaven, \
-             storage isn't unlimited.\n\n\
-             I can help you see what's piling up: `josephine doctor`."
+            "Disk usage is at {value:.0}% — space is running low.\n\n\
+             See what's taking up room: `josephine doctor`."
         ),
         Lang::Fr => format!(
-            "Votre disque est à {value:.0} % — il tousse un peu. \
-             Même au paradis, on n'a pas de stockage illimité.\n\n\
-             Je peux vous aider à voir ce qui encombre : `josephine doctor`."
+            "Le disque est à {value:.0} % — l'espace se raréfie.\n\n\
+             Voyez ce qui prend de la place : `josephine doctor`."
         ),
     }
 }
@@ -326,23 +238,19 @@ fn temperature_alert(
 
     match (state, lang) {
         (AlertState::Critical, Lang::En) => format!(
-            "{value:.0}°C! Your machine is hotter than an oven in midsummer. \
-             My wings aren't enough to cool it.\n\n\
+            "{value:.0}°C — critical. Your machine is running very hot.\n\n\
              Take a look: `josephine doctor`."
         ),
         (AlertState::Critical, Lang::Fr) => format!(
-            "{value:.0} °C ! Votre machine chauffe plus qu'un four en plein été. \
-             Mes ailes ne suffisent pas à la refroidir.\n\n\
+            "{value:.0} °C — critique. Votre machine chauffe fortement.\n\n\
              Un coup d'œil : `josephine doctor`."
         ),
         (AlertState::Warning, Lang::En) => format!(
-            "It's getting warm in here ({value:.0}°C, threshold {limit:.0}°C). \
-             Your fans deserve some encouragement.\n\n\
+            "Temperature is rising ({value:.0}°C, threshold {limit:.0}°C).\n\n\
              `josephine doctor`?"
         ),
         (AlertState::Warning, Lang::Fr) => format!(
-            "Il commence à faire chaud ici ({value:.0} °C, seuil {limit:.0} °C). \
-             Vos ventilateurs méritent un encouragement.\n\n\
+            "La température monte ({value:.0} °C, seuil {limit:.0} °C).\n\n\
              `josephine doctor` ?"
         ),
         (AlertState::Normal, _) => unreachable!(),
@@ -354,24 +262,23 @@ fn systemd_failed_alert(count: f64, lang: Lang) -> String {
     match lang {
         Lang::En => {
             let services = if n <= 1 {
-                "1 service threw in the towel".to_string()
+                "1 service has stopped".to_string()
             } else {
-                format!("{n} services threw in the towel")
+                format!("{n} services have stopped")
             };
             format!(
-                "Between us, {services}. Nobody's perfect — except me, perhaps.\n\n\
+                "{services}.\n\n\
                  The list: `josephine doctor`."
             )
         }
         Lang::Fr => {
             let services = if n <= 1 {
-                "1 service a jeté l'éponge".to_string()
+                "1 service s'est arrêté".to_string()
             } else {
-                format!("{n} services ont jeté l'éponge")
+                format!("{n} services se sont arrêtés")
             };
             format!(
-                "Entre nous, {services}. \
-                 Personne n'est parfait — sauf moi, peut-être.\n\n\
+                "{services}.\n\n\
                  La liste : `josephine doctor`."
             )
         }
@@ -388,8 +295,7 @@ fn updates_alert(count: f64, lang: Lang) -> String {
                 ("updates", "are waiting for you")
             };
             format!(
-                "{n} {subject} {verb}. A little refresh and your machine will be \
-                 dressed like an angel.\n\n\
+                "{n} {subject} {verb}.\n\n\
                  The list: `josephine doctor`."
             )
         }
@@ -400,8 +306,7 @@ fn updates_alert(count: f64, lang: Lang) -> String {
                 ("mises à jour", "vous attendent")
             };
             format!(
-                "{n} {subject} {verb}. \
-                 Un petit coup de neuf et votre machine sera parée comme un ange.\n\n\
+                "{n} {subject} {verb}.\n\n\
                  La liste : `josephine doctor`."
             )
         }
@@ -411,14 +316,14 @@ fn updates_alert(count: f64, lang: Lang) -> String {
 fn network_alert(latency_ms: f64, lang: Lang) -> String {
     match lang {
         Lang::En => format!(
-            "Your network link is coughing a little ({latency_ms:.0} ms to the \
-             gateway, or no answer at all). A glance at the Wi-Fi or the cable?\n\n\
-             The details: `josephine doctor`."
+            "Your network link is unstable ({latency_ms:.0} ms to the gateway, \
+             or no response at all).\n\n\
+             Check the Wi-Fi or the cable: `josephine doctor`."
         ),
         Lang::Fr => format!(
-            "Votre lien réseau tousse un peu ({latency_ms:.0} ms vers la passerelle, \
-             voire plus de réponse du tout). Un coup d'œil au Wi-Fi ou au câble ?\n\n\
-             Les détails : `josephine doctor`."
+            "Le lien réseau est instable ({latency_ms:.0} ms vers la passerelle, \
+             voire aucune réponse).\n\n\
+             Vérifiez le Wi-Fi ou le câble : `josephine doctor`."
         ),
     }
 }
@@ -427,14 +332,12 @@ fn battery_alert(depletion_percent: f64, lang: Lang) -> String {
     let charge = 100.0 - depletion_percent;
     match lang {
         Lang::En => format!(
-            "Your battery is down to {charge:.0}%. A quick plug-in and everyone \
-             breathes again — mind the charger.\n\n\
-             The full picture: `josephine doctor`."
+            "Your battery is down to {charge:.0}%.\n\n\
+             Plug in when you can: `josephine doctor` for the full picture."
         ),
         Lang::Fr => format!(
-            "Votre batterie descend à {charge:.0} %. \
-             Un petit branchement et tout le monde respire — pensez au chargeur.\n\n\
-             L'état complet : `josephine doctor`."
+            "Votre batterie descend à {charge:.0} %.\n\n\
+             Branchez-la quand vous pouvez : `josephine doctor` pour le détail."
         ),
     }
 }
@@ -442,13 +345,13 @@ fn battery_alert(depletion_percent: f64, lang: Lang) -> String {
 fn inode_alert(percent: f64, lang: Lang) -> String {
     match lang {
         Lang::En => format!(
-            "Inodes are filling up ({percent:.0}%). A swarm of tiny files is \
-             smothering the disk — even with free space.\n\n\
+            "Inodes are filling up ({percent:.0}%) — many small files, even with \
+             free space left.\n\n\
              `josephine doctor` to spot the partition."
         ),
         Lang::Fr => format!(
-            "Les inodes se remplissent ({percent:.0} %). \
-             Une nuée de petits fichiers étouffe le disque — même avec de l'espace libre.\n\n\
+            "Les inodes se remplissent ({percent:.0} %) — de nombreux petits fichiers, \
+             même avec de l'espace libre.\n\n\
              `josephine doctor` pour repérer la partition."
         ),
     }
@@ -458,14 +361,12 @@ fn smart_alert(failing: f64, lang: Lang) -> String {
     let n = failing as u64;
     match lang {
         Lang::En => format!(
-            "{n} disk(s) are reporting a SMART weakness. Back up without delay — \
-             forewarned is forearmed.\n\n\
-             The details: `josephine doctor`."
+            "{n} disk(s) are reporting a SMART weakness.\n\n\
+             Back up without delay: `josephine doctor` for the details."
         ),
         Lang::Fr => format!(
-            "{n} disque(s) signalent une faiblesse SMART. \
-             Sauvegardez sans tarder — un disque prévenu en vaut deux.\n\n\
-             Le détail : `josephine doctor`."
+            "{n} disque(s) signalent une faiblesse SMART.\n\n\
+             Sauvegardez sans tarder : `josephine doctor` pour le détail."
         ),
     }
 }
@@ -474,14 +375,12 @@ fn kernel_alert(count: f64, lang: Lang) -> String {
     let n = count as u64;
     match lang {
         Lang::En => format!(
-            "The kernel stumbled {n} times this hour (OOM, oops…). Something's \
-             rattling your machine under the hood.\n\n\
-             `josephine doctor` to see more clearly."
+            "{n} kernel incident(s) this hour (OOM, oops…).\n\n\
+             `josephine doctor` for more detail."
         ),
         Lang::Fr => format!(
-            "Le noyau a bronché {n} fois cette heure (OOM, oops…). \
-             Quelque chose secoue votre machine sous le capot.\n\n\
-             `josephine doctor` pour y voir plus clair."
+            "{n} incident(s) noyau cette heure (OOM, oops…).\n\n\
+             `josephine doctor` pour en savoir plus."
         ),
     }
 }
@@ -489,14 +388,12 @@ fn kernel_alert(count: f64, lang: Lang) -> String {
 fn systemd_restarts_alert(count: f64, lang: Lang) -> String {
     match lang {
         Lang::En => format!(
-            "A service has restarted {count:.0} times — it's struggling to find its \
-             place, not even in the sky.\n\n\
-             `josephine doctor` to understand."
+            "A service has restarted {count:.0} times.\n\n\
+             `josephine doctor` to see why."
         ),
         Lang::Fr => format!(
-            "Un service a redémarré {count:.0} fois — \
-             il peine à trouver sa place, même pas au ciel.\n\n\
-             `josephine doctor` pour comprendre."
+            "Un service a redémarré {count:.0} fois.\n\n\
+             `josephine doctor` pour comprendre pourquoi."
         ),
     }
 }
