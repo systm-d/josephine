@@ -183,11 +183,14 @@ pub fn check_label(name: &str) -> &'static str {
     }
 }
 
-pub fn print_footer(message: &str) {
+/// Print the sober closing rule + a one-space-indented, dimmed footer
+/// message. Shared bottom treatment for `status` and `doctor`.
+pub fn sober_footer(msg: &str) {
+    println!("{}", "─".repeat(HEADER_WIDTH).dimmed());
     if is_tty() {
-        println!("{}", message.dimmed());
+        println!(" {}", msg.dimmed());
     } else {
-        println!("{message}");
+        println!(" {msg}");
     }
 }
 

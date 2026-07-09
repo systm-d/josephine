@@ -1,5 +1,3 @@
-use colored::Colorize;
-
 use josephine_core::check::{CheckResult, Severity};
 use josephine_core::i18n;
 
@@ -23,7 +21,6 @@ pub fn print_status_table(results: &[CheckResult]) {
     for row in &rows {
         print_row(row, label_w);
     }
-    println!("{}", "─".repeat(super::style::HEADER_WIDTH).dimmed());
     print_footer_line(results);
 }
 
@@ -129,15 +126,7 @@ fn print_footer_line(results: &[CheckResult]) {
         .iter()
         .filter(|r| r.worst_severity() != Severity::Info)
         .count();
-    let msg = footer_message(count);
-    println!(
-        " {}",
-        if super::style::is_tty() {
-            msg.dimmed().to_string()
-        } else {
-            msg
-        }
-    );
+    super::style::sober_footer(&footer_message(count));
 }
 
 // ---------------------------------------------------------------------------

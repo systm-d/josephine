@@ -98,7 +98,7 @@ pub fn run() -> Result<()> {
     for event in &events {
         events_table.add_row(vec![
             Cell::new(event.created_at.format("%H:%M").to_string()),
-            Cell::new(&event.check_name),
+            Cell::new(check_label(&event.check_name)),
             Cell::new(format!("{} → {}", event.from_state, event.to_state)),
             Cell::new(format_event_value(event)),
         ]);

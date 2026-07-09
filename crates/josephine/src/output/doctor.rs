@@ -4,7 +4,7 @@ use josephine_core::config::Config;
 use josephine_core::i18n;
 
 use super::bars::{BAR_WIDTH, bar_plain};
-use super::style::{check_label, format_metric_value, metric_scale, primary_metric, print_footer};
+use super::style::{check_label, format_metric_value, metric_scale, primary_metric};
 
 pub fn print_doctor(results: &[CheckResult], config: &Config, verbose: bool) {
     super::style::sober_header(
@@ -15,8 +15,7 @@ pub fn print_doctor(results: &[CheckResult], config: &Config, verbose: bool) {
         print_check_block(result, config, verbose);
     }
     println!();
-    print_footer(footer_hint(verbose));
-    println!();
+    super::style::sober_footer(footer_hint(verbose));
 }
 
 fn summary_line(results: &[CheckResult]) -> String {
