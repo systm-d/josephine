@@ -45,6 +45,7 @@ impl Scheduler {
         let config = self.config.clone();
         let retention = self.config.history.retention_days;
         let desktop_notify = self.config.notifications.desktop;
+        let terminal_notify = self.config.notifications.terminal;
 
         let mut handles = Vec::new();
 
@@ -92,14 +93,24 @@ impl Scheduler {
                                 for transition in transitions {
                                     let store = storage.lock().await;
                                     if let Ok(event_id) = store.insert_event(&transition)
-                                        && desktop_notify
                                         && transition.notify
                                     {
-                                        if let Err(e) = notify::send_josephine(&transition.message)
-                                        {
-                                            error!("notification : {e}");
-                                        } else {
-                                            let _ = store.insert_notification(event_id, "desktop");
+                                        // Terminal channel: surface the alert in the daemon's
+                                        // log (journal / foreground `daemon run`).
+                                        if terminal_notify {
+                                            warn!(target: "josephine::alert", "{}", transition.message);
+                                            let _ = store.insert_notification(event_id, "terminal");
+                                        }
+                                        // Desktop channel: libnotify.
+                                        if desktop_notify {
+                                            if let Err(e) =
+                                                notify::send_josephine(&transition.message)
+                                            {
+                                                error!("notification : {e}");
+                                            } else {
+                                                let _ =
+                                                    store.insert_notification(event_id, "desktop");
+                                            }
                                         }
                                     }
                                 }
