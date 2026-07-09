@@ -1,12 +1,12 @@
 use anyhow::Result;
-use comfy_table::presets::UTF8_FULL;
+use comfy_table::presets::UTF8_BORDERS_ONLY;
 use comfy_table::{Attribute, Cell, ContentArrangement, Table};
 use josephine_core::config::Config;
 use josephine_core::i18n;
 use josephine_core::paths::Paths;
 use josephine_core::storage::{EventRecord, Storage};
 
-use crate::output::{check_label, is_tty, print_banner, sparkline};
+use crate::output::{check_label, sparkline};
 
 /// `(check, metric, unit)` shown in the 24-hour trend table.
 const TRACKED: &[(&str, &str, &str)] = &[
@@ -24,8 +24,8 @@ pub fn run() -> Result<()> {
         println!(
             "{}",
             i18n::t(
-                "✨ My logbook is napping (history disabled). Wake it in the config and I'll note everything.",
-                "✨ Mon carnet de bord fait la sieste (historique désactivé). Réveillez-le dans la configuration et je noterai tout.",
+                "History is off. Enable it in the config and I'll keep the log.",
+                "Historique désactivé. Activez-le dans la configuration et je tiendrai le journal.",
             )
         );
         return Ok(());
@@ -34,13 +34,10 @@ pub fn run() -> Result<()> {
     let paths = Paths::new()?;
     let storage = Storage::open(&paths)?;
 
-    print_banner(i18n::t(
-        "Last 24 hours at a glance",
-        "Synthèse des dernières 24 heures",
-    ));
+    crate::output::sober_header(Some(i18n::t("24 h", "24 h")), None);
 
     let mut trend = Table::new();
-    trend.load_preset(UTF8_FULL);
+    trend.load_preset(UTF8_BORDERS_ONLY);
     trend.set_content_arrangement(ContentArrangement::Dynamic);
     trend.set_header(vec![
         Cell::new(i18n::t("Metric", "Métrique")).add_attribute(Attribute::Bold),
@@ -68,8 +65,8 @@ pub fn run() -> Result<()> {
         println!(
             "{}",
             i18n::t(
-                "No data to plot yet. Start the daemon (`josephine daemon start`) and I'll fill this logbook as the hours pass.",
-                "Pas encore de données à retracer. Lancez le démon (`josephine daemon start`) et je remplirai ce carnet au fil des heures.",
+                "No data yet. Start the daemon (`josephine daemon start`) and it fills in over the hours.",
+                "Pas encore de données. Lancez le démon (`josephine daemon start`) et il se remplit au fil des heures.",
             )
         );
         return Ok(());
@@ -79,28 +76,18 @@ pub fn run() -> Result<()> {
 
     let events = storage.recent_events(10)?;
     if events.is_empty() {
-        if is_tty() {
-            println!(
-                "{}",
-                i18n::t(
-                    "Nothing to report — a calm day, just how I like them. I watch in silence.\n",
-                    "Rien à signaler — journée calme, comme je les aime. Je veille en silence.\n",
-                )
-            );
-        } else {
-            println!(
-                "{}",
-                i18n::t(
-                    "Nothing to report — a calm day, just how I like them.\n",
-                    "Rien à signaler — journée calme, comme je les aime.\n",
-                )
-            );
-        }
+        println!(
+            "{}",
+            i18n::t(
+                "No events — a calm 24 hours.",
+                "Aucun événement — 24 h calmes."
+            )
+        );
         return Ok(());
     }
 
     let mut events_table = Table::new();
-    events_table.load_preset(UTF8_FULL);
+    events_table.load_preset(UTF8_BORDERS_ONLY);
     events_table.set_content_arrangement(ContentArrangement::Dynamic);
     events_table.set_header(vec![
         Cell::new(i18n::t("Time", "Heure")).add_attribute(Attribute::Bold),

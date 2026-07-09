@@ -9,8 +9,13 @@ pub use runner::run_checks_with_progress;
 pub use status::print_status_table;
 
 pub use style::{
-    check_label, confirm, format_metric_value, is_tty, primary_metric, print_banner, sparkline,
+    check_label, confirm, format_metric_value, primary_metric, print_banner, sparkline,
 };
+// `is_tty` has no external consumer now that Task 4 collapsed history's
+// TTY/non-TTY branch; kept exported (not removed, per Task 4's brief) for
+// the next command that needs terminal detection.
+#[allow(unused_imports)]
+pub use style::is_tty;
 // Task 1's new "Constellation sobre" primitives; Tasks 2-4 are the consumers.
 // The allow is scoped to only these until they're wired in.
 #[allow(unused_imports)]
