@@ -13,17 +13,11 @@ pub fn is_tty() -> bool {
 }
 
 /// Width of the header rule and the clock's right edge.
-///
-/// Not yet read outside this module — Tasks 2–4 (status/doctor/history
-/// rewrites) are the consumers. `#[allow(dead_code)]` until then.
-#[allow(dead_code)]
 pub const HEADER_WIDTH: usize = 54;
 
 /// Soft indigo/violet — Joséphine's discreet stellar accent.
 const ACCENT: (u8, u8, u8) = (150, 130, 220);
 
-/// Not yet called outside this module — Tasks 2–4 are the consumers.
-#[allow(dead_code)]
 pub fn accent(s: &str) -> String {
     s.truecolor(ACCENT.0, ACCENT.1, ACCENT.2).to_string()
 }
@@ -36,18 +30,12 @@ fn severity_color(severity: Severity) -> Color {
     }
 }
 
-/// Not yet called outside this module — Tasks 2–4 are the consumers.
-#[allow(dead_code)]
 pub fn severity_paint(s: &str, severity: Severity) -> String {
     s.color(severity_color(severity)).to_string()
 }
 
 /// Status glyph carrying severity by shape *and* colour. Off a terminal it
 /// degrades to an ASCII tag so pipes and logs stay readable.
-///
-/// Only exercised by the unit test below until Tasks 2–4 wire it into the
-/// real output surfaces; `#[allow(dead_code)]` covers plain (non-test) builds.
-#[allow(dead_code)]
 pub fn status_glyph(severity: Severity) -> String {
     let (glyph, plain) = match severity {
         Severity::Info => ("●", "[ok]"),
@@ -104,9 +92,6 @@ fn lerp(a: f64, b: f64, t: f64) -> u8 {
 /// Print the sober header: an optional `banner.txt` on top, then
 /// `✦ Joséphine[ · suffix]` with a right-aligned clock, an optional dimmed
 /// tagline, and a thin rule.
-///
-/// Not yet called outside this module — Tasks 2–4 are the consumers.
-#[allow(dead_code)]
 pub fn sober_header(suffix: Option<&str>, tagline: Option<&str>) {
     println!();
     if let Some(banner) = custom_banner() {
