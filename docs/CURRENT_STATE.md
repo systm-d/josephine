@@ -37,16 +37,25 @@ Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est i
 
 | Commande | Statut |
 |----------|--------|
-| `status` (défaut) | ✅ |
-| `doctor` (`--verbose`) | ✅ |
+| `status` (défaut, `--json`) | ✅ |
+| `doctor` (`--verbose`, `--json`) | ✅ |
 | `history` | ✅ |
 | `daemon start/stop/restart/status/logs/run` | ✅ |
 | `config show/validate/edit` | ✅ |
-| `clean` (`--apply`), `fix`, `report` (`-o`) | ✅ |
+| `clean` (`--apply`), `fix`, `report` (`-o`, `--json`) | ✅ |
 | `notify test` | ✅ |
 | `update` (`--check`, `--yes`) | ✅ |
+| `completions <bash\|zsh\|fish…>` | ✅ |
 
 **Supprimé du scope :** `watch` (TUI), check Docker.
+
+**Capacités transverses (increment B, depuis 0.8.0) :** `--json` (sortie
+machine-readable pour `status`/`doctor`/`report`, sévérité `ok`/`warning`/
+`critical`) ; complétions shell (`completions <shell>`, via `clap_complete`) ;
+notifications **terminal** — le démon honore `notifications.terminal` et émet
+les alertes dans son journal en parallèle du canal desktop ; `--help`
+**localisé** — l'aide suit `language` (anglais par défaut, français avec
+`language: fr`).
 
 ### Rendu CLI — « Constellation sobre » (depuis 0.7.0)
 

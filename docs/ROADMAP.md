@@ -92,8 +92,8 @@ alignées, ton détoné « chaleur sobre » en anglais et en français, sur
 | Increment | Contenu | État |
 |---|---|---|
 | A — rendu & ton | `status`/`doctor`/`history` + notifications passés au sobre | ✅ livré (v0.7.0) |
-| C — solidité & finitions | bascule de `report`/`clean`/`fix`/`update` sur l'habillage sobre, pied de page unifié, nettoyage de copie EN/FR, docs à jour | ✅ livré (`feat/cli-increment-c`) |
-| B — sortie machine & canaux | `--json`, complétions shell, `--help` localisé, canal de notification terminal | ⏳ planifié |
+| C — solidité & finitions | bascule de `report`/`clean`/`fix`/`update` sur l'habillage sobre, pied de page unifié, nettoyage de copie EN/FR, docs à jour | ✅ livré (v0.7.1) |
+| B — sortie machine & canaux | `--json`, complétions shell, `--help` localisé, canal de notification terminal | ✅ livré (v0.8.0) |
 | D — nouveaux checks/commandes | hors périmètre de la refonte CLI | ⏳ planifié |
 
 ---

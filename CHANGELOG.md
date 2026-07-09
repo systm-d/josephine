@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`--json` output** for `status`, `doctor` and `report` — machine-readable
+  JSON on stdout (no colour, no header) for scripting and monitoring. Severity
+  is reported as `ok` / `warning` / `critical`.
+- **Shell completions**: `josephine completions <bash|zsh|fish|…>` generates a
+  completion script for your shell.
+- **Terminal notifications**: the daemon now honours `notifications.terminal`,
+  emitting alerts to its log/terminal channel (journal / foreground
+  `daemon run`) alongside the desktop channel.
+- **Localised `--help`**: `--help` / `--version` help text follows the
+  configured `language` — English by default, French with `language: fr` — with
+  no side effects on a fresh system.
+
 ## [0.7.1] - 2026-07-09
 
 ### Changed
