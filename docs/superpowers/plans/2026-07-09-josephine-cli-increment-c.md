@@ -32,17 +32,26 @@ These are stuck at 0.3.0. Read the real current state from code before editing: 
 
 ---
 
-### Task 2: Sweep the remaining commands onto the sober header + detoned voice
+### Task 2: Full sweep — sober header + detoned voice across ALL remaining commands
 
-**Files:** Modify `crates/josephine/src/commands/fix_cmd.rs`, `clean_cmd.rs`, `report_cmd.rs`, `update_cmd.rs`; and `crates/josephine/src/output/style.rs` + `mod.rs` if `print_banner` becomes unused.
+**Files:** Modify `crates/josephine/src/commands/fix_cmd.rs`, `clean_cmd.rs`, `report_cmd.rs`, `update_cmd.rs`, `daemon_cmd.rs`, `config_cmd.rs`, `notify_cmd.rs`; and `crates/josephine/src/output/style.rs` + `mod.rs` if `print_banner` becomes unused.
 
-These commands still open with the old `✨ Joséphine` banner (via `print_banner(...)` or a hard-coded title) and carry some twee copy (e.g. `report_cmd` "a fresh logbook" / "un carnet de bord tout frais"; `fix_cmd` "file un parfait bonheur ✨").
+The redesign (increment A) detoned `status`/`doctor`/`history` + notifications, but the other commands still open with the old `✨ Joséphine` banner / titles and carry mascot copy (`✨`, wings/"ailes", "petit nuage", "carnet de bord tout frais", "file un parfait bonheur", "battement d'ailes"). Sweep them all so the whole CLI reads as one system.
 
-- [ ] **Step 1:** For each of the four commands, replace the `print_banner(subtitle)` call (or hard-coded `"✨ Joséphine …"` title) with `crate::output::sober_header(Some(<short suffix>), Some(<tagline>))` — choose a fitting suffix per command (e.g. `report`, `clean`, `fix`, `update`), tagline optional. Match the header style of `status`/`doctor`/`history`.
-- [ ] **Step 2:** Detone the twee copy in those commands' output (titles, summaries, success/empty-state lines) to the "chaleur sobre" voice — direct, calm, no `✨`/`♥`/mascot metaphors — keeping every string bilingual EN+FR via `i18n::t`.
-- [ ] **Step 3:** After migration, check whether `print_banner` (the old sparkly one) still has any caller (`git grep 'print_banner' crates/josephine/src`). If none, remove `print_banner` from `style.rs` and its `mod.rs` re-export. Let clippy confirm (`-D warnings`).
-- [ ] **Step 4:** Run `cargo test -p josephine`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --check` (all clean), and eyeball each command (`cargo run -p josephine -- report`, `... clean`, `... fix`, `... update --check`) — sober `✦` header, no `✨`, detoned copy. Note observations. Commit:
-  `git commit -m "feat(cli): sober header + detoned voice for report/clean/fix/update"`
+Known cutesy sites to detone (grep `✨` and re-verify — there may be a couple more):
+- `fix_cmd.rs:17-18` title `"✨ Joséphine — guided fixes"`; `:85-86` "…parfait bonheur ✨"; `:93-94` "…you keep the wheel ✨".
+- `clean_cmd.rs:18` title `"✨ Joséphine — big clean-up"`; `:115-118` "✨ {size} returned…".
+- `report_cmd.rs:30-32` "✨ Report saved … a fresh logbook / carnet de bord tout frais".
+- `update_cmd.rs:18,30` uses `print_banner(i18n::t("Update","Mise à jour"))`.
+- `daemon_cmd.rs:32-53` start/stop/restart messages ("✨ Here I am at my post…", "flap of the wings", "battement d'ailes").
+- `config_cmd.rs:39-81` "✨ Configuration spotless… your little cloud / petit nuage", "not a crease to iron", "petit accroc".
+- `notify_cmd.rs:19-26` "my wings reach your desktop / mes ailes touchent…", "✨ Notification sent".
+
+- [ ] **Step 1 (headers):** In the commands that open with a banner/title — `fix`, `clean`, `report`, `update` — replace the hard-coded `"✨ Joséphine — …"` title or the `print_banner(subtitle)` call with `crate::output::sober_header(Some(<short suffix>), None)` (suffix e.g. `fix` / `clean` / `report` / `update`), matching `status`/`doctor`/`history`. (`daemon`/`config`/`notify` don't print a header banner — they only need copy detoning.)
+- [ ] **Step 2 (copy):** Detone every `✨`/mascot string across all seven command files to the "chaleur sobre" voice — direct, calm, no `✨`/`♥`/wings/clouds/logbooks — keeping each string bilingual EN+FR via `i18n::t`. Preserve all interpolations (`{size}`, `{done}`, paths, counts) and control flow; change only wording. Do NOT touch `cli.rs`'s deliberately-kept clap `about` ("Your computer's guardian angel") or the `cli.rs` error prefix.
+- [ ] **Step 3:** After the header migration, check `git grep 'print_banner' crates/josephine/src`. If `print_banner` has no caller left, remove it from `style.rs` and its `mod.rs` re-export (let clippy `-D warnings` confirm). If a caller remains, leave it.
+- [ ] **Step 4:** Run `cargo test -p josephine`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --check` (all clean); grep `✨` across `crates/josephine/src` and confirm zero remain (except any deliberately kept — there should be none in command output). Eyeball `report` / `clean` / `fix` / `update --check` / `config show` / `notify test` — sober `✦` header where applicable, no `✨`, detoned copy. Note observations. Commit:
+  `git commit -m "feat(cli): sober header + detoned voice across all remaining commands"`
 
 ---
 
