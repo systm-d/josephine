@@ -21,6 +21,7 @@ path = "src/main.rs"
 anyhow.workspace = true
 chrono.workspace = true
 clap.workspace = true
+clap_complete.workspace = true
 colored.workspace = true
 comfy-table.workspace = true
 indicatif.workspace = true

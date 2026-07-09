@@ -83,6 +83,11 @@ enum Commands {
         #[arg(short = 'y', long = "yes")]
         yes: bool,
     },
+    /// Generate shell completions (bash, zsh, fish, …)
+    Completions {
+        /// Which shell to generate completions for
+        shell: clap_complete::Shell,
+    },
 }
 
 /// Entry point: parse, dispatch, and map errors to a process exit code.
@@ -126,6 +131,15 @@ async fn dispatch() -> Result<()> {
         Some(Commands::Report { output, json }) => report_cmd::run(output, json)?,
         Some(Commands::Notify { action }) => notify_cmd::run(action)?,
         Some(Commands::Update { check, yes }) => update_cmd::run(check, yes)?,
+        Some(Commands::Completions { shell }) => {
+            use clap::CommandFactory;
+            clap_complete::generate(
+                shell,
+                &mut Cli::command(),
+                "josephine",
+                &mut std::io::stdout(),
+            );
+        }
         None => status_cmd::run(false)?,
     }
 

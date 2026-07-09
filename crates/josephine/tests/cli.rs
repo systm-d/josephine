@@ -119,3 +119,14 @@ fn status_json_prints_a_json_array_on_stdout() {
     let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
     assert!(value.is_array());
 }
+
+#[test]
+fn completions_generates_a_script() {
+    // Completions are generated from the static command tree — no config needed.
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .args(["completions", "bash"])
+        .assert()
+        .success()
+        .stdout(contains("josephine"));
+}
