@@ -156,9 +156,12 @@ async fn dispatch() -> Result<()> {
     }
 
     // A real command is running: ensure the config exists (first run) and
-    // re-apply its language.
-    if let Ok(config) = josephine_core::config::Config::load_default() {
-        josephine_core::i18n::set_lang(config.language);
+    // re-apply its language. `completions` needs neither and must not create
+    // files (it generates from the static command tree), so skip it for that.
+    if !matches!(cli.command, Some(Commands::Completions { .. })) {
+        if let Ok(config) = josephine_core::config::Config::load_default() {
+            josephine_core::i18n::set_lang(config.language);
+        }
     }
 
     match cli.command {
@@ -173,7 +176,6 @@ async fn dispatch() -> Result<()> {
         Some(Commands::Notify { action }) => notify_cmd::run(action)?,
         Some(Commands::Update { check, yes }) => update_cmd::run(check, yes)?,
         Some(Commands::Completions { shell }) => {
-            use clap::CommandFactory;
             clap_complete::generate(
                 shell,
                 &mut Cli::command(),

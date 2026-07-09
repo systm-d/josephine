@@ -147,9 +147,13 @@ fn help_about_follows_the_configured_language() {
 
 #[test]
 fn completions_generates_a_script() {
-    // Completions are generated from the static command tree — no config needed.
+    // Completions are generated from the static command tree — no config needed,
+    // and must not create any files. Isolated HOME guards against a regression.
     Command::cargo_bin("josephine")
         .unwrap()
+        .env("HOME", isolated_home("completions"))
+        .env_remove("XDG_CONFIG_HOME")
+        .env_remove("XDG_DATA_HOME")
         .args(["completions", "bash"])
         .assert()
         .success()
