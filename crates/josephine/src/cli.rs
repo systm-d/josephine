@@ -84,8 +84,8 @@ pub async fn run() -> ExitCode {
             eprintln!(
                 "{}",
                 match i18n::lang() {
-                    Lang::En => format!("✨ Joséphine ran into a snag: {e}"),
-                    Lang::Fr => format!("✨ Joséphine a rencontré un souci : {e}"),
+                    Lang::En => format!("✦ Joséphine ran into a snag: {e}"),
+                    Lang::Fr => format!("✦ Joséphine a rencontré un souci : {e}"),
                 }
             );
             ExitCode::from(1)

@@ -13,8 +13,6 @@ use josephine_core::scheduler::run_all_checks;
 use crate::output::{check_label, format_metric_value, primary_metric};
 
 pub fn run(output: Option<PathBuf>) -> Result<()> {
-    crate::output::sober_header(Some(i18n::t("report", "report")), None);
-
     let config = Config::load_default()?;
     let results = run_all_checks(&config)?;
 

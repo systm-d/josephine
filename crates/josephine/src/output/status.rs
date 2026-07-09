@@ -150,9 +150,11 @@ mod tests {
     #[test]
     fn footer_message_pluralizes() {
         use josephine_core::i18n::{self, Lang};
+        let prev = i18n::lang();
         i18n::set_lang(Lang::En);
         assert_eq!(footer_message(0), "All clear.");
         assert!(footer_message(1).starts_with("1 thing to look at"));
         assert!(footer_message(3).starts_with("3 things to look at"));
+        i18n::set_lang(prev);
     }
 }

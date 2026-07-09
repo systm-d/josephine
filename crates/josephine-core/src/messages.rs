@@ -93,12 +93,12 @@ pub fn recovery_message(check_name: &str, metric: &Metric, lang: Lang) -> String
         },
         "network" => match lang {
             Lang::En => "The network is back, stable and steady.".into(),
-            Lang::Fr => "Le réseau est revenu, stable et fluide.".into(),
+            Lang::Fr => "Le réseau est revenu, stable et constant.".into(),
         },
         "battery" => match lang {
             Lang::En => "Your battery is back to a healthy level (or you're plugged in).".into(),
             Lang::Fr => {
-                "Votre batterie est revenue à un niveau correct (ou vous êtes branché).".into()
+                "Votre batterie est revenue à un niveau sain (ou vous êtes branché).".into()
             }
         },
         "inode" => match lang {
@@ -155,7 +155,7 @@ pub fn update_done(version: &str, lang: Lang) -> String {
     match lang {
         Lang::En => format!("Update complete — Joséphine is now on {version}."),
         Lang::Fr => {
-            format!("Mise à jour terminée — Joséphine est maintenant en version {version}.")
+            format!("Mise à jour terminée — Joséphine est maintenant sur la version {version}.")
         }
     }
 }
