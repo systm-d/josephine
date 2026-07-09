@@ -1,6 +1,7 @@
 mod battery;
 mod cpu;
 mod disk;
+mod filesystem;
 mod inode;
 mod kernel;
 mod memory;
@@ -13,6 +14,7 @@ mod updates;
 pub use battery::BatteryCheck;
 pub use cpu::CpuCheck;
 pub use disk::DiskCheck;
+pub use filesystem::FilesystemCheck;
 pub use inode::InodeCheck;
 pub use kernel::KernelCheck;
 pub use memory::MemoryCheck;
@@ -61,6 +63,9 @@ pub fn build_checks(config: &ChecksConfig) -> Vec<Box<dyn Check>> {
     if config.kernel.enabled {
         checks.push(Box::new(KernelCheck::new(config.kernel.clone())));
     }
+    if config.filesystem.enabled {
+        checks.push(Box::new(FilesystemCheck::new(config.filesystem.clone())));
+    }
 
     checks
 }
@@ -78,6 +83,7 @@ pub fn interval_for_check(name: &str, config: &ChecksConfig) -> u64 {
         "inode" => config.inode.interval_secs,
         "smart" => config.smart.interval_secs,
         "kernel" => config.kernel.interval_secs,
+        "filesystem" => config.filesystem.interval_secs,
         _ => 60,
     }
 }

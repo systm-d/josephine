@@ -175,6 +175,7 @@ fn metric_label(name: &str) -> String {
         "inode_usage_percent_worst" => "Inodes (max)".into(),
         "smart_failing" => i18n::t("Failing disks", "Disques en échec").into(),
         "kernel_incidents" => i18n::t("Kernel incidents", "Incidents noyau").into(),
+        "readonly_mounts" => i18n::t("Read-only mounts", "Montages en lecture seule").into(),
         other => other.replace('_', " "),
     }
 }

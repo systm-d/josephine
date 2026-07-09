@@ -43,6 +43,8 @@ pub struct ChecksConfig {
     pub smart: SmartCheckConfig,
     #[serde(default)]
     pub kernel: KernelCheckConfig,
+    #[serde(default)]
+    pub filesystem: CheckThresholds,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -280,6 +282,12 @@ impl Default for ChecksConfig {
             },
             smart: SmartCheckConfig::default(),
             kernel: KernelCheckConfig::default(),
+            filesystem: CheckThresholds {
+                enabled: true,
+                interval_secs: 120,
+                warning: 1.0,
+                critical: 1.0,
+            },
         }
     }
 }
@@ -428,6 +436,7 @@ impl Config {
         Self::validate_battery(&self.checks.battery)?;
         Self::validate_thresholds("inode", &self.checks.inode)?;
         Self::validate_kernel(&self.checks.kernel)?;
+        Self::validate_filesystem(&self.checks.filesystem)?;
         if self.checks.smart.interval_secs < 5 {
             bail!("checks.smart.interval_secs must be ≥ 5 seconds");
         }
@@ -539,6 +548,23 @@ impl Config {
         }
         if c.warning >= c.critical {
             bail!("checks.kernel.warning must be less than critical");
+        }
+        Ok(())
+    }
+
+    /// Unlike `validate_thresholds`, warning and critical may be *equal* here:
+    /// the filesystem check's default is warning = critical = 1 (any
+    /// read-only remount is critical — there's no intermediate "worth a
+    /// look" state for a filesystem that may be silently corrupting data).
+    fn validate_filesystem(c: &CheckThresholds) -> Result<()> {
+        if c.interval_secs < 5 {
+            bail!("checks.filesystem.interval_secs must be ≥ 5 seconds");
+        }
+        if c.warning < 1.0 || c.critical < 1.0 {
+            bail!("checks.filesystem.warning and critical must be ≥ 1");
+        }
+        if c.warning > c.critical {
+            bail!("checks.filesystem.warning must be less than or equal to critical");
         }
         Ok(())
     }

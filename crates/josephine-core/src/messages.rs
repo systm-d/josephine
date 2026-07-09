@@ -27,6 +27,7 @@ pub fn alert_message(
         "inode" => inode_alert(metric.value, lang),
         "smart" => smart_alert(metric.value, lang),
         "kernel" => kernel_alert(metric.value, lang),
+        "filesystem" => filesystem_alert(metric.value, lang),
         other => match lang {
             Lang::En => format!(
                 "{other} is out of range ({:.1} {}). \
@@ -112,6 +113,10 @@ pub fn recovery_message(check_name: &str, metric: &Metric, lang: Lang) -> String
         "kernel" => match lang {
             Lang::En => "No more kernel incidents in the last hour.".into(),
             Lang::Fr => "Plus aucun incident noyau sur la dernière heure.".into(),
+        },
+        "filesystem" => match lang {
+            Lang::En => "Your filesystems are writable again.".into(),
+            Lang::Fr => "Vos systèmes de fichiers sont de nouveau accessibles en écriture.".into(),
         },
         other => match lang {
             Lang::En => format!(
@@ -382,6 +387,35 @@ fn kernel_alert(count: f64, lang: Lang) -> String {
             "{n} incident(s) noyau cette heure (OOM, oops…).\n\n\
              `josephine doctor` pour en savoir plus."
         ),
+    }
+}
+
+fn filesystem_alert(count: f64, lang: Lang) -> String {
+    let n = count as u64;
+    match lang {
+        Lang::En => {
+            let subject = if n <= 1 {
+                "A filesystem is mounted read-only".to_string()
+            } else {
+                format!("{n} filesystems are mounted read-only")
+            };
+            format!(
+                "{subject} — it may be failing.\n\n\
+                 Back up what matters and check `dmesg`: `josephine doctor` for which one."
+            )
+        }
+        Lang::Fr => {
+            let subject = if n <= 1 {
+                "Un système de fichiers est monté en lecture seule".to_string()
+            } else {
+                format!("{n} systèmes de fichiers sont montés en lecture seule")
+            };
+            format!(
+                "{subject} — il pourrait être défaillant.\n\n\
+                 Sauvegardez ce qui compte et vérifiez `dmesg` : \
+                 `josephine doctor` pour savoir lequel."
+            )
+        }
     }
 }
 
