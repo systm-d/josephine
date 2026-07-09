@@ -11,13 +11,7 @@ use josephine_core::i18n;
 use josephine_core::scheduler::run_all_checks;
 
 pub fn run() -> Result<()> {
-    println!(
-        "{}\n",
-        i18n::t(
-            "✨ Joséphine — guided fixes",
-            "✨ Joséphine — corrections guidées"
-        )
-    );
+    crate::output::sober_header(Some(i18n::t("fix", "fix")), None);
     let mut findings = 0;
 
     // 1. Failed systemd units.
@@ -82,16 +76,16 @@ pub fn run() -> Result<()> {
         println!(
             "{}",
             i18n::t(
-                "Nothing to fix — your machine is perfectly happy. ✨",
-                "Rien à réparer — votre machine file un parfait bonheur. ✨",
+                "Nothing to fix — the machine is in good shape.",
+                "Rien à réparer — la machine va bien.",
             )
         );
     } else {
         println!(
             "{}",
             i18n::t(
-                "These moves stay in your hands: I show the way, you keep the wheel. ✨",
-                "Ces gestes restent entre vos mains : je montre le chemin, vous gardez le volant. ✨",
+                "These moves stay in your hands: I show the way, you keep the wheel.",
+                "Ces gestes restent entre vos mains : je montre le chemin, vous gardez le volant.",
             )
         );
     }

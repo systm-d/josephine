@@ -15,7 +15,7 @@ use josephine_core::i18n::{self, Lang};
 use josephine_core::messages;
 use josephine_core::update::{self, Asset, InstallPlan, ReleaseInfo, UpdateStatus};
 
-use crate::output::{confirm, print_banner};
+use crate::output::confirm;
 
 const USER_AGENT: &str = concat!("josephine/", env!("CARGO_PKG_VERSION"));
 
@@ -27,7 +27,7 @@ enum Integrity {
 }
 
 pub fn run(check_only: bool, assume_yes: bool) -> Result<()> {
-    print_banner(i18n::t("Update", "Mise à jour"));
+    crate::output::sober_header(Some(i18n::t("update", "update")), None);
 
     let release = match fetch_latest() {
         Ok(release) => release,

@@ -29,8 +29,8 @@ pub async fn run(action: DaemonAction) -> Result<()> {
             println!(
                 "{}",
                 i18n::t(
-                    "✨ Here I am at my post, eyes open. Go about your day — I'm watching.",
-                    "✨ Me voilà à mon poste, l'œil ouvert. Vaquez tranquille, je veille.",
+                    "Daemon started — on watch, eyes open. Go about your day.",
+                    "Démon démarré — de garde, l'œil ouvert. Vaquez tranquille.",
                 )
             );
         }
@@ -39,8 +39,8 @@ pub async fn run(action: DaemonAction) -> Result<()> {
             println!(
                 "{}",
                 i18n::t(
-                    "✨ I fold my wings and doze off. Call me at the slightest trouble.",
-                    "✨ Je replie mes ailes et m'assoupis. Appelez-moi au moindre souci.",
+                    "Daemon stopped. Call me at the slightest trouble.",
+                    "Démon arrêté. Appelez-moi au moindre souci.",
                 )
             );
         }
@@ -49,8 +49,8 @@ pub async fn run(action: DaemonAction) -> Result<()> {
             println!(
                 "{}",
                 i18n::t(
-                    "✨ A flap of the wings and here I am again, fresh and back on watch.",
-                    "✨ Un battement d'ailes et me revoilà, fraîche et de nouveau de garde.",
+                    "Daemon restarted — back on watch.",
+                    "Démon redémarré — de nouveau de garde.",
                 )
             );
         }
@@ -74,13 +74,7 @@ pub async fn run(action: DaemonAction) -> Result<()> {
                 }
             }
             DaemonStatus::Stopped => {
-                println!(
-                    "{}",
-                    i18n::t(
-                        "State: dozing, wings folded.",
-                        "État : assoupie, les ailes repliées."
-                    )
-                );
+                println!("{}", i18n::t("State: stopped.", "État : arrêté."));
                 println!(
                     "{}",
                     i18n::t(

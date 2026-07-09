@@ -9,6 +9,5 @@ pub use runner::run_checks_with_progress;
 pub use status::print_status_table;
 
 pub use style::{
-    check_label, confirm, format_metric_value, primary_metric, print_banner, sober_header,
-    sparkline,
+    check_label, confirm, format_metric_value, primary_metric, sober_header, sparkline,
 };

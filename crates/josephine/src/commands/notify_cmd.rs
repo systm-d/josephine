@@ -16,14 +16,14 @@ pub fn run(action: NotifyAction) -> Result<()> {
     match action {
         NotifyAction::Test => {
             notify::send_josephine(i18n::t(
-                "Hello! If you're reading this, my wings reach your desktop just fine. ✨",
-                "Coucou ! Si vous lisez ceci, mes ailes touchent bien votre bureau. ✨",
+                "Hello — if you can read this, desktop notifications are working.",
+                "Bonjour — si vous lisez ceci, les notifications de bureau fonctionnent.",
             ))?;
             println!(
                 "{}",
                 i18n::t(
-                    "✨ Notification sent — take a look at your notifications.",
-                    "✨ Notification envoyée — jetez un œil du côté de vos notifications.",
+                    "Notification sent — take a look at your notifications.",
+                    "Notification envoyée — jetez un œil du côté de vos notifications.",
                 )
             );
             println!(

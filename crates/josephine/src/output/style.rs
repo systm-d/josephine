@@ -183,20 +183,6 @@ pub fn check_label(name: &str) -> &'static str {
     }
 }
 
-pub fn print_banner(subtitle: &str) {
-    if is_tty() {
-        println!();
-        println!("{}", "✨ Joséphine".to_string().bold().cyan());
-        println!("{}", subtitle.dimmed());
-        println!("{}", "─".repeat(52).dimmed());
-        println!();
-    } else {
-        println!("✨ Joséphine");
-        println!("{subtitle}");
-        println!();
-    }
-}
-
 pub fn print_footer(message: &str) {
     if is_tty() {
         println!("{}", message.dimmed());

@@ -13,6 +13,8 @@ use josephine_core::scheduler::run_all_checks;
 use crate::output::{check_label, format_metric_value, primary_metric};
 
 pub fn run(output: Option<PathBuf>) -> Result<()> {
+    crate::output::sober_header(Some(i18n::t("report", "report")), None);
+
     let config = Config::load_default()?;
     let results = run_all_checks(&config)?;
 
@@ -27,9 +29,8 @@ pub fn run(output: Option<PathBuf>) -> Result<()> {
             println!(
                 "{}",
                 match i18n::lang() {
-                    Lang::En => format!("✨ Report saved to {done} — a fresh logbook."),
-                    Lang::Fr =>
-                        format!("✨ Rapport déposé dans {done} — un carnet de bord tout frais."),
+                    Lang::En => format!("Report saved to {done}."),
+                    Lang::Fr => format!("Rapport enregistré dans {done}."),
                 }
             );
         }

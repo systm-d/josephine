@@ -13,11 +13,7 @@ use josephine_core::i18n::{self, Lang};
 use crate::output::confirm;
 
 pub fn run(apply: bool) -> Result<()> {
-    println!(
-        "{} {}\n",
-        i18n::t("✨ Joséphine — big clean-up", "✨ Joséphine — grand ménage"),
-        mode_label(apply)
-    );
+    crate::output::sober_header(Some(i18n::t("clean", "clean")), mode_label(apply));
 
     let cache = cache_dir();
     let thumbnails = cache.join("thumbnails");
@@ -111,11 +107,10 @@ pub fn run(apply: bool) -> Result<()> {
     println!(
         "{}",
         match i18n::lang() {
-            Lang::En => format!(
-                "✨ {size} returned to your disk — thumbnails will regenerate on their own."
-            ),
+            Lang::En =>
+                format!("{size} returned to your disk — thumbnails will regenerate on their own."),
             Lang::Fr => format!(
-                "✨ {size} rendus à votre disque — les miniatures se régénéreront toutes seules."
+                "{size} rendus à votre disque — les miniatures se régénéreront toutes seules."
             ),
         }
     );
@@ -129,11 +124,11 @@ pub fn run(apply: bool) -> Result<()> {
     Ok(())
 }
 
-fn mode_label(apply: bool) -> &'static str {
+fn mode_label(apply: bool) -> Option<&'static str> {
     if apply {
-        ""
+        None
     } else {
-        i18n::t("(preview)", "(aperçu)")
+        Some(i18n::t("(preview)", "(aperçu)"))
     }
 }
 

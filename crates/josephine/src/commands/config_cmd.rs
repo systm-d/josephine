@@ -36,8 +36,8 @@ pub fn run(action: ConfigAction) -> Result<()> {
             println!(
                 "{}",
                 i18n::t(
-                    "✨ Configuration spotless — not a crease to iron on your little cloud.",
-                    "✨ Configuration impeccable — pas un pli à repasser sur votre petit nuage.",
+                    "Configuration valid — nothing to fix.",
+                    "Configuration valide — rien à corriger.",
                 )
             );
         }
@@ -58,8 +58,8 @@ pub fn run(action: ConfigAction) -> Result<()> {
                 println!(
                     "{}",
                     i18n::t(
-                        "✨ The editor closed without finishing — I touched nothing.",
-                        "✨ L'éditeur s'est refermé sans conclure — je n'ai touché à rien.",
+                        "The editor closed without finishing — I touched nothing.",
+                        "L'éditeur s'est refermé sans conclure — je n'ai touché à rien.",
                     )
                 );
                 return Ok(());
@@ -69,16 +69,16 @@ pub fn run(action: ConfigAction) -> Result<()> {
                 Ok(_) => println!(
                     "{}",
                     i18n::t(
-                        "✨ Configuration re-read and validated — not a fold out of place.",
-                        "✨ Configuration relue et validée — pas un pli de travers.",
+                        "Configuration re-read and validated.",
+                        "Configuration relue et validée.",
                     )
                 ),
                 Err(e) => {
                     println!(
                         "{}",
                         i18n::t(
-                            "✨ Hmm, your configuration has a little snag:",
-                            "✨ Hmm, votre configuration a un petit accroc :",
+                            "Your configuration has an issue:",
+                            "Votre configuration a un problème :",
                         )
                     );
                     println!("   {e}");
