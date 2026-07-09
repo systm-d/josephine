@@ -12,5 +12,5 @@ pub fn send_desktop(title: &str, body: &str) -> Result<()> {
 }
 
 pub fn send_josephine(message: &str) -> Result<()> {
-    send_desktop("✨ Joséphine", message)
+    send_desktop("✦ Joséphine", message)
 }
