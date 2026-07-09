@@ -1,12 +1,144 @@
 use std::io::{self, IsTerminal, Write};
 
 use anyhow::Result;
+use chrono::Local;
+use colored::Color;
 use colored::Colorize;
-use josephine_core::check::{Metric, metric_severity};
+use josephine_core::check::{Metric, Severity, metric_severity};
 use josephine_core::i18n::{self, Lang};
+use josephine_core::paths::Paths;
 
 pub fn is_tty() -> bool {
     std::io::stdout().is_terminal()
+}
+
+/// Width of the header rule and the clock's right edge.
+///
+/// Not yet read outside this module — Tasks 2–4 (status/doctor/history
+/// rewrites) are the consumers. `#[allow(dead_code)]` until then.
+#[allow(dead_code)]
+pub const HEADER_WIDTH: usize = 54;
+
+/// Soft indigo/violet — Joséphine's discreet stellar accent.
+const ACCENT: (u8, u8, u8) = (150, 130, 220);
+
+/// Not yet called outside this module — Tasks 2–4 are the consumers.
+#[allow(dead_code)]
+pub fn accent(s: &str) -> String {
+    s.truecolor(ACCENT.0, ACCENT.1, ACCENT.2).to_string()
+}
+
+fn severity_color(severity: Severity) -> Color {
+    match severity {
+        Severity::Info => Color::Green,
+        Severity::Attention => Color::Yellow,
+        Severity::Critique => Color::Red,
+    }
+}
+
+/// Not yet called outside this module — Tasks 2–4 are the consumers.
+#[allow(dead_code)]
+pub fn severity_paint(s: &str, severity: Severity) -> String {
+    s.color(severity_color(severity)).to_string()
+}
+
+/// Status glyph carrying severity by shape *and* colour. Off a terminal it
+/// degrades to an ASCII tag so pipes and logs stay readable.
+///
+/// Only exercised by the unit test below until Tasks 2–4 wire it into the
+/// real output surfaces; `#[allow(dead_code)]` covers plain (non-test) builds.
+#[allow(dead_code)]
+pub fn status_glyph(severity: Severity) -> String {
+    let (glyph, plain) = match severity {
+        Severity::Info => ("●", "[ok]"),
+        Severity::Attention => ("▲", "[!]"),
+        Severity::Critique => ("✕", "[x]"),
+    };
+    if is_tty() {
+        severity_paint(glyph, severity)
+    } else {
+        plain.to_string()
+    }
+}
+
+/// Load a user banner from `<config dir>/banner.txt`, if present and non-empty.
+///
+/// Private copy of `status::custom_banner`; kept duplicated until Task 2
+/// deletes the original from `status.rs`.
+fn custom_banner() -> Option<Vec<String>> {
+    let paths = Paths::new().ok()?;
+    let dir = paths.config.parent()?;
+    let content = std::fs::read_to_string(dir.join("banner.txt")).ok()?;
+    if content.trim().is_empty() {
+        return None;
+    }
+    Some(content.lines().map(str::to_string).collect())
+}
+
+/// Print each banner line tinted from amber (top) to violet (bottom).
+///
+/// Private copy of `status::print_banner_gradient`; kept duplicated until
+/// Task 2 deletes the original from `status.rs`.
+fn print_banner_gradient(lines: &[String]) {
+    let n = lines.len();
+    for (i, line) in lines.iter().enumerate() {
+        let t = if n <= 1 {
+            0.0
+        } else {
+            i as f64 / (n - 1) as f64
+        };
+        let r = lerp(224.0, 158.0, t);
+        let g = lerp(164.0, 128.0, t);
+        let b = lerp(88.0, 210.0, t);
+        println!("{}", line.truecolor(r, g, b));
+    }
+}
+
+/// Private copy of `status::lerp`; kept duplicated until Task 2 deletes the
+/// original from `status.rs`.
+fn lerp(a: f64, b: f64, t: f64) -> u8 {
+    (a + (b - a) * t).round() as u8
+}
+
+/// Print the sober header: an optional `banner.txt` on top, then
+/// `✦ Joséphine[ · suffix]` with a right-aligned clock, an optional dimmed
+/// tagline, and a thin rule.
+///
+/// Not yet called outside this module — Tasks 2–4 are the consumers.
+#[allow(dead_code)]
+pub fn sober_header(suffix: Option<&str>, tagline: Option<&str>) {
+    println!();
+    if let Some(banner) = custom_banner() {
+        print_banner_gradient(&banner);
+        println!();
+    }
+    let clock = Local::now().format("%H:%M").to_string();
+    let mut title = String::from("✦ Joséphine");
+    if let Some(s) = suffix {
+        title.push_str(&format!(" · {s}"));
+    }
+    if is_tty() {
+        let pad = HEADER_WIDTH.saturating_sub(title.chars().count() + clock.chars().count());
+        println!(
+            "{}{}{}",
+            accent(&title),
+            " ".repeat(pad.max(1)),
+            clock.dimmed()
+        );
+    } else {
+        println!("{title}  {clock}");
+    }
+    if let Some(t) = tagline {
+        println!(
+            "{}",
+            if is_tty() {
+                t.dimmed().to_string()
+            } else {
+                t.to_string()
+            }
+        );
+    }
+    println!("{}", "─".repeat(HEADER_WIDTH).dimmed());
 }
 
 /// Ask a yes/no question on the terminal. Returns `false` on a non-interactive
@@ -196,5 +328,15 @@ mod tests {
         assert_eq!(ticks[0], '▁');
         assert_eq!(ticks[2], '█');
         assert!(ticks[0] < ticks[1] && ticks[1] < ticks[2]);
+    }
+
+    #[test]
+    fn status_glyph_is_ascii_off_tty() {
+        // `cargo test` stdout is not a terminal, so we get the plain fallback —
+        // and it must differ per severity by shape, not colour alone.
+        use josephine_core::check::Severity;
+        assert_eq!(status_glyph(Severity::Info), "[ok]");
+        assert_eq!(status_glyph(Severity::Attention), "[!]");
+        assert_eq!(status_glyph(Severity::Critique), "[x]");
     }
 }
