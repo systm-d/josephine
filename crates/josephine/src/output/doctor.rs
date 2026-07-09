@@ -176,6 +176,8 @@ fn metric_label(name: &str) -> String {
         "smart_failing" => i18n::t("Failing disks", "Disques en échec").into(),
         "kernel_incidents" => i18n::t("Kernel incidents", "Incidents noyau").into(),
         "readonly_mounts" => i18n::t("Read-only mounts", "Montages en lecture seule").into(),
+        "clock_unsynced" => i18n::t("Clock unsynced", "Horloge désynchronisée").into(),
+        "failed_auths" => i18n::t("Failed logins", "Connexions échouées").into(),
         other => other.replace('_', " "),
     }
 }

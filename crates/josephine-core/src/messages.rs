@@ -28,6 +28,8 @@ pub fn alert_message(
         "smart" => smart_alert(metric.value, lang),
         "kernel" => kernel_alert(metric.value, lang),
         "filesystem" => filesystem_alert(metric.value, lang),
+        "timesync" => timesync_alert(metric.value, lang),
+        "security" => security_alert(metric.value, lang),
         other => match lang {
             Lang::En => format!(
                 "{other} is out of range ({:.1} {}). \
@@ -117,6 +119,14 @@ pub fn recovery_message(check_name: &str, metric: &Metric, lang: Lang) -> String
         "filesystem" => match lang {
             Lang::En => "Your filesystems are writable again.".into(),
             Lang::Fr => "Vos systèmes de fichiers sont de nouveau accessibles en écriture.".into(),
+        },
+        "timesync" => match lang {
+            Lang::En => "Your system clock is synchronised again.".into(),
+            Lang::Fr => "L'horloge système est de nouveau synchronisée.".into(),
+        },
+        "security" => match lang {
+            Lang::En => "No more failed login attempts in the last hour.".into(),
+            Lang::Fr => "Plus aucune tentative de connexion échouée sur la dernière heure.".into(),
         },
         other => match lang {
             Lang::En => format!(
@@ -416,6 +426,38 @@ fn filesystem_alert(count: f64, lang: Lang) -> String {
                  `josephine doctor` pour savoir lequel."
             )
         }
+    }
+}
+
+fn timesync_alert(unsynced: f64, lang: Lang) -> String {
+    if unsynced >= 1.0 {
+        match lang {
+            Lang::En => "The clock isn't synchronised (NTP). Logs, TLS and cron can drift — \
+                          `timedatectl set-ntp true` usually fixes it."
+                .to_string(),
+            Lang::Fr => "L'horloge n'est pas synchronisée (NTP). Les journaux, TLS et cron \
+                          peuvent dériver — `timedatectl set-ntp true` règle souvent le problème."
+                .to_string(),
+        }
+    } else {
+        match lang {
+            Lang::En => "Clock synchronisation needs attention.".into(),
+            Lang::Fr => "La synchronisation de l'horloge mérite un coup d'œil.".into(),
+        }
+    }
+}
+
+fn security_alert(count: f64, lang: Lang) -> String {
+    let n = count as u64;
+    match lang {
+        Lang::En => format!(
+            "{n} failed login attempt(s) in the last hour. If that's not you, \
+             check `journalctl -u sshd`."
+        ),
+        Lang::Fr => format!(
+            "{n} tentative(s) de connexion échouée(s) sur la dernière heure. \
+             Si ce n'est pas vous, vérifiez `journalctl -u sshd`."
+        ),
     }
 }
 

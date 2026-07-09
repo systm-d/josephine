@@ -180,6 +180,8 @@ pub fn check_label(name: &str) -> &'static str {
         "smart" => i18n::t("Disk health", "Santé disque"),
         "kernel" => i18n::t("Kernel", "Noyau"),
         "filesystem" => i18n::t("Filesystem", "Système de fichiers"),
+        "timesync" => i18n::t("Clock", "Horloge"),
+        "security" => i18n::t("Security", "Sécurité"),
         _ => i18n::t("System", "Système"),
     }
 }
@@ -220,6 +222,8 @@ pub fn primary_metric(result: &josephine_core::check::CheckResult) -> Option<&Me
         "smart" => result.metrics.iter().find(|m| m.name == "smart_failing"),
         "kernel" => result.metrics.iter().find(|m| m.name == "kernel_incidents"),
         "filesystem" => result.metrics.iter().find(|m| m.name == "readonly_mounts"),
+        "timesync" => result.metrics.iter().find(|m| m.name == "clock_unsynced"),
+        "security" => result.metrics.iter().find(|m| m.name == "failed_auths"),
         _ => result.metrics.first(),
     }
 }

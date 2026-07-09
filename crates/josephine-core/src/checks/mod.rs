@@ -6,9 +6,11 @@ mod inode;
 mod kernel;
 mod memory;
 mod network;
+mod security;
 mod smart;
 mod systemd;
 mod temperature;
+mod timesync;
 mod updates;
 
 pub use battery::BatteryCheck;
@@ -19,9 +21,11 @@ pub use inode::InodeCheck;
 pub use kernel::KernelCheck;
 pub use memory::MemoryCheck;
 pub use network::NetworkCheck;
+pub use security::SecurityCheck;
 pub use smart::SmartCheck;
 pub use systemd::SystemdCheck;
 pub use temperature::TemperatureCheck;
+pub use timesync::TimesyncCheck;
 pub use updates::UpdatesCheck;
 
 use crate::check::Check;
@@ -66,6 +70,12 @@ pub fn build_checks(config: &ChecksConfig) -> Vec<Box<dyn Check>> {
     if config.filesystem.enabled {
         checks.push(Box::new(FilesystemCheck::new(config.filesystem.clone())));
     }
+    if config.timesync.enabled {
+        checks.push(Box::new(TimesyncCheck::new(config.timesync.clone())));
+    }
+    if config.security.enabled {
+        checks.push(Box::new(SecurityCheck::new(config.security.clone())));
+    }
 
     checks
 }
@@ -84,6 +94,8 @@ pub fn interval_for_check(name: &str, config: &ChecksConfig) -> u64 {
         "smart" => config.smart.interval_secs,
         "kernel" => config.kernel.interval_secs,
         "filesystem" => config.filesystem.interval_secs,
+        "timesync" => config.timesync.interval_secs,
+        "security" => config.security.interval_secs,
         _ => 60,
     }
 }
