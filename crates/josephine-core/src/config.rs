@@ -43,6 +43,12 @@ pub struct ChecksConfig {
     pub smart: SmartCheckConfig,
     #[serde(default)]
     pub kernel: KernelCheckConfig,
+    #[serde(default)]
+    pub filesystem: FilesystemCheckConfig,
+    #[serde(default)]
+    pub timesync: TimesyncCheckConfig,
+    #[serde(default)]
+    pub security: SecurityCheckConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -146,6 +152,54 @@ pub struct KernelCheckConfig {
     pub critical: f64,
 }
 
+/// Unlike the generic [`CheckThresholds`], this check's own defaults
+/// (warning = critical = 1: any read-only remount is critical) must win on
+/// *every* deserialization path — including a pre-existing config file that
+/// has no `filesystem:` key at all, where serde falls back to
+/// `#[serde(default)]` on the field, i.e. `FilesystemCheckConfig::default()`.
+/// A bare `#[serde(default)]` pointing at the generic `CheckThresholds`
+/// (85/95) would silently defeat the "any read-only mount is critical"
+/// intent on upgraded installs.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct FilesystemCheckConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    #[serde(default = "default_filesystem_interval")]
+    pub interval_secs: u64,
+    /// Number of unexpectedly read-only mounts.
+    #[serde(default = "default_filesystem_warning")]
+    pub warning: f64,
+    #[serde(default = "default_filesystem_critical")]
+    pub critical: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct TimesyncCheckConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    #[serde(default = "default_timesync_interval")]
+    pub interval_secs: u64,
+    /// `clock_unsynced` flag: 0 = synced, 1 = not synced. warning=1 surfaces
+    /// unsynced as attention; critical=2 keeps it below critical.
+    #[serde(default = "default_timesync_warning")]
+    pub warning: f64,
+    #[serde(default = "default_timesync_critical")]
+    pub critical: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct SecurityCheckConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    #[serde(default = "default_security_interval")]
+    pub interval_secs: u64,
+    /// Number of failed authentication attempts in the last hour.
+    #[serde(default = "default_security_warning")]
+    pub warning: f64,
+    #[serde(default = "default_security_critical")]
+    pub critical: f64,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct NotificationsConfig {
     #[serde(default = "default_true")]
@@ -218,6 +272,42 @@ fn default_kernel_critical() -> f64 {
     3.0
 }
 
+fn default_filesystem_interval() -> u64 {
+    120
+}
+
+fn default_filesystem_warning() -> f64 {
+    1.0
+}
+
+fn default_filesystem_critical() -> f64 {
+    1.0
+}
+
+fn default_timesync_interval() -> u64 {
+    300
+}
+
+fn default_timesync_warning() -> f64 {
+    1.0
+}
+
+fn default_timesync_critical() -> f64 {
+    2.0
+}
+
+fn default_security_interval() -> u64 {
+    300
+}
+
+fn default_security_warning() -> f64 {
+    5.0
+}
+
+fn default_security_critical() -> f64 {
+    20.0
+}
+
 fn default_warning() -> f64 {
     85.0
 }
@@ -280,6 +370,9 @@ impl Default for ChecksConfig {
             },
             smart: SmartCheckConfig::default(),
             kernel: KernelCheckConfig::default(),
+            filesystem: FilesystemCheckConfig::default(),
+            timesync: TimesyncCheckConfig::default(),
+            security: SecurityCheckConfig::default(),
         }
     }
 }
@@ -333,6 +426,39 @@ impl Default for KernelCheckConfig {
             interval_secs: 300,
             warning: default_kernel_warning(),
             critical: default_kernel_critical(),
+        }
+    }
+}
+
+impl Default for FilesystemCheckConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            interval_secs: default_filesystem_interval(),
+            warning: default_filesystem_warning(),
+            critical: default_filesystem_critical(),
+        }
+    }
+}
+
+impl Default for TimesyncCheckConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            interval_secs: default_timesync_interval(),
+            warning: default_timesync_warning(),
+            critical: default_timesync_critical(),
+        }
+    }
+}
+
+impl Default for SecurityCheckConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            interval_secs: default_security_interval(),
+            warning: default_security_warning(),
+            critical: default_security_critical(),
         }
     }
 }
@@ -428,6 +554,9 @@ impl Config {
         Self::validate_battery(&self.checks.battery)?;
         Self::validate_thresholds("inode", &self.checks.inode)?;
         Self::validate_kernel(&self.checks.kernel)?;
+        Self::validate_filesystem(&self.checks.filesystem)?;
+        Self::validate_timesync(&self.checks.timesync)?;
+        Self::validate_security(&self.checks.security)?;
         if self.checks.smart.interval_secs < 5 {
             bail!("checks.smart.interval_secs must be ≥ 5 seconds");
         }
@@ -543,6 +672,49 @@ impl Config {
         Ok(())
     }
 
+    /// Unlike `validate_thresholds`, warning and critical may be *equal* here:
+    /// the filesystem check's default is warning = critical = 1 (any
+    /// read-only remount is critical — there's no intermediate "worth a
+    /// look" state for a filesystem that may be silently corrupting data).
+    fn validate_filesystem(c: &FilesystemCheckConfig) -> Result<()> {
+        if c.interval_secs < 5 {
+            bail!("checks.filesystem.interval_secs must be ≥ 5 seconds");
+        }
+        if c.warning < 1.0 || c.critical < 1.0 {
+            bail!("checks.filesystem.warning and critical must be ≥ 1");
+        }
+        if c.warning > c.critical {
+            bail!("checks.filesystem.warning must be less than or equal to critical");
+        }
+        Ok(())
+    }
+
+    fn validate_timesync(c: &TimesyncCheckConfig) -> Result<()> {
+        if c.interval_secs < 5 {
+            bail!("checks.timesync.interval_secs must be ≥ 5 seconds");
+        }
+        if c.warning < 1.0 || c.critical < 1.0 {
+            bail!("checks.timesync.warning and critical must be ≥ 1");
+        }
+        if c.warning >= c.critical {
+            bail!("checks.timesync.warning must be less than critical");
+        }
+        Ok(())
+    }
+
+    fn validate_security(c: &SecurityCheckConfig) -> Result<()> {
+        if c.interval_secs < 5 {
+            bail!("checks.security.interval_secs must be ≥ 5 seconds");
+        }
+        if c.warning < 1.0 || c.critical < 1.0 {
+            bail!("checks.security.warning and critical must be ≥ 1");
+        }
+        if c.warning >= c.critical {
+            bail!("checks.security.warning must be less than critical");
+        }
+        Ok(())
+    }
+
     pub fn load_default() -> Result<Self> {
         let paths = Paths::new()?;
         paths.ensure_dirs()?;
@@ -576,5 +748,61 @@ mod tests {
         let mut config = Config::default();
         config.checks.cpu.warning = 96.0;
         assert!(config.validate().is_err());
+    }
+
+    /// Regression test for a pre-existing config file (written before the
+    /// `filesystem` check existed) that has no `filesystem:` key at all. On
+    /// this "field absent" deserialization path, serde falls back to
+    /// `FilesystemCheckConfig`'s own `#[serde(default = "…")]` functions —
+    /// NOT to `ChecksConfig`'s manual `Default` impl. Both must agree on
+    /// warning = critical = 1.0, or an upgraded install silently gets the
+    /// generic 85/95 thresholds and the alert never fires for a read-only
+    /// remount (count = 1 is nowhere near 85).
+    #[test]
+    fn upgraded_config_without_filesystem_key_still_defaults_to_1_and_1() {
+        let yaml = "\
+checks:
+  cpu:
+    warning: 80
+    critical: 90
+";
+        let config: Config = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(config.checks.filesystem.warning, 1.0);
+        assert_eq!(config.checks.filesystem.critical, 1.0);
+        assert!(config.checks.filesystem.enabled);
+        assert_eq!(config.checks.filesystem.interval_secs, 120);
+        config.validate().unwrap();
+    }
+
+    #[test]
+    fn upgraded_config_without_timesync_key_still_defaults_to_1_and_2() {
+        let yaml = "\
+checks:
+  cpu:
+    warning: 80
+    critical: 90
+";
+        let config: Config = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(config.checks.timesync.warning, 1.0);
+        assert_eq!(config.checks.timesync.critical, 2.0);
+        assert!(config.checks.timesync.enabled);
+        assert_eq!(config.checks.timesync.interval_secs, 300);
+        config.validate().unwrap();
+    }
+
+    #[test]
+    fn upgraded_config_without_security_key_still_defaults_to_5_and_20() {
+        let yaml = "\
+checks:
+  cpu:
+    warning: 80
+    critical: 90
+";
+        let config: Config = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(config.checks.security.warning, 5.0);
+        assert_eq!(config.checks.security.critical, 20.0);
+        assert!(config.checks.security.enabled);
+        assert_eq!(config.checks.security.interval_secs, 300);
+        config.validate().unwrap();
     }
 }

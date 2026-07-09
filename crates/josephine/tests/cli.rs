@@ -146,6 +146,37 @@ fn help_about_follows_the_configured_language() {
 }
 
 #[test]
+fn explain_lists_checks() {
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .arg("explain")
+        .assert()
+        .success()
+        .stdout(contains("cpu"))
+        .stdout(contains("filesystem"));
+}
+
+#[test]
+fn explain_disk_mentions_disk() {
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .args(["explain", "disk"])
+        .assert()
+        .success()
+        .stdout(contains("disk"));
+}
+
+#[test]
+fn help_lists_explain_subcommand() {
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .arg("--help")
+        .assert()
+        .success()
+        .stdout(contains("explain"));
+}
+
+#[test]
 fn completions_generates_a_script() {
     // Completions are generated from the static command tree — no config needed,
     // and must not create any files. Isolated HOME guards against a regression.

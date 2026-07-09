@@ -6,7 +6,7 @@ use clap::{Parser, Subcommand};
 
 use crate::commands::{
     ConfigAction, DaemonAction, NotifyAction, clean_cmd, config_cmd, daemon_cmd, doctor_cmd,
-    fix_cmd, history_cmd, notify_cmd, report_cmd, status_cmd, update_cmd,
+    explain_cmd, fix_cmd, history_cmd, notify_cmd, report_cmd, status_cmd, update_cmd,
 };
 
 /// Your computer's guardian angel
@@ -60,6 +60,11 @@ enum Commands {
     },
     /// Guided fixes: what's wrong and how to remedy it
     Fix,
+    /// Explain what each check watches, and how to act
+    Explain {
+        /// One check name (e.g. `cpu`, `disk`); omit to list all
+        check: Option<String>,
+    },
     /// Dated system report, to the screen or a file
     Report {
         /// Write the report to this file instead of printing it
@@ -125,6 +130,9 @@ fn localize_help_fr(command: clap::Command) -> clap::Command {
         .mut_subcommand("fix", |c| {
             c.about("Réparations guidées : ce qui ne va pas et comment y remédier")
         })
+        .mut_subcommand("explain", |c| {
+            c.about("Expliquer ce que chaque check surveille et comment agir")
+        })
         .mut_subcommand("report", |c| {
             c.about("Rapport système daté, à l'écran ou dans un fichier")
         })
@@ -158,7 +166,10 @@ async fn dispatch() -> Result<()> {
     // A real command is running: ensure the config exists (first run) and
     // re-apply its language. `completions` needs neither and must not create
     // files (it generates from the static command tree), so skip it for that.
-    if !matches!(cli.command, Some(Commands::Completions { .. })) {
+    if !matches!(
+        cli.command,
+        Some(Commands::Completions { .. }) | Some(Commands::Explain { .. })
+    ) {
         if let Ok(config) = josephine_core::config::Config::load_default() {
             josephine_core::i18n::set_lang(config.language);
         }
@@ -172,6 +183,7 @@ async fn dispatch() -> Result<()> {
         Some(Commands::Config { action }) => config_cmd::run(action)?,
         Some(Commands::Clean { apply }) => clean_cmd::run(apply)?,
         Some(Commands::Fix) => fix_cmd::run()?,
+        Some(Commands::Explain { check }) => explain_cmd::run(check.as_deref())?,
         Some(Commands::Report { output, json }) => report_cmd::run(output, json)?,
         Some(Commands::Notify { action }) => notify_cmd::run(action)?,
         Some(Commands::Update { check, yes }) => update_cmd::run(check, yes)?,

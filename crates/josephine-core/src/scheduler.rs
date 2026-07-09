@@ -174,6 +174,30 @@ fn thresholds_for(name: &str, config: &Config) -> CheckThresholds {
             warning: config.checks.systemd.failed_warning,
             critical: config.checks.systemd.failed_critical,
         },
+        "kernel" => CheckThresholds {
+            enabled: config.checks.kernel.enabled,
+            interval_secs: config.checks.kernel.interval_secs,
+            warning: config.checks.kernel.warning,
+            critical: config.checks.kernel.critical,
+        },
+        "filesystem" => CheckThresholds {
+            enabled: config.checks.filesystem.enabled,
+            interval_secs: config.checks.filesystem.interval_secs,
+            warning: config.checks.filesystem.warning,
+            critical: config.checks.filesystem.critical,
+        },
+        "timesync" => CheckThresholds {
+            enabled: config.checks.timesync.enabled,
+            interval_secs: config.checks.timesync.interval_secs,
+            warning: config.checks.timesync.warning,
+            critical: config.checks.timesync.critical,
+        },
+        "security" => CheckThresholds {
+            enabled: config.checks.security.enabled,
+            interval_secs: config.checks.security.interval_secs,
+            warning: config.checks.security.warning,
+            critical: config.checks.security.critical,
+        },
         _ => CheckThresholds::default(),
     }
 }
