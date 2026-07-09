@@ -52,8 +52,8 @@ pub fn status_glyph(severity: Severity) -> String {
 
 /// Load a user banner from `<config dir>/banner.txt`, if present and non-empty.
 ///
-/// Private copy of `status::custom_banner`; kept duplicated until Task 2
-/// deletes the original from `status.rs`.
+/// Private helper for `sober_header`, which prints the banner (if any) above
+/// the header.
 fn custom_banner() -> Option<Vec<String>> {
     let paths = Paths::new().ok()?;
     let dir = paths.config.parent()?;
@@ -66,8 +66,8 @@ fn custom_banner() -> Option<Vec<String>> {
 
 /// Print each banner line tinted from amber (top) to violet (bottom).
 ///
-/// Private copy of `status::print_banner_gradient`; kept duplicated until
-/// Task 2 deletes the original from `status.rs`.
+/// Private helper for `sober_header`, used to render the optional
+/// `banner.txt` above the header.
 fn print_banner_gradient(lines: &[String]) {
     let n = lines.len();
     for (i, line) in lines.iter().enumerate() {
@@ -83,8 +83,8 @@ fn print_banner_gradient(lines: &[String]) {
     }
 }
 
-/// Private copy of `status::lerp`; kept duplicated until Task 2 deletes the
-/// original from `status.rs`.
+/// Linear interpolation between `a` and `b` at `t` (`0.0..=1.0`), used by
+/// `print_banner_gradient` to compute each line's tint.
 fn lerp(a: f64, b: f64, t: f64) -> u8 {
     (a + (b - a) * t).round() as u8
 }

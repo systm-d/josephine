@@ -11,10 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The whole CLI now reads as one system: the remaining commands (`report`,
   `clean`, `fix`, `update`, `daemon`, `config`, `notify`) drop the old
-  `✨ Joséphine` banners and mascot copy for the sober `✦` header and the
-  direct "chaleur sobre" voice (English + French); `status` and `doctor` share
-  one footer; `history` events show human check labels. The `CURRENT_STATE`
-  and `ROADMAP` docs are refreshed to the 0.7.0 baseline.
+  `✨ Joséphine` banners and mascot copy for the direct "chaleur sobre" voice
+  (English + French); `clean`, `fix` and `update` gain the sober `✦` header
+  (`report` keeps its own body title, `daemon`/`config`/`notify` print no
+  header); `status` and `doctor` share one footer; `history` events show
+  human check labels. The `CURRENT_STATE` and `ROADMAP` docs are refreshed to
+  the 0.7.0 baseline.
 
 ## [0.7.0] - 2026-07-09
 

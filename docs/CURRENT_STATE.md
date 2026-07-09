@@ -57,9 +57,12 @@ de couleur (`●` ok, `▲` attention, `✕` critique — dégradés en
 (bilingue, ton « chaleur sobre » : direct et rassurant, sans mascotte ni
 emoji). Un `banner.txt` personnalisé (`~/.config/josephine/banner.txt`) reste
 honoré au-dessus de l'en-tête. Les notifications desktop
-(`messages.rs`) suivent le même détonage. `report`, `clean`, `fix` et
-`update` conservent encore l'ancien habillage `✨` — bascule prévue par
-l'increment C en cours (voir [ROADMAP.md](ROADMAP.md)).
+(`messages.rs`) suivent le même détonage. Toutes les commandes sont
+désormais passées à la voix « chaleur sobre » : `clean`, `fix` et `update`
+s'ouvrent elles aussi avec l'en-tête sobre `✦` ; `report` garde son propre
+titre de document (« Joséphine — rapport système ») sans en-tête `✦`, pour
+éviter un « Joséphine » en double ; `daemon`, `config` et `notify` n'affichent
+aucun en-tête, seulement des lignes de résultat détonées.
 
 ### Démon
 
