@@ -1,24 +1,70 @@
 {% extends "base.html" %}
 {% block title %}Joséphine — {{ section.extra.tagline }}{% endblock title %}
 {% block content %}
-<header class="hero">
-  <span class="sparkle" style="top:3rem;left:13%">✦</span>
-  <span class="sparkle" style="top:6.5rem;right:15%;animation-delay:1.4s">✧</span>
-  <span class="sparkle" style="top:12rem;left:24%;animation-delay:2.8s">˚</span>
-  <span class="sparkle" style="top:9rem;right:26%;animation-delay:2s">✦</span>
-  <nav class="langs">
-    <a href="{{ get_url(path='@/_index.md', lang='en') }}">EN</a>
-    <a href="{{ get_url(path='@/_index.md', lang='fr') }}">FR</a>
-  </nav>
-  <div class="halo">✨</div>
-  <h1>Joséphine</h1>
-  <p class="tagline">{{ section.extra.tagline }}</p>
-  <p class="lede">{{ section.extra.lede }}</p>
-  <div class="cta">
-    <a class="button" href="{{ config.extra.repo_url }}">{{ section.extra.cta }}</a>
-    <a class="button button--ghost" href="#install">{{ section.extra.cta2 }}</a>
+<header>
+  <div class="wrap">
+    <div class="topbar">
+      <span class="wordmark"><span class="star">✦</span> Joséphine</span>
+      <span class="langs">
+        <a{% if lang == 'en' %} class="on"{% endif %} href="{{ get_url(path='@/_index.md', lang='en') }}">EN</a> ·
+        <a{% if lang == 'fr' %} class="on"{% endif %} href="{{ get_url(path='@/_index.md', lang='fr') }}">FR</a>
+      </span>
+    </div>
+  </div>
+
+  <div class="wrap hero">
+    <p class="eyebrow">{{ section.extra.eyebrow }}</p>
+    <h1><span class="star">✦</span> Joséphine</h1>
+    <p class="tagline">{{ section.extra.tagline }}</p>
+    <p class="lede">{{ section.extra.lede }}</p>
+    <div class="cta">
+      <a class="button button--primary" href="#install">{{ section.extra.cta2 }}</a>
+      <a class="button" href="{{ config.extra.repo_url }}">{{ section.extra.cta }}</a>
+    </div>
+
+    <div class="term" role="img" aria-label="{{ section.extra.readout_alt }}">
+      <div class="term__bar"><span class="term__dot"></span><span class="term__dot"></span><span class="term__dot"></span><span class="term__title">josephine</span></div>
+{% if lang == 'fr' -%}
+<pre>
+<span class="dim">✦ Joséphine                                    14:40</span>
+Votre machine, sous bonne garde.
+<span class="rule">──────────────────────────────────────────────────</span>
+ <span class="g-ok">●</span>  CPU            24 %
+ <span class="g-ok">●</span>  Mémoire        60 %   18G / 31G
+ <span class="g-ok">●</span>  Disque         21 %   « / » 195G / 937G
+ <span class="g-ok">●</span>  Température     74 °C
+ <span class="g-ok">●</span>  Services       tous actifs
+ <span class="g-warn">▲</span>  Mises à jour   30 disponibles
+ <span class="g-ok">●</span>  Réseau         10 ms
+ <span class="g-ok">●</span>  Batterie       99 %  (branchée)
+ <span class="g-ok">●</span>  Inodes         4 %
+ <span class="g-ok">●</span>  Noyau          0 incident (1 h)
+<span class="rule">──────────────────────────────────────────────────</span>
+ <span class="dim">1 point à regarder → josephine doctor</span>
+</pre>
+{%- else -%}
+<pre>
+<span class="dim">✦ Joséphine                                    14:40</span>
+Your machine, watched over.
+<span class="rule">──────────────────────────────────────────────────</span>
+ <span class="g-ok">●</span>  CPU            24 %
+ <span class="g-ok">●</span>  Memory         60 %   18G / 31G
+ <span class="g-ok">●</span>  Disk           21 %   « / » 195G / 937G
+ <span class="g-ok">●</span>  Temperature    74 °C
+ <span class="g-ok">●</span>  Services       all running
+ <span class="g-warn">▲</span>  Updates        30 available
+ <span class="g-ok">●</span>  Network        10 ms
+ <span class="g-ok">●</span>  Battery        99 %  (plugged in)
+ <span class="g-ok">●</span>  Inodes         4 %
+ <span class="g-ok">●</span>  Kernel         0 incidents (1 h)
+<span class="rule">──────────────────────────────────────────────────</span>
+ <span class="dim">1 thing to look at → josephine doctor</span>
+</pre>
+{%- endif %}
+    </div>
   </div>
 </header>
+
 <main class="container">
   {{ section.content | safe }}
 </main>

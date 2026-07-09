@@ -2,110 +2,92 @@
 title = "Joséphine"
 
 [extra]
-tagline = "L'ange gardien de votre ordinateur."
-lede = "Elle veille en douceur sur votre machine Linux — onze signes vitaux, surveillés en silence — et ne murmure que lorsque quelque chose a vraiment besoin de vous. 100 % local. Jamais de cloud."
+eyebrow = "Gardien Linux local"
+tagline = "Votre machine, sous bonne garde — en silence."
+lede = "Elle veille sur onze signes vitaux de votre machine Linux et ne parle que lorsque quelque chose vous concerne. Directe, calme, et 100 % locale — jamais de cloud."
 cta = "Voir sur GitHub"
 cta2 = "Installer"
+readout_alt = "Exemple de sortie josephine status : onze contrôles, un à surveiller"
 +++
 
-<div class="features">
-  <div class="feature">
-    <span class="feature__icon">🩺</span>
-    <h3>Onze checks</h3>
-    <p>CPU, mémoire, disque, température, systemd, mises à jour, réseau, batterie, inodes, SMART &amp; noyau.</p>
-  </div>
-  <div class="feature">
-    <span class="feature__icon">🔔</span>
-    <h3>Alertes douces</h3>
-    <p>Des notifications chaleureuses, en langage clair — jamais ERROR / FATAL / PANIC.</p>
-  </div>
-  <div class="feature">
-    <span class="feature__icon">🔒</span>
-    <h3>100 % local</h3>
-    <p>Tout s'exécute sur votre machine. Pas de cloud, pas de télémétrie, pas de compte.</p>
-  </div>
-  <div class="feature">
-    <span class="feature__icon">⬆️</span>
-    <h3>Mise à jour</h3>
-    <p><code>josephine update</code> récupère &amp; installe la dernière version, sur demande.</p>
-  </div>
+<section>
+<p class="eyebrow">Ce qu'elle surveille</p>
+
+## Onze signes vitaux
+
+<p class="section__lede">Chaque contrôle est indépendant, configurable, et lu directement dans le noyau et <code>/sys</code> — rien ne quitte jamais la machine.</p>
+
+<div class="signs">
+  <div class="sign"><h3><span class="mark">✦</span> Onze contrôles</h3><p>CPU, mémoire, disque, température, systemd, mises à jour, réseau, batterie, inodes, SMART &amp; noyau.</p></div>
+  <div class="sign"><h3><span class="mark">✦</span> Alertes directes</h3><p>Des notes desktop en clair, calmes et précises — jamais <code>ERROR</code> / <code>FATAL</code> / <code>PANIC</code>.</p></div>
+  <div class="sign"><h3><span class="mark">✦</span> 100 % locale</h3><p>Tout tourne sur votre machine. Pas de cloud, pas de télémétrie, pas de compte.</p></div>
+  <div class="sign"><h3><span class="mark">✦</span> Lisible par machine</h3><p><code>--json</code> pour le scripting, complétions shell, et mise à jour depuis les releases GitHub.</p></div>
 </div>
+</section>
 
-## 👀 En action
+<hr class="divider" />
+<section>
+<p class="eyebrow">En action</p>
 
-Lancez `josephine` pour un résumé sur un écran. Chaque check affiche une valeur
-et un état clair — `OK`, `attention` ou `critique` :
+## Un écran, d'un coup d'œil
 
-```
-$ josephine
-✨ Joséphine
-Votre ange gardien système
-────────────────────────────────────────────────────────────
-  🖥️  Utilisation CPU     24%                               [OK]
-  🧠  Mémoire             60% (18G / 31G)                   [OK]
-  💽  Espace disque       21% de « / » (195G / 937G)        [OK]
-  🌡️  Température         74°C                              [OK]
-  🛡️  Services critiques  Tous les services fonctionnent    [OK]
-  🔄  Mises à jour        30 mises à jour disponibles       [!] ATTENTION
-  🌐  Réseau              10 ms (passerelle)                [OK]
-  🔋  Batterie            99 % (branchée)                   [OK]
-  🗂️  Inodes              4% de « / »                       [OK]
-  🐧  Noyau               0 incident (1 h)                  [OK]
-```
+<p class="section__lede">La gravité est portée par la forme <em>et</em> la couleur — <span class="g-ok">●</span> ok, <span class="g-warn">▲</span> attention, <span class="g-crit">✕</span> critique — lisible même dans un pipe (<code>[ok] [!] [x]</code> hors terminal). <code>josephine doctor</code> détaille contrôle par contrôle ; <code>josephine history</code> montre les min / moy / max sur 24 h avec des sparklines <code>▁▂▄▇▅▃</code>.</p>
 
-`josephine doctor` détaille check par check, avec des barres par métrique et les
-processus les plus actifs. `josephine history` montre les **min / moy / max** sur
-24 h avec des tendances en sparklines : `▁▂▄▇▅▃`.
+<div class="term"><div class="term__bar"><span class="term__dot"></span><span class="term__dot"></span><span class="term__dot"></span><span class="term__title">josephine doctor</span></div><pre><span class="dim">✦ Joséphine · diagnostic                        14:40</span>
+11 contrôles · 1 à regarder
+<span class="rule">──────────────────────────────────────────────────</span>
+ <span class="g-warn">▲</span>  Mises à jour · <span class="g-warn">attention</span>             30 dispo.
+    ▓▓▓▓▓▓▓░░░░░░░  apt : 30 paquets à mettre à jour
+ <span class="g-ok">●</span>  Disque · <span class="g-ok">ok</span>                           21 %
+    ▓▓▓░░░░░░░░░░░  « / » (btrfs) 195G / 937G · SSD
+ <span class="g-ok">●</span>  Noyau · <span class="g-ok">ok</span>                        0 incident
+    Aucun incident noyau sur la dernière heure.</pre></div>
+</section>
 
-### 💬 Des notifications qu'on lit vraiment
+<hr class="divider" />
+<section>
+<p class="eyebrow">Notifications</p>
 
-Ni jargon, ni panique. Joséphine parle comme une amie posée — et vous indique
-toujours la commande exacte pour creuser.
+## Elle ne parle que si ça aide
+
+<p class="section__lede">Ni jargon, ni dramatisation — une ligne calme et directe, et toujours la commande exacte pour creuser.</p>
 
 <div class="notifs">
-  <div class="notif notif--warn">
-    <span class="notif__icon">✨</span>
-    <p>Votre disque est à 91 % — il tousse un peu. Même au paradis, on n'a pas de
-    stockage illimité. Je peux vous aider à voir ce qui encombre :
-    <code>josephine doctor</code>.</p>
-  </div>
-  <div class="notif notif--crit">
-    <span class="notif__icon">✨</span>
-    <p>Mon cher… 97 % de CPU. Votre machine court plus vite que moi avec mes ailes —
-    et ce n'est pas un compliment. <code>josephine doctor</code>, vite.</p>
-  </div>
-  <div class="notif notif--ok">
-    <span class="notif__icon">✨</span>
-    <p>Votre batterie a repris des forces (ou vous voilà branché). Ouf — je respire
-    mieux, moi aussi.</p>
-  </div>
+  <div class="notif notif--warn"><span class="notif__glyph g-warn">▲</span><p>Disque à 91 % sur <code>/</code>. L'espace se remplit — <code>josephine doctor</code> montre ce qui prend la place.</p></div>
+  <div class="notif notif--crit"><span class="notif__glyph g-crit">✕</span><p>CPU à 97 %, et ça tient. Quelque chose le sature — <code>josephine doctor</code> vous mènera à la cause.</p></div>
+  <div class="notif notif--ok"><span class="notif__glyph g-ok">●</span><p>La batterie est revenue à un niveau sain (ou vous êtes branché). Tout est au vert.</p></div>
 </div>
+</section>
 
-## 📖 Commandes
+<hr class="divider" />
+<section>
+<p class="eyebrow">Commandes</p>
+
+## Une petite boîte à outils honnête
 
 <ul class="commands">
-  <li><code>josephine</code><span>un résumé de tous les checks sur un écran</span></li>
-  <li><code>josephine doctor</code><span>diagnostic détaillé, check par check (<code>-v</code> pour plus)</span></li>
-  <li><code>josephine history</code><span>min/moy/max sur 24 h avec tendances en sparklines</span></li>
-  <li><code>josephine report</code><span>un rapport système daté, en texte (<code>-o</code> vers un fichier)</span></li>
-  <li><code>josephine clean</code><span>aperçu de l'espace récupérable (<code>--apply</code> pour nettoyer)</span></li>
-  <li><code>josephine fix</code><span>corrections guidées : services en échec / disque serré</span></li>
-  <li><code>josephine update</code><span>vérifie &amp; installe une nouvelle version</span></li>
-  <li><code>josephine daemon start</code><span>lance la surveillance en arrière-plan</span></li>
-  <li><code>josephine config edit</code><span>ouvre la config dans <code>$EDITOR</code>, puis revalide</span></li>
+  <li><code>josephine</code><span>un résumé d'un écran de chaque contrôle</span></li>
+  <li><code>josephine doctor</code><span>diagnostic détaillé, contrôle par contrôle (<code>-v</code> pour plus)</span></li>
+  <li><code>josephine history</code><span>min / moy / max sur 24 h avec sparklines</span></li>
+  <li><code>josephine report</code><span>un rapport texte daté (<code>--json</code> aussi)</span></li>
+  <li><code>josephine clean</code><span>aperçu de l'espace disque récupérable (<code>--apply</code> pour vider les caches)</span></li>
+  <li><code>josephine fix</code><span>remédiation guidée pour services en échec / disque plein</span></li>
+  <li><code>josephine completions</code><span>complétions shell pour bash, zsh, fish</span></li>
+  <li><code>josephine daemon start</code><span>lance le veilleur en arrière-plan</span></li>
 </ul>
 
-La doc complète vit dans le dépôt — [Architecture](https://github.com/systm-d/josephine/blob/main/docs/ARCHITECTURE.md) ·
-[État actuel](https://github.com/systm-d/josephine/blob/main/docs/CURRENT_STATE.md) ·
-[Roadmap](https://github.com/systm-d/josephine/blob/main/docs/ROADMAP.md). Votre
-configuration vit dans `~/.config/josephine/config.yaml` (créé au premier
-lancement), et l'historique sous `~/.local/share/josephine/`.
+La doc détaillée vit dans le dépôt — [Architecture](https://github.com/systm-d/josephine/blob/main/docs/ARCHITECTURE.md) · [État actuel](https://github.com/systm-d/josephine/blob/main/docs/CURRENT_STATE.md) · [Roadmap](https://github.com/systm-d/josephine/blob/main/docs/ROADMAP.md). Votre configuration vit dans `~/.config/josephine/config.yaml` (créée au premier lancement), et l'historique sous `~/.local/share/josephine/`.
+</section>
 
-## 🕊️ Installation {#install}
+<hr class="divider" />
+<section id="install">
+<p class="eyebrow">Installer</p>
+
+## En place en une minute
 
 Récupérez un paquet depuis la [dernière release](https://github.com/systm-d/josephine/releases/latest) :
 
-```
+```sh
 # Debian / Ubuntu
 sudo dpkg -i josephine_*_amd64.deb
 
@@ -113,19 +95,15 @@ sudo dpkg -i josephine_*_amd64.deb
 sudo rpm -i josephine-*.x86_64.rpm
 ```
 
-Vous préférez compiler ? `cargo install --git https://github.com/systm-d/josephine josephine` (Rust 1.85+).
+Vous préférez la compiler vous-même ? `cargo install --git https://github.com/systm-d/josephine josephine` (Rust 1.85+). Sous Linux avec Homebrew, `brew install …/josephine.rb` compile depuis les sources.
 
 Pour que Joséphine veille au fil des redémarrages, activez l'unité systemd **user** fournie :
 
-```
+```sh
 systemctl --user enable --now josephine
 ```
 
-<p class="callout">✨ <strong>Joséphine est un ange gardien, pas un tableau de bord.</strong>
-Elle reste discrète, garde une voix chaleureuse et ne parle que lorsque c'est
-utile — <em>faite avec ♥ pour celles et ceux qui préfèrent que leur ordinateur
-prenne soin de lui-même.</em></p>
+<p class="callout"><strong>Joséphine est un ange gardien, pas un tableau de bord.</strong> Elle reste discrète, garde une voix calme, et ne parle que lorsque ça aide — pour celles et ceux qui préfèrent que leur ordinateur s'occupe simplement de lui-même.</p>
 
-> Joséphine parle **anglais par défaut** — mettez `language: fr` dans la config
-> pour sa voix française (les captures ci-dessus). Le ton chaleureux d'ange
-> gardien est préservé dans les deux langues.
+> Joséphine parle anglais par défaut — mettez <code>language: fr</code> dans la config pour sa voix française. Le ton chaleureux et direct est préservé dans les deux.
+</section>
