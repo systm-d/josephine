@@ -96,7 +96,7 @@ sudo dpkg -i josephine_*_amd64.deb
 sudo rpm -i josephine-*.x86_64.rpm
 ```
 
-Prefer to build it yourself? `cargo install --git https://github.com/systm-d/josephine josephine` (Rust 1.85+). On Linux with Homebrew, `brew install …/josephine.rb` builds from source.
+Prefer to build it yourself? `cargo install --git https://github.com/systm-d/josephine josephine` (Rust 1.85+). On Linux with Homebrew, `brew tap systm-d/josephine https://github.com/systm-d/josephine && brew install josephine` builds from source.
 
 To keep Joséphine watching across reboots, enable the bundled systemd **user** unit:
 
