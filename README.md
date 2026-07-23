@@ -47,32 +47,53 @@ computer.**
 
 ## Installation
 
-Grab a package from the [latest release](https://github.com/systm-d/josephine/releases/latest):
+Every `v*.*.*` tag triggers the [Release](.github/workflows/release.yml)
+workflow, which publishes artifacts for the common Linux targets. Joséphine is
+Linux-native (systemd, `/sys`, `/proc`, libnotify) — there are **no macOS or
+Windows builds**.
+
+| Platform        | Artifact                          |
+| --------------- | --------------------------------- |
+| Linux (generic) | `josephine-linux-x86_64.tar.gz`   |
+| Debian / Ubuntu | `josephine_<version>_amd64.deb`   |
+| Fedora / RHEL   | `josephine-<version>.x86_64.rpm`  |
+| Arch Linux      | AUR — `packaging/aur/PKGBUILD`    |
 
 ```sh
 # Debian / Ubuntu
 sudo dpkg -i josephine_*_amd64.deb
-
 # Fedora / RHEL
 sudo rpm -i josephine-*.x86_64.rpm
 ```
 
-With [Homebrew](https://brew.sh/) on Linux (this repo is a Homebrew tap; builds
-from source, requires Rust):
+### Package managers
+
+**Homebrew** — this repository is a tap (builds from source, requires Rust;
+Linux-only, `depends_on :linux`):
 
 ```sh
 brew tap systm-d/josephine https://github.com/systm-d/josephine
 brew install josephine
 ```
 
-Or, in a `Brewfile`:
+Or pin it in a `Brewfile`:
 
 ```ruby
 tap "systm-d/josephine", "https://github.com/systm-d/josephine"
 brew "josephine"
 ```
 
-Or build from source (requires Rust 1.85+):
+**Arch Linux — AUR:** each release ships a ready-to-use `PKGBUILD`
+([`packaging/aur/PKGBUILD`](packaging/aur/PKGBUILD)):
+
+```sh
+curl -LO https://github.com/systm-d/josephine/releases/latest/download/PKGBUILD
+makepkg -si
+```
+
+### From source
+
+Requires Rust 1.85+.
 
 ```sh
 cargo install --git https://github.com/systm-d/josephine josephine

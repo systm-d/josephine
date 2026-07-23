@@ -9,13 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Homebrew install is now a tap.** The repository ships a discoverable
-  `Formula/josephine.rb`, so install with
+- **Homebrew install is now a tap**, aligned with the `systm-d/claudine`
+  packaging layout. The repository ships a discoverable `Formula/josephine.rb`
+  rendered from the `packaging/homebrew/josephine.rb` template, so install with
   `brew tap systm-d/josephine https://github.com/systm-d/josephine` followed by
   `brew install josephine` (and it works from a `Brewfile`). This replaces
   `brew install …/josephine.rb`, which recent Homebrew rejects — installing a
-  formula from a URL is no longer supported. The release workflow keeps the tap
-  formula pointed at the latest tag on each release.
+  formula from a URL is no longer supported. Joséphine stays Linux-only
+  (`depends_on :linux`): its checks and daemon rely on `/sys`, `/proc`,
+  `systemctl` and `journalctl`, so no macOS/Windows builds are produced.
+- **Release workflow restructured into parallel jobs** (`binaries`, `debian`,
+  `fedora`, `release`, `homebrew`, `crates-io`), mirroring claudine. The
+  `homebrew` job renders and commits `Formula/josephine.rb` on each tag, keeping
+  the tap current. `.deb`/`.rpm`/`.tar.gz` artifacts keep their `.sha256`
+  companions so `josephine update` can still verify downloads.
 
 ### Fixed
 
