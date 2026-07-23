@@ -1,9 +1,8 @@
 class Josephine < Formula
   desc "Your computer's guardian angel — a local Linux system watcher"
   homepage "https://github.com/systm-d/josephine"
-  url "https://github.com/systm-d/josephine/archive/refs/tags/v0.1.0.tar.gz"
-  # Placeholder: release.yml replaces url + sha256 with the real values on tag.
-  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
+  url "https://github.com/systm-d/josephine/archive/refs/tags/v0.9.0.tar.gz"
+  sha256 "eee82ee61a2e13a46fdbb7d9c7fd621a1a1bf93ba40053457af1baa3c3b91a6a"
   license "MIT OR Apache-2.0"
   head "https://github.com/systm-d/josephine.git", branch: "main"
 
