@@ -1,7 +1,7 @@
 # Joséphine — État actuel du code
 
-**Version :** 0.9.0  
-**Dernière mise à jour :** 2026-07-10  
+**Version :** 0.10.0  
+**Dernière mise à jour :** 2026-07-24  
 **Langage :** Rust (workspace Cargo)  
 **Cible :** Linux (Debian 13+ recommandé)
 
@@ -77,6 +77,25 @@ titre de document (« Joséphine — rapport système ») sans en-tête `✦`, p
 éviter un « Joséphine » en double ; `daemon`, `config` et `notify` n'affichent
 aucun en-tête, seulement des lignes de résultat détonées.
 
+### Voix & variété — hommage « ange gardien » (depuis 0.10.0)
+
+Joséphine a désormais un peu de **caractère**, et surtout de la **variété** :
+le module `josephine-core/src/voice.rs` fournit un moteur qui tire au sort une
+formulation parmi plusieurs (toujours **EN + FR**), pour qu'elle ne dise pas la
+même phrase à chaque fois. Sont variés : l'accroche de `status`, la ligne
+« tout va bien », les signatures de `fix`, les lignes de `daemon`, le message
+de `notify test`, et les notifications de **rétablissement**. Règle d'or : la
+variété ne touche que les **lignes de caractère** — les *faits* d'une alerte
+(le nombre, la commande à lancer) restent stables et précis. Le
+**claquement de doigts** (`✧`) est le geste-signature repris par `josephine
+fix` (aide + ligne de clôture).
+
+`doctor` **diagnostique** maintenant vraiment : il ouvre sur un **verdict**
+(rien à signaler / une note ou deux / quelque chose réclame votre attention)
+avant l'examen check par check. `history` s'est réchauffé : accroche 24 h,
+transitions d'état adoucies façon garde (`▲ attention → ● résolu` au lieu de
+`WARNING → RECOVERED`), et une ligne de clôture — le tout bilingue.
+
 ### Démon
 
 - Binaire unique : `josephine --__daemon__` (flag interne)
@@ -90,7 +109,9 @@ aucun en-tête, seulement des lignes de résultat détonées.
 - Anti-spam : pas de notification si l'état ne change pas
 - Messages : module `messages.rs`, ton « chaleur sobre » depuis 0.7.0 —
   direct, calme, rassurant, jamais alarmiste (identité ange gardien
-  conservée, sans mascotte ni emoji)
+  conservée, sans mascotte ni emoji). Depuis 0.10.0, les messages de
+  **rétablissement** sont variés via `voice.rs` (plusieurs formulations
+  EN + FR) ; le **corps des alertes reste stable** (fait + commande)
 - Canal : desktop via `notify-rust` / libnotify
 - `notifications.terminal` : présent en config, **non implémenté**
 
@@ -174,7 +195,7 @@ Commande : `cargo test --workspace`
 | TUI / `watch` | Hors périmètre |
 | Logo ASCII | Retiré au profit d'un en-tête sobre `✦` (0.7.0) ; `banner.txt` personnalisé toujours possible |
 | Notifications | Démon uniquement, pas le CLI interactif |
-| Ton | Bilingue (anglais par défaut, français en option) ; identité ange gardien conservée, sucre visuel retiré — « chaleur sobre » depuis 0.7.0 |
+| Ton | Bilingue (anglais par défaut, français en option) ; identité ange gardien conservée, sucre visuel retiré — « chaleur sobre » depuis 0.7.0 ; **variété + caractère joueur** via `voice.rs` depuis 0.10.0 (lignes de caractère uniquement, faits d'alerte stables) |
 
 ---
 
@@ -186,7 +207,8 @@ crates/josephine-core/src/
   checks/            implémentations
   config.rs          YAML + validation
   rules.rs           moteur d'états
-  messages.rs        textes notifications
+  messages.rs        textes notifications (faits d'alerte, stables)
+  voice.rs           variété des lignes de caractère (EN + FR)
   scheduler.rs       boucle démon + run_all_checks
   storage.rs         SQLite
   daemon.rs          start/stop/status

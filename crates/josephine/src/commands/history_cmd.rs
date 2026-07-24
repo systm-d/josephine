@@ -5,6 +5,7 @@ use josephine_core::config::Config;
 use josephine_core::i18n;
 use josephine_core::paths::Paths;
 use josephine_core::storage::{EventRecord, Storage};
+use josephine_core::voice;
 
 use crate::output::{check_label, sparkline};
 
@@ -34,7 +35,13 @@ pub fn run() -> Result<()> {
     let paths = Paths::new()?;
     let storage = Storage::open(&paths)?;
 
-    crate::output::sober_header(Some(i18n::t("24 h", "24 h")), None);
+    crate::output::sober_header(
+        Some(i18n::t("24 h", "24 h")),
+        Some(i18n::t(
+            "The last 24 hours, at a glance.",
+            "Les dernières 24 heures, d'un coup d'œil.",
+        )),
+    );
 
     let mut trend = Table::new();
     trend.load_preset(UTF8_BORDERS_ONLY);
@@ -76,13 +83,7 @@ pub fn run() -> Result<()> {
 
     let events = storage.recent_events(10)?;
     if events.is_empty() {
-        println!(
-            "{}",
-            i18n::t(
-                "No events — a calm 24 hours.",
-                "Aucun événement — 24 h calmes."
-            )
-        );
+        println!("{}", voice::history_calm());
         return Ok(());
     }
 
@@ -99,12 +100,31 @@ pub fn run() -> Result<()> {
         events_table.add_row(vec![
             Cell::new(event.created_at.format("%H:%M").to_string()),
             Cell::new(check_label(&event.check_name)),
-            Cell::new(format!("{} → {}", event.from_state, event.to_state)),
+            Cell::new(format!(
+                "{} → {}",
+                state_phrase(&event.from_state),
+                state_phrase(&event.to_state)
+            )),
             Cell::new(format_event_value(event)),
         ]);
     }
     println!("{events_table}\n");
+    println!("{}", voice::history_closing());
     Ok(())
+}
+
+/// Soften a stored event state (`NORMAL` / `WARNING` / `CRITICAL` / `RECOVERED`)
+/// into a calm glyph-and-word pair, matching the shape language used across
+/// `status` and `doctor`. Plain glyphs (no colour) so the table stays aligned.
+fn state_phrase(state: &str) -> String {
+    let (glyph, word) = match state {
+        "NORMAL" => ("●", i18n::t("calm", "au calme")),
+        "WARNING" => ("▲", i18n::t("attention", "attention")),
+        "CRITICAL" => ("✕", i18n::t("critical", "critique")),
+        "RECOVERED" => ("●", i18n::t("resolved", "résolu")),
+        other => ("·", other),
+    };
+    format!("{glyph} {word}")
 }
 
 fn fmt_stat(value: f64, unit: &str) -> String {

@@ -10,6 +10,7 @@ pub mod rules;
 pub mod scheduler;
 pub mod storage;
 pub mod update;
+pub mod voice;
 
 pub use check::{Check, CheckResult, Metric, Severity};
 pub use config::Config;

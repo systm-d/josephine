@@ -506,6 +506,7 @@ footer {
   margin-top: 1.6rem;
 }
 .cmd {
+  position: relative;
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
@@ -543,6 +544,33 @@ footer {
 .cmd__d code::before { content: none; }
 .cmd--feat { background: linear-gradient(180deg, rgba(154, 134, 224, 0.09), var(--night-2) 70%); border-color: var(--line-strong); }
 
+/* the finger-snap — Joséphine's signature, tied to `fix` */
+.cmd__snap {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.7rem;
+  font-size: 0.85rem;
+  color: var(--violet-bright);
+  animation: snap 3.4s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes snap {
+  0%, 62%, 100% { opacity: 0.35; transform: scale(0.82) rotate(0deg); }
+  70% { opacity: 1; transform: scale(1.25) rotate(8deg); }
+  82% { opacity: 0.7; transform: scale(0.95) rotate(-4deg); }
+}
+
+/* homage caption under the guardian illustration */
+.how__cap {
+  margin: 0.9rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+  color: var(--dim);
+  text-align: center;
+  text-wrap: balance;
+}
+
 /* ---------- click-to-copy affordance ---------- */
 .copyable { cursor: pointer; position: relative; }
 .container pre.copyable::after {
@@ -573,6 +601,7 @@ footer {
 @media (prefers-reduced-motion: reduce) {
   .button, .cmd, .check { transition: none; }
   .js .reveal { opacity: 1; transform: none; transition: none; }
+  .cmd__snap { animation: none; opacity: 0.6; transform: none; }
 }
 @media (max-width: 48rem) {
   .how { grid-template-columns: 1fr; gap: 1.4rem; }

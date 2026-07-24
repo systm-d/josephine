@@ -27,6 +27,7 @@ Local Linux system guardian. Rust workspace: `josephine-core` (pure logic) +
 |------|------|
 | New check | `crates/josephine-core/src/checks/` + `config.rs` + `messages.rs` |
 | Notification text | `crates/josephine-core/src/messages.rs` (EN + FR) |
+| Varied "voice" lines (greetings, sign-offs, recoveries) | `crates/josephine-core/src/voice.rs` — pools of EN/FR phrasings; **flavour only**, never the facts of an alert |
 | Any user-facing string | wrap in `i18n::t(en, fr)` / `match i18n::lang()` |
 | CLI output | `crates/josephine/src/output/` |
 | CLI command | `crates/josephine/src/commands/` |

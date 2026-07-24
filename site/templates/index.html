@@ -159,7 +159,7 @@ Your machine, watched over.
       <div class="toast__body">
         <div class="toast__meta"><span class="toast__app">Joséphine</span><span class="toast__sev g-ok">{% if fr %}résolu{% else %}resolved{% endif %}</span><span class="toast__time">{% if fr %}il y a 1 h{% else %}1 h ago{% endif %}</span></div>
         <p class="toast__title">{% if fr %}Tout est revenu au vert{% else %}Everything is back to normal{% endif %}</p>
-        <p class="toast__text">{% if fr %}Le disque est redescendu sous le seuil. Rien à faire — je vous tiens au courant.{% else %}Disk dropped back below the threshold. Nothing to do — I'll keep watch.{% endif %}</p>
+        <p class="toast__text">{% if fr %}Le disque est repassé sous le seuil. Vous n'avez même pas eu à lever les yeux — c'est un peu l'idée.{% else %}Disk's back below the threshold. You didn't even have to look up — which is rather the point.{% endif %}</p>
       </div>
     </figure>
   </div>
@@ -173,14 +173,14 @@ Your machine, watched over.
   <h2 id="how">{% if fr %}Des interventions utiles, rien de plus{% else %}Useful interventions, nothing more{% endif %}</h2>
   <p class="section__lede">
     {%- if fr -%}
-    Pas de tableaux de bord. Pas de graphes. Aucune interface à garder ouverte. Une chaîne simple, du matériel jusqu'à un mot que vous pouvez suivre.
+    Pas de tableaux de bord. Pas de graphes. Aucune interface à garder ouverte. On lui a confié une mission — votre machine — et une chaîne toute simple lui suffit : du matériel jusqu'à un mot que vous pouvez suivre.
     {%- else -%}
-    No dashboards. No graphs. No monitoring UI to keep open. One simple chain, from the hardware to a word you can act on.
+    No dashboards. No graphs. No monitoring UI to keep open. She was sent here with one assignment — your machine — and a simple chain is all she needs: from the hardware to a word you can act on.
     {%- endif -%}
   </p>
 
   <div class="how">
-    <div class="how__art">{{ m::guardian() }}</div>
+    <figure class="how__art">{{ m::guardian() }}<figcaption class="how__cap">{% if fr %}Envoyée veiller sur une machine. La vôtre.{% else %}Sent to watch over one machine. Yours.{% endif %}</figcaption></figure>
     <div class="flow" role="list">
       <div class="flow__node" role="listitem"><span class="flow__k">{% if fr %}Votre machine{% else %}Your machine{% endif %}</span><span class="flow__v">/proc · /sys · systemd · journal</span></div>
       <div class="flow__arrow" aria-hidden="true">↓</div>
@@ -203,9 +203,9 @@ Your machine, watched over.
   <h2 id="checks">{% if fr %}Quatorze signes vitaux{% else %}Fourteen vital signs{% endif %}</h2>
   <p class="section__lede">
     {%- if fr -%}
-    Chaque contrôle est indépendant, configurable, et lu directement dans le noyau et <code>/sys</code>. Ensemble, ils couvrent les manières lentes et discrètes dont une machine dérive.
+    Comme elle le voit, on l'a envoyée ici pour une mission — votre machine — alors elle ne fait pas les choses à moitié : quatorze contrôles, chacun indépendant, configurable, et lu directement dans le noyau et <code>/sys</code>. Ensemble, ils couvrent les manières lentes et discrètes dont une machine dérive.
     {%- else -%}
-    Each check is independent, configurable, and read straight from the kernel and <code>/sys</code>. Together they cover the slow, quiet ways a machine drifts.
+    The way she sees it, she was sent here for one job — your machine — so she doesn't cut corners: fourteen checks, each independent, configurable, and read straight from the kernel and <code>/sys</code>. Together they cover the slow, quiet ways a machine drifts.
     {%- endif -%}
   </p>
 
@@ -284,7 +284,7 @@ Your machine, watched over.
     <div class="cmd cmd--feat"><span class="cmd__ic">{{ m::icon(name="smart") }}</span><code>doctor</code><span class="cmd__d">{% if fr %}Diagnostic détaillé, contrôle par contrôle{% else %}Detailed diagnosis, check by check{% endif %}</span></div>
     <div class="cmd cmd--feat"><span class="cmd__ic">{{ m::icon(name="history") }}</span><code>history</code><span class="cmd__d">{% if fr %}Tendances sur 24 h, min / moy / max{% else %}24-hour trends, min / avg / max{% endif %}</span></div>
     <div class="cmd cmd--feat"><span class="cmd__ic">{{ m::icon(name="clean") }}</span><code>clean</code><span class="cmd__d">{% if fr %}Récupérer de l'espace disque{% else %}Reclaim disk space{% endif %}</span></div>
-    <div class="cmd cmd--feat"><span class="cmd__ic">{{ m::icon(name="fix") }}</span><code>fix</code><span class="cmd__d">{% if fr %}Remédiation guidée, pas à pas{% else %}Guided, step-by-step remediation{% endif %}</span></div>
+    <div class="cmd cmd--feat cmd--snap"><span class="cmd__ic">{{ m::icon(name="fix") }}</span><span class="cmd__snap" aria-hidden="true">✧</span><code>fix</code><span class="cmd__d">{% if fr %}Son claquement de doigts : remédiation guidée, pas à pas{% else %}Her finger-snap: guided remediation, one step at a time{% endif %}</span></div>
     <div class="cmd"><span class="cmd__ic">{{ m::icon(name="status") }}</span><code>status</code><span class="cmd__d">{% if fr %}Résumé d'un écran de chaque contrôle{% else %}One-screen summary of every check{% endif %}</span></div>
     <div class="cmd"><span class="cmd__ic">{{ m::icon(name="report") }}</span><code>report</code><span class="cmd__d">{% if fr %}Rapport texte daté (<code>--json</code>){% else %}Dated plain-text report (<code>--json</code>){% endif %}</span></div>
     <div class="cmd"><span class="cmd__ic">{{ m::icon(name="explain") }}</span><code>explain</code><span class="cmd__d">{% if fr %}Ce que surveille chaque contrôle{% else %}What each check watches, and why{% endif %}</span></div>

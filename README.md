@@ -30,12 +30,15 @@ computer.**
   inode usage, SMART disk health (opt-in), kernel incidents (OOM / oops),
   read-only filesystem remounts, NTP clock sync and recent failed logins.
 - **Warm notifications** — plain-language desktop alerts that escalate only when
-  it helps; never `ERROR` / `FATAL` / `PANIC`.
+  it helps; never `ERROR` / `FATAL` / `PANIC`. She varies her phrasing so it
+  never feels canned — while the facts (the number, the command) stay exact.
 - **Background daemon** — a lightweight systemd *user* service that watches
   continuously and records a rolling **24-hour history** (local SQLite).
 - **At-a-glance `status`** — colour-coded summary with a **customizable banner**.
-- **Detailed `doctor`** — check-by-check diagnostics; `--verbose` adds thresholds,
-  the top 10 processes and each check's collection interval.
+- **Detailed `doctor`** — opens with a plain verdict (clean bill of health, a
+  note or two, or something that needs you now), then check-by-check
+  diagnostics; `--verbose` adds thresholds, the top 10 processes and each
+  check's collection interval.
 - **`explain`** — what each check watches, why it matters, and how to act.
 - **Self-update** — `josephine update` checks GitHub Releases and installs the
   package matching your install (`.deb` / `.rpm`); reaches the network only when

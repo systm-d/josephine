@@ -9,9 +9,10 @@ use josephine_core::check::Severity;
 use josephine_core::config::Config;
 use josephine_core::i18n;
 use josephine_core::scheduler::run_all_checks;
+use josephine_core::voice;
 
 pub fn run() -> Result<()> {
-    crate::output::sober_header(Some(i18n::t("fix", "fix")), None);
+    crate::output::sober_header(Some(i18n::t("fix", "fix")), Some(voice::fix_tagline()));
     let mut findings = 0;
 
     // 1. Failed systemd units.
@@ -73,21 +74,9 @@ pub fn run() -> Result<()> {
 
     println!();
     if findings == 0 {
-        println!(
-            "{}",
-            i18n::t(
-                "Nothing to fix — the machine is in good shape.",
-                "Rien à réparer — la machine va bien.",
-            )
-        );
+        println!("{}", voice::fix_all_good());
     } else {
-        println!(
-            "{}",
-            i18n::t(
-                "These moves stay in your hands: I show the way, you keep the wheel.",
-                "Ces gestes restent entre vos mains : je montre le chemin, vous gardez le volant.",
-            )
-        );
+        println!("{}", voice::fix_hands_off());
     }
     Ok(())
 }
