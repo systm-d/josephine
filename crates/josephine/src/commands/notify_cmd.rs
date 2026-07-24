@@ -5,6 +5,7 @@ use anyhow::Result;
 use clap::Subcommand;
 use josephine_core::i18n;
 use josephine_core::notify;
+use josephine_core::voice;
 
 #[derive(Subcommand)]
 pub enum NotifyAction {
@@ -15,10 +16,7 @@ pub enum NotifyAction {
 pub fn run(action: NotifyAction) -> Result<()> {
     match action {
         NotifyAction::Test => {
-            notify::send_josephine(i18n::t(
-                "Hello — if you can read this, desktop notifications are working.",
-                "Bonjour — si vous lisez ceci, les notifications de bureau fonctionnent.",
-            ))?;
+            notify::send_josephine(voice::notify_test_body())?;
             println!(
                 "{}",
                 i18n::t(

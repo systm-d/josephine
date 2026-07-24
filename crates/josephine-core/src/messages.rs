@@ -5,6 +5,7 @@ use crate::check::Metric;
 use crate::config::CheckThresholds;
 use crate::i18n::Lang;
 use crate::rules::AlertState;
+use crate::voice;
 
 pub fn alert_message(
     check_name: &str,
@@ -47,34 +48,48 @@ pub fn alert_message(
 
 pub fn recovery_message(check_name: &str, metric: &Metric, lang: Lang) -> String {
     match check_name {
-        "cpu" => match lang {
-            Lang::En => "Your processor is breathing again — CPU load is back to normal.".into(),
-            Lang::Fr => {
+        "cpu" => match (voice::index(2), lang) {
+            (0, Lang::En) => {
+                "Your processor is breathing again — CPU load is back to normal.".into()
+            }
+            (_, Lang::En) => {
+                "Your processor is breathing easy again — load is back to normal.".into()
+            }
+            (0, Lang::Fr) => {
                 "Votre processeur respire à nouveau — la charge CPU est revenue à la normale."
                     .into()
+            }
+            (_, Lang::Fr) => {
+                "Votre processeur respire, enfin — la charge est revenue à la normale.".into()
             }
         },
         "memory" if metric.name == "swap_percent" => match lang {
             Lang::En => format!("Swap is back to normal ({:.0} %).", metric.value),
             Lang::Fr => format!("Le swap est revenu à la normale ({:.0} %).", metric.value),
         },
-        "memory" => match lang {
-            Lang::En => format!("Memory usage is back to normal ({:.0} %).", metric.value),
-            Lang::Fr => format!(
+        "memory" => match (voice::index(2), lang) {
+            (0, Lang::En) => format!("Memory usage is back to normal ({:.0} %).", metric.value),
+            (_, Lang::En) => format!("Memory has room to breathe again ({:.0} %).", metric.value),
+            (0, Lang::Fr) => format!(
                 "L'utilisation mémoire est revenue à la normale ({:.0} %).",
                 metric.value
             ),
+            (_, Lang::Fr) => format!("La mémoire respire de nouveau ({:.0} %).", metric.value),
         },
-        "disk" => match lang {
-            Lang::En => format!("Your disk has room again ({:.0} %).", metric.value),
-            Lang::Fr => format!(
+        "disk" => match (voice::index(2), lang) {
+            (0, Lang::En) => format!("Your disk has room again ({:.0} %).", metric.value),
+            (_, Lang::En) => format!("Breathing room back on the disk ({:.0} %).", metric.value),
+            (0, Lang::Fr) => format!(
                 "Votre disque a de nouveau de la place ({:.0} %).",
                 metric.value
             ),
+            (_, Lang::Fr) => format!("Le disque a repris de l'air ({:.0} %).", metric.value),
         },
-        "temperature" => match lang {
-            Lang::En => format!("The temperature is coming down ({:.0} °C).", metric.value),
-            Lang::Fr => format!("La température redescend ({:.0} °C).", metric.value),
+        "temperature" => match (voice::index(2), lang) {
+            (0, Lang::En) => format!("The temperature is coming down ({:.0} °C).", metric.value),
+            (_, Lang::En) => format!("Things are cooling off nicely ({:.0} °C).", metric.value),
+            (0, Lang::Fr) => format!("La température redescend ({:.0} °C).", metric.value),
+            (_, Lang::Fr) => format!("Ça se rafraîchit gentiment ({:.0} °C).", metric.value),
         },
         "systemd" if metric.name == "failed_units" => match lang {
             Lang::En => "All your services are back up.".into(),
@@ -90,18 +105,28 @@ pub fn recovery_message(check_name: &str, metric: &Metric, lang: Lang) -> String
                 metric.value
             ),
         },
-        "updates" => match lang {
-            Lang::En => "Everything is up to date.".into(),
-            Lang::Fr => "Tout est à jour.".into(),
+        "updates" => match (voice::index(2), lang) {
+            (0, Lang::En) => "Everything is up to date.".into(),
+            (_, Lang::En) => "All caught up — nothing pending.".into(),
+            (0, Lang::Fr) => "Tout est à jour.".into(),
+            (_, Lang::Fr) => "Vous êtes à jour — plus rien en attente.".into(),
         },
-        "network" => match lang {
-            Lang::En => "The network is back, stable and steady.".into(),
-            Lang::Fr => "Le réseau est revenu, stable et constant.".into(),
+        "network" => match (voice::index(2), lang) {
+            (0, Lang::En) => "The network is back, stable and steady.".into(),
+            (_, Lang::En) => "Your link is back on its feet.".into(),
+            (0, Lang::Fr) => "Le réseau est revenu, stable et constant.".into(),
+            (_, Lang::Fr) => "Le lien réseau a retrouvé ses esprits.".into(),
         },
-        "battery" => match lang {
-            Lang::En => "Your battery is back to a healthy level (or you're plugged in).".into(),
-            Lang::Fr => {
+        "battery" => match (voice::index(2), lang) {
+            (0, Lang::En) => {
+                "Your battery is back to a healthy level (or you're plugged in).".into()
+            }
+            (_, Lang::En) => "Battery's happy again (or you found a socket).".into(),
+            (0, Lang::Fr) => {
                 "Votre batterie est revenue à un niveau sain (ou vous êtes branché).".into()
+            }
+            (_, Lang::Fr) => {
+                "La batterie a repris des couleurs (ou vous avez trouvé une prise).".into()
             }
         },
         "inode" => match lang {

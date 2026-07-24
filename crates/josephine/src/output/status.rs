@@ -1,16 +1,11 @@
 use josephine_core::check::{CheckResult, Severity};
 use josephine_core::i18n;
+use josephine_core::voice;
 
 use super::style::{format_metric_value, primary_metric};
 
 pub fn print_status_table(results: &[CheckResult]) {
-    super::style::sober_header(
-        None,
-        Some(i18n::t(
-            "Your machine, watched over.",
-            "Votre machine, sous bonne garde.",
-        )),
-    );
+    super::style::sober_header(None, Some(voice::status_tagline()));
     let rows = build_rows(results);
     let label_w = rows
         .iter()
@@ -107,7 +102,7 @@ fn print_row(row: &Row, label_w: usize) {
 fn footer_message(count: usize) -> String {
     use josephine_core::i18n::{self, Lang};
     if count == 0 {
-        return i18n::t("All clear.", "Tout est au vert.").to_string();
+        return voice::all_clear().to_string();
     }
     match i18n::lang() {
         Lang::En => format!(
@@ -152,7 +147,8 @@ mod tests {
         use josephine_core::i18n::{self, Lang};
         let prev = i18n::lang();
         i18n::set_lang(Lang::En);
-        assert_eq!(footer_message(0), "All clear.");
+        // The zero-issue line is varied (voice::all_clear); just assert it speaks up.
+        assert!(!footer_message(0).is_empty());
         assert!(footer_message(1).starts_with("1 thing to look at"));
         assert!(footer_message(3).starts_with("3 things to look at"));
         i18n::set_lang(prev);

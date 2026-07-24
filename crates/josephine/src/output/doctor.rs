@@ -1,16 +1,31 @@
+use colored::Colorize;
 use josephine_core::check::{CheckResult, Metric, Severity};
 use josephine_core::checks::interval_for_check;
 use josephine_core::config::Config;
 use josephine_core::i18n;
+use josephine_core::voice;
 
 use super::bars::{BAR_WIDTH, bar_plain};
 use super::style::{check_label, format_metric_value, metric_scale, primary_metric};
 
 pub fn print_doctor(results: &[CheckResult], config: &Config, verbose: bool) {
+    let worst = results
+        .iter()
+        .map(CheckResult::worst_severity)
+        .max()
+        .unwrap_or(Severity::Info);
+    // Lead with the diagnosis (the verdict), then the count, then the exam.
     super::style::sober_header(
         Some(i18n::t("diagnostic", "diagnostic")),
-        Some(&summary_line(results)),
+        Some(voice::doctor_verdict(worst)),
     );
+    let summary = summary_line(results);
+    if super::style::is_tty() {
+        println!(" {}", summary.dimmed());
+    } else {
+        println!(" {summary}");
+    }
+    println!();
     for result in results {
         print_check_block(result, config, verbose);
     }

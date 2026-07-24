@@ -7,8 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-07-24
+
+### Added
+
+- **Joséphine has more of a voice.** A small variety engine
+  (`josephine-core/src/voice.rs`) means she no longer says things the exact
+  same way every time: greetings, the "all clear" line, the `fix` sign-offs,
+  the `daemon` status lines, the `notify test` message and the recovery
+  notifications now rotate through several English **and** French phrasings.
+  The *facts* of an alert — the number, the command to run — stay stable and
+  precise; only the personality lines vary. A quiet, affectionate nod to
+  *Joséphine, ange gardien*.
+- **`doctor` now diagnoses.** It opens with a plain verdict — a clean bill of
+  health, a note or two, or something that needs you now — before the
+  check-by-check exam, living up to its name rather than merely inspecting.
+- **The finger-snap.** `josephine fix` leans into Joséphine's signature
+  gesture, in both its help text and its closing line (`✧`).
+
 ### Changed
 
+- **`history` reads warmer.** A 24-hour tagline, guardian-style state
+  transitions (`▲ attention → ● resolved` rather than `WARNING → RECOVERED`)
+  and a closing line, in both languages.
 - **Homebrew install is now a tap**, aligned with the `systm-d/claudine`
   packaging layout. The repository ships a discoverable `Formula/josephine.rb`
   rendered from the `packaging/homebrew/josephine.rb` template, so install with
@@ -26,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Desktop-notification error context is now bilingual (it was French-only).
 - Homebrew formula now builds the binary crate explicitly
   (`--path crates/josephine`); the previous default targeted the virtual
   workspace root and would fail to install.

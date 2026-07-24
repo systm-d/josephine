@@ -2,6 +2,7 @@ use anyhow::Result;
 use clap::Subcommand;
 use josephine_core::daemon::{DaemonControl, DaemonStatus};
 use josephine_core::i18n;
+use josephine_core::voice;
 
 #[derive(Subcommand)]
 pub enum DaemonAction {
@@ -26,33 +27,15 @@ pub async fn run(action: DaemonAction) -> Result<()> {
     match action {
         DaemonAction::Start => {
             control.start()?;
-            println!(
-                "{}",
-                i18n::t(
-                    "Daemon started — on watch, eyes open. Go about your day.",
-                    "Démon démarré — de garde, l'œil ouvert. Vaquez tranquille.",
-                )
-            );
+            println!("{}", voice::daemon_started());
         }
         DaemonAction::Stop => {
             control.stop()?;
-            println!(
-                "{}",
-                i18n::t(
-                    "Daemon stopped. Call me at the slightest trouble.",
-                    "Démon arrêté. Appelez-moi au moindre souci.",
-                )
-            );
+            println!("{}", voice::daemon_stopped());
         }
         DaemonAction::Restart => {
             control.restart()?;
-            println!(
-                "{}",
-                i18n::t(
-                    "Daemon restarted — back on watch.",
-                    "Démon redémarré — de nouveau de garde.",
-                )
-            );
+            println!("{}", voice::daemon_restarted());
         }
         DaemonAction::Status => match control.status()? {
             DaemonStatus::Running { pid, started_at } => {
@@ -75,13 +58,7 @@ pub async fn run(action: DaemonAction) -> Result<()> {
             }
             DaemonStatus::Stopped => {
                 println!("{}", i18n::t("State: stopped.", "État : arrêté."));
-                println!(
-                    "{}",
-                    i18n::t(
-                        "A `josephine daemon start` and I'm back on guard.",
-                        "Un `josephine daemon start` et je reprends la garde.",
-                    )
-                );
+                println!("{}", voice::daemon_back_on_guard());
             }
         },
         DaemonAction::Logs => {

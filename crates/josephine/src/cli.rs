@@ -58,7 +58,7 @@ enum Commands {
         #[arg(long)]
         apply: bool,
     },
-    /// Guided fixes: what's wrong and how to remedy it
+    /// Guided fixes: what's wrong and how to set it right — her finger-snap
     Fix,
     /// Explain what each check watches, and how to act
     Explain {
@@ -97,17 +97,10 @@ enum Commands {
 
 /// Entry point: parse, dispatch, and map errors to a process exit code.
 pub async fn run() -> ExitCode {
-    use josephine_core::i18n::{self, Lang};
     match dispatch().await {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
-            eprintln!(
-                "{}",
-                match i18n::lang() {
-                    Lang::En => format!("✦ Joséphine ran into a snag: {e}"),
-                    Lang::Fr => format!("✦ Joséphine a rencontré un souci : {e}"),
-                }
-            );
+            eprintln!("{} {e}", josephine_core::voice::error_lead());
             ExitCode::from(1)
         }
     }
@@ -128,7 +121,7 @@ fn localize_help_fr(command: clap::Command) -> clap::Command {
             c.about("Espace disque récupérable (aperçu par défaut)")
         })
         .mut_subcommand("fix", |c| {
-            c.about("Réparations guidées : ce qui ne va pas et comment y remédier")
+            c.about("Réparations guidées : ce qui cloche et comment y remédier — son claquement de doigts")
         })
         .mut_subcommand("explain", |c| {
             c.about("Expliquer ce que chaque check surveille et comment agir")
