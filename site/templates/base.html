@@ -6,6 +6,9 @@
     <title>{% block title %}{{ config.title }}{% endblock title %}</title>
     <meta name="description" content="{{ config.description }}" />
     <meta name="theme-color" content="#0b0e19" />
+    <link rel="icon" href="{{ get_url(path='favicon.svg') }}" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="{{ get_url(path='favicon.svg') }}" />
+    <script>document.documentElement.className += " js";</script>
     <link rel="stylesheet" href="{{ get_url(path='main.css') }}" />
   </head>
   <body>
@@ -13,8 +16,14 @@
     <div class="halo" aria-hidden="true"></div>
     {% block content %}{% endblock content %}
     <footer>
-      100% local <span class="sep">·</span> Linux <span class="sep">·</span> open source
-      <span class="sep">·</span> <a href="{{ config.extra.repo_url }}">GitHub</a>
+      <p class="foot__mark"><span class="star">✦</span> 100% local <span class="sep">·</span> Linux <span class="sep">·</span> {% if lang == 'fr' %}open source{% else %}open source{% endif %}</p>
+      <nav class="foot__nav" aria-label="{% if lang == 'fr' %}Liens{% else %}Links{% endif %}">
+        <a href="{{ config.extra.repo_url }}">GitHub</a>
+        <a href="{{ config.extra.repo_url }}#documentation">{% if lang == 'fr' %}Documentation{% else %}Documentation{% endif %}</a>
+        <a href="{{ config.extra.repo_url }}/releases">{% if lang == 'fr' %}Versions{% else %}Releases{% endif %}</a>
+        <a href="{{ config.extra.repo_url }}/blob/main/docs/ROADMAP.md">{% if lang == 'fr' %}Feuille de route{% else %}Roadmap{% endif %}</a>
+        <a href="{{ config.extra.repo_url }}#license">{% if lang == 'fr' %}Licence — MIT / Apache-2.0{% else %}License — MIT / Apache-2.0{% endif %}</a>
+      </nav>
     </footer>
     <script>
       (function () {
@@ -54,6 +63,51 @@
         window.addEventListener("resize", resize, { passive: true });
         resize();
         requestAnimationFrame(draw);
+      })();
+    </script>
+    <script>
+      /* Gentle reveal-on-scroll — enhancement only, never hides content
+         without JS, and stays still when reduced motion is requested. */
+      (function () {
+        var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var items = [].slice.call(document.querySelectorAll(".reveal"));
+        if (reduce || !("IntersectionObserver" in window)) {
+          items.forEach(function (el) { el.classList.add("is-in"); });
+          return;
+        }
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); }
+          });
+        }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+        items.forEach(function (el) { io.observe(el); });
+      })();
+
+      /* Click any command/code block to copy it. Quiet, keyboard-friendly. */
+      (function () {
+        var labelCopy = document.documentElement.lang === "fr" ? "Copié" : "Copied";
+        function attach(el, text) {
+          el.classList.add("copyable");
+          el.setAttribute("tabindex", "0");
+          el.setAttribute("role", "button");
+          var base = document.documentElement.lang === "fr" ? "Cliquer pour copier" : "Click to copy";
+          el.setAttribute("aria-label", base + ": " + text);
+          function copy() {
+            var done = function () {
+              el.classList.add("copied");
+              el.setAttribute("data-copied", labelCopy);
+              setTimeout(function () { el.classList.remove("copied"); }, 1200);
+            };
+            if (navigator.clipboard) { navigator.clipboard.writeText(text).then(done, function () {}); }
+          }
+          el.addEventListener("click", copy);
+          el.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); copy(); }
+          });
+        }
+        [].slice.call(document.querySelectorAll(".toast__cmd, .cmd code, .container pre")).forEach(function (el) {
+          attach(el, el.textContent.trim());
+        });
       })();
     </script>
   </body>

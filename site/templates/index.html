@@ -1,6 +1,8 @@
 {% extends "base.html" %}
+{% import "macros.html" as m %}
 {% block title %}Joséphine — {{ section.extra.tagline }}{% endblock title %}
 {% block content %}
+{% set fr = lang == 'fr' %}
 <header>
   <div class="wrap">
     <div class="topbar">
@@ -21,10 +23,17 @@
       <a class="button button--primary" href="#install">{{ section.extra.cta2 }}</a>
       <a class="button" href="{{ config.extra.repo_url }}">{{ section.extra.cta }}</a>
     </div>
+    <ul class="trust" aria-label="{% if fr %}Principes{% else %}Principles{% endif %}">
+      <li>{% if fr %}Pas de cloud{% else %}No cloud{% endif %}</li>
+      <li>{% if fr %}Pas de télémétrie{% else %}No telemetry{% endif %}</li>
+      <li>{% if fr %}Pas de compte{% else %}No account{% endif %}</li>
+      <li>{% if fr %}Écrite en Rust{% else %}Written in Rust{% endif %}</li>
+      <li>MIT / Apache-2.0</li>
+    </ul>
 
     <div class="term" role="img" aria-label="{{ section.extra.readout_alt }}">
       <div class="term__bar"><span class="term__dot"></span><span class="term__dot"></span><span class="term__dot"></span><span class="term__title">josephine</span></div>
-{% if lang == 'fr' -%}
+{% if fr -%}
 <pre>
 <span class="dim">✦ Joséphine                                    14:40</span>
 Votre machine, sous bonne garde.
@@ -66,6 +75,227 @@ Your machine, watched over.
 </header>
 
 <main class="container">
-  {{ section.content | safe }}
+
+{# ============================ WHY SHE EXISTS ============================ #}
+<section class="reveal" aria-labelledby="why">
+  <p class="eyebrow">{% if fr %}Pourquoi elle existe{% else %}Why she exists{% endif %}</p>
+  <h2 id="why">{% if fr %}Les problèmes n'arrivent pas d'un coup{% else %}Problems don't arrive all at once{% endif %}</h2>
+  <p class="section__lede">
+    {%- if fr -%}
+    Ils s'installent lentement. Un disque se remplit d'un pour-cent à la fois. Un SSD accumule des secteurs réalloués pendant des semaines avant de lâcher. Un service s'arrête mardi, vous le voyez vendredi. <code>htop</code>, <code>smartctl</code> et <code>journalctl</code> vous montrent l'instant où vous regardez. Joséphine surveille les signaux lents que vous ne regardez pas — et vous prévient pendant qu'il est encore tôt.
+    {%- else -%}
+    They creep in. A disk fills a percent at a time. An SSD sheds reallocated sectors for weeks before it fails. A service dies on Tuesday; you notice on Friday. <code>htop</code>, <code>smartctl</code> and <code>journalctl</code> show you the moment you look. Joséphine watches the slow-moving signals you don't — and speaks up while it's still early.
+    {%- endif -%}
+  </p>
+
+  <div class="compare">
+    <div class="compare__col compare__col--without">
+      <p class="compare__head"><span class="compare__tag">{% if fr %}Sans elle{% else %}Without her{% endif %}</span> {% if fr %}le jour où ça vous rattrape{% else %}the day it catches up with you{% endif %}</p>
+      <ul>
+        <li><span class="g-crit" aria-hidden="true">✕</span> {% if fr %}Le disque se remplit en plein build — et le build meurt à 3 h du matin.{% else %}The disk fills mid-build — and the build dies at 3 a.m.{% endif %}</li>
+        <li><span class="g-crit" aria-hidden="true">✕</span> {% if fr %}Le SSD logue des erreurs SMART depuis des semaines — vous l'apprenez quand un fichier ne s'ouvre plus.{% else %}An SSD logged SMART errors for weeks — you find out when a file won't open.{% endif %}</li>
+        <li><span class="g-crit" aria-hidden="true">✕</span> {% if fr %}Un service s'est arrêté hier ; vous le voyez quand ce qui en dépend casse.{% else %}A service stopped yesterday; you notice when something downstream breaks.{% endif %}</li>
+        <li><span class="g-crit" aria-hidden="true">✕</span> {% if fr %}Le ventilateur hurle depuis des heures sous un process emballé.{% else %}The fan has been screaming for hours under a runaway process.{% endif %}</li>
+        <li><span class="g-crit" aria-hidden="true">✕</span> {% if fr %}Les mises à jour s'accumulent depuis des mois — dont le correctif de sécurité qu'il fallait.{% else %}Updates have piled up for months — including the security fix you needed.{% endif %}</li>
+      </ul>
+    </div>
+    <div class="compare__col compare__col--with">
+      <p class="compare__head"><span class="compare__tag compare__tag--with">{% if fr %}Avec elle{% else %}With her{% endif %}</span> {% if fr %}un mot discret, des jours plus tôt{% else %}a quiet word, days earlier{% endif %}</p>
+      <ul>
+        <li><span class="g-ok" aria-hidden="true">●</span> {% if fr %}« Disque à 85 % sur / et ça grimpe. Voici ce qui prend la place. »{% else %}“Disk at 85% on / and climbing. Here's what's taking the room.”{% endif %}</li>
+        <li><span class="g-ok" aria-hidden="true">●</span> {% if fr %}« SMART signale des secteurs réalloués sur nvme0. Sauvegardez ce disque bientôt. »{% else %}“SMART reports reallocated sectors on nvme0. Back this disk up soon.”{% endif %}</li>
+        <li><span class="g-ok" aria-hidden="true">●</span> {% if fr %}« nginx.service est en échec depuis 14:02. Je vous montre les derniers logs ? »{% else %}“nginx.service has been failed since 14:02. Want the last log lines?”{% endif %}</li>
+        <li><span class="g-ok" aria-hidden="true">●</span> {% if fr %}« CPU bloqué à 97 % depuis 20 min. Rien de cassé — mais le voici. »{% else %}“CPU pinned at 97% for 20 min. Nothing's broken yet — but here it is.”{% endif %}</li>
+        <li><span class="g-ok" aria-hidden="true">●</span> {% if fr %}« 42 mises à jour en attente, 3 de sécurité. Pas d'urgence — mais gardez-les en tête. »{% else %}“42 updates pending, 3 security. No rush — but you'll want these.”{% endif %}</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+{# ============================ NOTIFICATIONS ============================ #}
+<section class="reveal" aria-labelledby="notes">
+  <p class="eyebrow">{% if fr %}Notifications{% else %}Notifications{% endif %}</p>
+  <h2 id="notes">{% if fr %}Ce que vous voyez vraiment{% else %}What you'll actually see{% endif %}</h2>
+  <p class="section__lede">
+    {%- if fr -%}
+    Pas de tableau de bord à surveiller. Juste une notification desktop native, quand ça compte — en clair, sans dramatisation, et toujours la commande exacte pour aller plus loin.
+    {%- else -%}
+    No dashboard to keep watching. Just a native desktop notification, when it matters — plain-language, never alarmist, and always the exact command to go deeper.
+    {%- endif -%}
+  </p>
+
+  <div class="toasts">
+    <figure class="toast toast--warn">
+      <span class="toast__icon" aria-hidden="true">✦</span>
+      <div class="toast__body">
+        <div class="toast__meta"><span class="toast__app">Joséphine</span><span class="toast__sev g-warn">{% if fr %}attention{% else %}attention{% endif %}</span><span class="toast__time">{% if fr %}à l'instant{% else %}now{% endif %}</span></div>
+        <p class="toast__title">{% if fr %}Disque à 90 % sur /{% else %}Disk usage reached 90% on /{% endif %}</p>
+        <p class="toast__text">{% if fr %}L'espace se remplit. Regardez ce qui prend la place :{% else %}Storage is filling up. See what's taking the room:{% endif %}</p>
+        <code class="toast__cmd">josephine doctor</code>
+      </div>
+    </figure>
+    <figure class="toast toast--crit">
+      <span class="toast__icon" aria-hidden="true">✦</span>
+      <div class="toast__body">
+        <div class="toast__meta"><span class="toast__app">Joséphine</span><span class="toast__sev g-crit">{% if fr %}critique{% else %}critical{% endif %}</span><span class="toast__time">{% if fr %}il y a 2 min{% else %}2 min ago{% endif %}</span></div>
+        <p class="toast__title">{% if fr %}SMART : secteurs réalloués sur nvme0{% else %}SMART detected reallocated sectors on nvme0{% endif %}</p>
+        <p class="toast__text">{% if fr %}Ce disque montre des signes d'usure. Sauvegardez-le bientôt.{% else %}This disk is showing wear. You should back it up soon.{% endif %}</p>
+        <code class="toast__cmd">josephine explain smart</code>
+      </div>
+    </figure>
+    <figure class="toast toast--crit">
+      <span class="toast__icon" aria-hidden="true">✦</span>
+      <div class="toast__body">
+        <div class="toast__meta"><span class="toast__app">Joséphine</span><span class="toast__sev g-crit">{% if fr %}critique{% else %}critical{% endif %}</span><span class="toast__time">{% if fr %}il y a 9 min{% else %}9 min ago{% endif %}</span></div>
+        <p class="toast__title">{% if fr %}nginx.service s'est arrêté{% else %}nginx.service has stopped{% endif %}</p>
+        <p class="toast__text">{% if fr %}En échec depuis 14:02. La remédiation guidée peut le relancer :{% else %}Failed since 14:02. Guided remediation can bring it back:{% endif %}</p>
+        <code class="toast__cmd">josephine fix</code>
+      </div>
+    </figure>
+    <figure class="toast toast--ok">
+      <span class="toast__icon" aria-hidden="true">✦</span>
+      <div class="toast__body">
+        <div class="toast__meta"><span class="toast__app">Joséphine</span><span class="toast__sev g-ok">{% if fr %}résolu{% else %}resolved{% endif %}</span><span class="toast__time">{% if fr %}il y a 1 h{% else %}1 h ago{% endif %}</span></div>
+        <p class="toast__title">{% if fr %}Tout est revenu au vert{% else %}Everything is back to normal{% endif %}</p>
+        <p class="toast__text">{% if fr %}Le disque est redescendu sous le seuil. Rien à faire — je vous tiens au courant.{% else %}Disk dropped back below the threshold. Nothing to do — I'll keep watch.{% endif %}</p>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<hr class="divider" />
+
+{# ============================ HOW SHE WORKS ============================ #}
+<section class="reveal" aria-labelledby="how">
+  <p class="eyebrow">{% if fr %}Comment elle fonctionne{% else %}How she works{% endif %}</p>
+  <h2 id="how">{% if fr %}Des interventions utiles, rien de plus{% else %}Useful interventions, nothing more{% endif %}</h2>
+  <p class="section__lede">
+    {%- if fr -%}
+    Pas de tableaux de bord. Pas de graphes. Aucune interface à garder ouverte. Une chaîne simple, du matériel jusqu'à un mot que vous pouvez suivre.
+    {%- else -%}
+    No dashboards. No graphs. No monitoring UI to keep open. One simple chain, from the hardware to a word you can act on.
+    {%- endif -%}
+  </p>
+
+  <div class="how">
+    <div class="how__art">{{ m::guardian() }}</div>
+    <div class="flow" role="list">
+      <div class="flow__node" role="listitem"><span class="flow__k">{% if fr %}Votre machine{% else %}Your machine{% endif %}</span><span class="flow__v">/proc · /sys · systemd · journal</span></div>
+      <div class="flow__arrow" aria-hidden="true">↓</div>
+      <div class="flow__node flow__node--wide" role="listitem"><span class="flow__k">{% if fr %}14 contrôles indépendants{% else %}14 independent health checks{% endif %}</span><span class="flow__v">{% if fr %}lus localement, jamais envoyés{% else %}read locally, never sent{% endif %}</span></div>
+      <div class="flow__arrow" aria-hidden="true">↓</div>
+      <div class="flow__node" role="listitem"><span class="flow__k">{% if fr %}Moteur de décision{% else %}Decision engine{% endif %}</span><span class="flow__v">{% if fr %}gravité · dé-duplication · anti-spam{% else %}severity · de-dupe · rate-limit{% endif %}</span></div>
+      <div class="flow__arrow" aria-hidden="true">↓</div>
+      <div class="flow__node" role="listitem"><span class="flow__k">{% if fr %}Une notification humaine{% else %}A human-friendly notification{% endif %}</span><span class="flow__v">{% if fr %}calme, en clair, jamais ERROR/FATAL{% else %}calm, plain-language, never ERROR/FATAL{% endif %}</span></div>
+      <div class="flow__arrow" aria-hidden="true">↓</div>
+      <div class="flow__node flow__node--cmd" role="listitem"><span class="flow__k">{% if fr %}Une commande suggérée{% else %}A suggested command{% endif %}</span><span class="flow__v"><code>josephine doctor</code></span></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+{# ============================ FOURTEEN CHECKS ============================ #}
+<section class="reveal" aria-labelledby="checks">
+  <p class="eyebrow">{% if fr %}Ce qu'elle surveille{% else %}What she watches{% endif %}</p>
+  <h2 id="checks">{% if fr %}Quatorze signes vitaux{% else %}Fourteen vital signs{% endif %}</h2>
+  <p class="section__lede">
+    {%- if fr -%}
+    Chaque contrôle est indépendant, configurable, et lu directement dans le noyau et <code>/sys</code>. Ensemble, ils couvrent les manières lentes et discrètes dont une machine dérive.
+    {%- else -%}
+    Each check is independent, configurable, and read straight from the kernel and <code>/sys</code>. Together they cover the slow, quiet ways a machine drifts.
+    {%- endif -%}
+  </p>
+
+  <div class="checks">
+    <div class="check"><span class="check__ic">{{ m::icon(name="cpu") }}</span><div><h3>CPU</h3><p>{% if fr %}Charge soutenue, process emballés{% else %}Sustained load, runaway processes{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="memory") }}</span><div><h3>{% if fr %}Mémoire{% else %}Memory{% endif %}</h3><p>{% if fr %}Pression et swap qui s'emballe{% else %}Pressure and swap thrash{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="disk") }}</span><div><h3>{% if fr %}Disque{% else %}Disk{% endif %}</h3><p>{% if fr %}Espace par système de fichiers, croissance{% else %}Space per filesystem, and growth{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="temp") }}</span><div><h3>{% if fr %}Température{% else %}Temperature{% endif %}</h3><p>{% if fr %}Dérive thermique via /sys/class/thermal{% else %}Thermal creep from /sys/class/thermal{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="services") }}</span><div><h3>{% if fr %}Services{% else %}Services{% endif %}</h3><p>{% if fr %}Unités systemd en échec{% else %}Failed systemd units{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="updates") }}</span><div><h3>{% if fr %}Mises à jour{% else %}Updates{% endif %}</h3><p>{% if fr %}En attente : apt / dnf / pacman{% else %}Pending apt / dnf / pacman{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="network") }}</span><div><h3>{% if fr %}Réseau{% else %}Network{% endif %}</h3><p>{% if fr %}Passerelle joignable, latence{% else %}Gateway reachability & latency{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="battery") }}</span><div><h3>{% if fr %}Batterie{% else %}Battery{% endif %}</h3><p>{% if fr %}Niveau et usure{% else %}Charge health and wear{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="inodes") }}</span><div><h3>{% if fr %}Inodes{% else %}Inodes{% endif %}</h3><p>{% if fr %}Épuisement avant l'espace{% else %}Exhaustion before space runs out{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="smart") }}</span><div><h3>SMART</h3><p>{% if fr %}Secteurs réalloués, usure (opt-in){% else %}Reallocated sectors, wear (opt-in){% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="kernel") }}</span><div><h3>{% if fr %}Noyau{% else %}Kernel{% endif %}</h3><p>{% if fr %}OOM et oops dans le journal{% else %}OOM kills and oops in the log{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="filesystem") }}</span><div><h3>{% if fr %}Système de fichiers{% else %}Filesystem{% endif %}</h3><p>{% if fr %}Remontages en lecture seule{% else %}Read-only remounts{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="clock") }}</span><div><h3>{% if fr %}Horloge{% else %}Clock{% endif %}</h3><p>{% if fr %}Dérive et synchro NTP{% else %}NTP drift and sync{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="security") }}</span><div><h3>{% if fr %}Sécurité{% else %}Security{% endif %}</h3><p>{% if fr %}Connexions échouées récentes{% else %}Recent failed logins{% endif %}</p></div></div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+{# ============================ ONE SCREEN ============================ #}
+<section class="reveal" aria-labelledby="glance">
+  <p class="eyebrow">{% if fr %}Quand vous voulez tout voir{% else %}When you want the full picture{% endif %}</p>
+  <h2 id="glance">{% if fr %}Un écran, pas un tableau de bord{% else %}One screen, not a dashboard{% endif %}</h2>
+  <p class="section__lede">
+    {%- if fr -%}
+    La gravité est portée par la forme <em>et</em> la couleur — <span class="g-ok">●</span> ok, <span class="g-warn">▲</span> attention, <span class="g-crit">✕</span> critique — lisible même dans un pipe. <code>josephine doctor</code> détaille contrôle par contrôle ; <code>josephine history</code> montre les min / moy / max sur 24 h en sparklines <code>▁▂▄▇▅▃</code>.
+    {%- else -%}
+    Severity is carried by shape <em>and</em> colour — <span class="g-ok">●</span> ok, <span class="g-warn">▲</span> attention, <span class="g-crit">✕</span> critical — so it reads even in a pipe. <code>josephine doctor</code> explains it check by check; <code>josephine history</code> shows 24-hour min / avg / max as sparklines <code>▁▂▄▇▅▃</code>.
+    {%- endif -%}
+  </p>
+
+  <div class="term"><div class="term__bar"><span class="term__dot"></span><span class="term__dot"></span><span class="term__dot"></span><span class="term__title">josephine doctor</span></div>
+{% if fr -%}
+<pre><span class="dim">✦ Joséphine · diagnostic                        14:40</span>
+14 contrôles · 1 à regarder
+<span class="rule">──────────────────────────────────────────────────</span>
+ <span class="g-warn">▲</span>  Mises à jour · <span class="g-warn">attention</span>             30 dispo.
+    ▓▓▓▓▓▓▓░░░░░░░  apt : 30 paquets à mettre à jour
+ <span class="g-ok">●</span>  Disque · <span class="g-ok">ok</span>                           21 %
+    ▓▓▓░░░░░░░░░░░  « / » (btrfs) 195G / 937G · SSD
+ <span class="g-ok">●</span>  Noyau · <span class="g-ok">ok</span>                        0 incident
+    Aucun incident noyau sur la dernière heure.</pre>
+{%- else -%}
+<pre><span class="dim">✦ Joséphine · diagnostic                        14:40</span>
+14 checks · 1 to look at
+<span class="rule">──────────────────────────────────────────────────</span>
+ <span class="g-warn">▲</span>  Updates · <span class="g-warn">attention</span>                    30 available
+    ▓▓▓▓▓▓▓░░░░░░░  apt: 30 package updates pending
+ <span class="g-ok">●</span>  Disk · <span class="g-ok">ok</span>                             21 %
+    ▓▓▓░░░░░░░░░░░  « / » (btrfs) 195G / 937G · SSD
+ <span class="g-ok">●</span>  Kernel · <span class="g-ok">ok</span>                       0 incidents
+    No kernel incidents in the last hour.</pre>
+{%- endif %}
+  </div>
+</section>
+
+<hr class="divider" />
+
+{# ============================ COMMANDS ============================ #}
+<section class="reveal" aria-labelledby="commands">
+  <p class="eyebrow">{% if fr %}Commandes{% else %}Commands{% endif %}</p>
+  <h2 id="commands">{% if fr %}Une petite boîte à outils honnête{% else %}A small, honest toolbox{% endif %}</h2>
+  <p class="section__lede">
+    {%- if fr -%}
+    Tout ce que fait Joséphine part d'une commande claire. Aucune n'est cachée, aucune ne touche le réseau sans que vous le demandiez.
+    {%- else -%}
+    Everything Joséphine does starts from one clear command. None are hidden, and none touch the network unless you ask.
+    {%- endif -%}
+  </p>
+
+  <div class="cmds">
+    <div class="cmd cmd--feat"><span class="cmd__ic">{{ m::icon(name="smart") }}</span><code>doctor</code><span class="cmd__d">{% if fr %}Diagnostic détaillé, contrôle par contrôle{% else %}Detailed diagnosis, check by check{% endif %}</span></div>
+    <div class="cmd cmd--feat"><span class="cmd__ic">{{ m::icon(name="history") }}</span><code>history</code><span class="cmd__d">{% if fr %}Tendances sur 24 h, min / moy / max{% else %}24-hour trends, min / avg / max{% endif %}</span></div>
+    <div class="cmd cmd--feat"><span class="cmd__ic">{{ m::icon(name="clean") }}</span><code>clean</code><span class="cmd__d">{% if fr %}Récupérer de l'espace disque{% else %}Reclaim disk space{% endif %}</span></div>
+    <div class="cmd cmd--feat"><span class="cmd__ic">{{ m::icon(name="fix") }}</span><code>fix</code><span class="cmd__d">{% if fr %}Remédiation guidée, pas à pas{% else %}Guided, step-by-step remediation{% endif %}</span></div>
+    <div class="cmd"><span class="cmd__ic">{{ m::icon(name="status") }}</span><code>status</code><span class="cmd__d">{% if fr %}Résumé d'un écran de chaque contrôle{% else %}One-screen summary of every check{% endif %}</span></div>
+    <div class="cmd"><span class="cmd__ic">{{ m::icon(name="report") }}</span><code>report</code><span class="cmd__d">{% if fr %}Rapport texte daté (<code>--json</code>){% else %}Dated plain-text report (<code>--json</code>){% endif %}</span></div>
+    <div class="cmd"><span class="cmd__ic">{{ m::icon(name="explain") }}</span><code>explain</code><span class="cmd__d">{% if fr %}Ce que surveille chaque contrôle{% else %}What each check watches, and why{% endif %}</span></div>
+    <div class="cmd"><span class="cmd__ic">{{ m::icon(name="daemon") }}</span><code>daemon start</code><span class="cmd__d">{% if fr %}Le veilleur en arrière-plan{% else %}The background watcher{% endif %}</span></div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+{# ============================ INSTALL (from markdown) ============================ #}
+{{ section.content | safe }}
+
 </main>
 {% endblock content %}
