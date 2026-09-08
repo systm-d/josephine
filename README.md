@@ -162,6 +162,7 @@ josephine history       # last 24 h: min/avg/max + sparkline trends, and events
 josephine history --since 3d --check disk --json   # scoped, machine-readable
 josephine daemon start  # run the background watcher
 josephine daemon status # daemon state (PID, uptime)
+josephine config init --profile server  # starter config for a kind of machine
 josephine config show   # print the current configuration
 josephine config edit   # edit the config in $EDITOR, then re-validate
 josephine report        # dated plain-text health report (-o writes to a file)
@@ -223,6 +224,13 @@ josephine man --dir ~/.local/share/man/man1
 ```
 
 Configuration lives at `~/.config/josephine/config.yaml` (created on first run).
+`josephine config init --profile <laptop|desktop|server>` writes a starter one
+instead: `desktop` drops the battery check, and `server` drops it too, warns on
+the first failed unit, watches disk and inodes from 80 %, keeps 90 days of
+history, and sends alerts to the journal rather than a desktop nobody is
+sitting at. A profile is only a starting point — the file is yours afterwards,
+and nothing reads the profile name again. It refuses to overwrite an existing
+configuration unless you pass `--force`.
 History and the daemon's state live under `~/.local/share/josephine/`.
 
 The `status` header is deliberately sober. Want a flourish? Drop any ASCII/Braille

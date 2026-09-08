@@ -46,7 +46,7 @@ Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est i
 | `doctor` (`--verbose`, `--json`) | ✅ |
 | `history` (`--since`, `--check` répétable, `--json`) | ✅ |
 | `daemon start/stop/restart/status/logs/run` | ✅ |
-| `config show/validate/edit` | ✅ |
+| `config show/validate/edit`, `config init --profile <laptop\|desktop\|server>` | ✅ |
 | `clean` (`--apply`), `report` (`-o`, `--json`, `--since`) | ✅ |
 | `notify test` | ✅ |
 | `update` (`--check`, `--yes`) | ✅ |

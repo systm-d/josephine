@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Starter configurations per kind of machine.** `josephine config init
+  --profile <laptop|desktop|server>` writes a config tuned for the machine it
+  is watching. The defaults were written for a laptop; a desktop has no battery
+  to report on, and a server wants the first failed unit, disk and inodes from
+  80 %, ninety days of history, and its alerts in the journal rather than to a
+  desktop nobody is sitting at. A profile is a starting point, not a mode — the
+  file is the user's afterwards and the name is never read again. It refuses to
+  overwrite an existing configuration without `--force`.
 - **`history` can be scoped and exported.** `--since <window>` (`6h`, `3d`)
   changes the window from the default 24 h, `--check <name>` narrows it to one
   check and repeats, and `--json` emits a documented, stable shape for scripts

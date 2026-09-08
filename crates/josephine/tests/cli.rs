@@ -273,6 +273,77 @@ fn completions_generates_a_script() {
 }
 
 #[test]
+fn config_init_writes_a_profile_and_then_refuses_to_clobber_it() {
+    let home = isolated_home("config-init");
+    let config = home.join(".config/josephine/config.yaml");
+
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .env("HOME", &home)
+        .env_remove("XDG_CONFIG_HOME")
+        .env_remove("XDG_DATA_HOME")
+        .args(["config", "init", "--profile", "server"])
+        .assert()
+        .success();
+
+    let written = std::fs::read_to_string(&config).expect("config written");
+    // A server has no battery and speaks to the journal, not a desktop.
+    assert!(
+        written.contains("starter configuration for a server"),
+        "{written}"
+    );
+
+    // The guard that matters: `config init` must not quietly replace settings
+    // someone has edited. It used to be defeated by the language pre-load,
+    // which created the file before the command could look.
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .env("HOME", &home)
+        .env_remove("XDG_CONFIG_HOME")
+        .env_remove("XDG_DATA_HOME")
+        .args(["config", "init", "--profile", "laptop"])
+        .assert()
+        .failure();
+    assert_eq!(
+        std::fs::read_to_string(&config).unwrap(),
+        written,
+        "the refused init still rewrote the file"
+    );
+
+    // --force is the way through, and what it writes still validates.
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .env("HOME", &home)
+        .env_remove("XDG_CONFIG_HOME")
+        .env_remove("XDG_DATA_HOME")
+        .args(["config", "init", "--profile", "laptop", "--force"])
+        .assert()
+        .success();
+
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .env("HOME", &home)
+        .env_remove("XDG_CONFIG_HOME")
+        .env_remove("XDG_DATA_HOME")
+        .args(["config", "validate"])
+        .assert()
+        .success();
+}
+
+#[test]
+fn config_init_rejects_a_profile_it_does_not_know() {
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .env("HOME", isolated_home("config-init-unknown"))
+        .env_remove("XDG_CONFIG_HOME")
+        .env_remove("XDG_DATA_HOME")
+        .args(["config", "init", "--profile", "toaster"])
+        .assert()
+        .failure()
+        .stderr(contains("laptop"));
+}
+
+#[test]
 fn history_json_emits_the_documented_shape() {
     let output = Command::cargo_bin("josephine")
         .unwrap()
