@@ -7,6 +7,7 @@ use tracing::{error, info, warn};
 
 use crate::checks::{build_checks, interval_for_check};
 use crate::config::{CheckThresholds, Config};
+use crate::export::PrometheusExport;
 use crate::notify;
 use crate::paths::Paths;
 use crate::rules::RulesEngine;
@@ -47,6 +48,17 @@ impl Scheduler {
         let desktop_notify = self.config.notifications.desktop;
         let terminal_notify = self.config.notifications.terminal;
 
+        // Opt-in, file-only, never a socket. `None` when switched off, so the
+        // per-check task does no work at all in the default case.
+        let export = self.config.export.prometheus.enabled.then(|| {
+            let path = self.config.export.prometheus.resolved_path(&self.paths);
+            info!("export Prometheus : {}", path.display());
+            (
+                Arc::new(Mutex::new(PrometheusExport::new())),
+                Arc::new(path),
+            )
+        });
+
         let mut handles = Vec::new();
 
         for mut check in checks {
@@ -56,6 +68,9 @@ impl Scheduler {
             let lang = config.language;
             let engine = Arc::clone(&engine);
             let storage = Arc::clone(&storage);
+            let export = export
+                .as_ref()
+                .map(|(state, path)| (Arc::clone(state), Arc::clone(path)));
 
             handles.push(tokio::spawn(async move {
                 loop {
@@ -79,6 +94,18 @@ impl Scheduler {
                                     start.elapsed().as_millis() as u64,
                                     None,
                                 );
+                            }
+
+                            if let Some((state, path)) = &export {
+                                let mut state = state.lock().await;
+                                state.record(&result);
+                                if let Err(e) =
+                                    state.write_to(path, chrono::Utc::now().timestamp())
+                                {
+                                    // A dashboard that stops updating must not
+                                    // take the watching down with it.
+                                    warn!("export Prometheus : {e}");
+                                }
                             }
 
                             {

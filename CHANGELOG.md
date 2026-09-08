@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **A local, opt-in metrics export.** With `export.prometheus.enabled`, the
+  daemon writes its latest results as a Prometheus textfile for node-exporter's
+  textfile collector — `josephine_metric{check,metric,unit}`,
+  `josephine_check_severity{check}` and a write timestamp. A file, not a
+  server: a homelab that graphs anything already runs node-exporter, and a
+  guardian that opens a listening socket has a new attack surface. Off by
+  default, and written atomically so a scrape never catches a half-written
+  file.
 - **Starter configurations per kind of machine.** `josephine config init
   --profile <laptop|desktop|server>` writes a config tuned for the machine it
   is watching. The defaults were written for a laptop; a desktop has no battery

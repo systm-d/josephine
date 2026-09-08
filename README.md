@@ -233,6 +233,28 @@ and nothing reads the profile name again. It refuses to overwrite an existing
 configuration unless you pass `--force`.
 History and the daemon's state live under `~/.local/share/josephine/`.
 
+### Feeding a dashboard, still 100 % local
+
+Joséphine can write her latest results as a Prometheus textfile for
+node-exporter's textfile collector to pick up. Off by default; no server, no
+port, nothing about her becomes reachable from the network:
+
+```yaml
+export:
+  prometheus:
+    enabled: true
+    # Optional. Defaults to ~/.local/share/josephine/josephine.prom — point
+    # node-exporter's --collector.textfile.directory at the folder holding it,
+    # or set an absolute path inside a directory it already reads.
+    path: /var/lib/node_exporter/textfile_collector/josephine.prom
+```
+
+The daemon rewrites the file after each check, atomically, so a scrape never
+catches it half-written. It exposes `josephine_metric{check,metric,unit}`,
+`josephine_check_severity{check}` (0 ok, 1 attention, 2 critical) and
+`josephine_last_write_timestamp_seconds` — the same figures `josephine status`
+shows, and nothing more.
+
 The `status` header is deliberately sober. Want a flourish? Drop any ASCII/Braille
 art in `~/.config/josephine/banner.txt` and it appears above the title, tinted
 with a gradient. A ready-to-use example lives at [`resources/banner.txt`](resources/banner.txt).

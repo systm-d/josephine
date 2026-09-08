@@ -167,6 +167,12 @@ Structures notables :
   libérée et non accumulée ; rendu **doctor-only**
   (section « Prévoyance »), sans notification.
 
+- `ExportConfig` — exposition locale, **désactivée par défaut** :
+  `export.prometheus.{enabled, path}`. Le démon réécrit un fichier textfile
+  Prometheus après chaque check, de façon atomique (écriture d'un `.tmp` puis
+  `rename`, pour qu'un scrape ne tombe jamais sur un fichier à moitié écrit).
+  Fichier uniquement — aucun socket, aucun port : `export.rs`.
+
 Validation dans `config.rs::validate()`.
 
 ---
