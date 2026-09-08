@@ -301,13 +301,29 @@ mod tests {
 
     #[test]
     fn summary_covers_the_window_and_averages_each_bucket() {
+        use chrono::Timelike;
+
         let storage = in_memory();
 
-        // Two samples inside the same hour, one an hour later, and one well
-        // outside a 6 h window.
-        let now = Utc::now();
-        for (offset_hours, value) in [(0.0, 10.0), (0.1, 30.0), (1.0, 50.0), (30.0, 999.0)] {
-            let at = (now - Duration::minutes((offset_hours * 60.0) as i64)).to_rfc3339();
+        // Buckets follow the wall clock, not the offset from now: two samples
+        // "six minutes apart" straddle an hour boundary whenever the test runs
+        // just after one. So anchor everything to the current hour boundary and
+        // place samples at known minutes inside known hours.
+        let hour_start = Utc::now()
+            .with_minute(0)
+            .unwrap()
+            .with_second(0)
+            .unwrap()
+            .with_nanosecond(0)
+            .unwrap();
+
+        for (minutes_before_hour_start, value) in [
+            (50, 10.0),    // previous hour
+            (40, 30.0),    // previous hour, same bucket as the one above
+            (90, 50.0),    // the hour before that
+            (1800, 999.0), // 30 h back: outside a 6 h window
+        ] {
+            let at = (hour_start - Duration::minutes(minutes_before_hour_start)).to_rfc3339();
             storage
                 .conn
                 .execute(
@@ -324,15 +340,13 @@ mod tests {
             .expect("samples inside the window");
 
         // The 999 sits 30 h back and must not reach a 6 h summary.
-        assert_eq!(summary.max, 50.0);
         assert_eq!(summary.min, 10.0);
+        assert_eq!(summary.max, 50.0);
         assert_eq!(summary.avg, 30.0);
 
-        // Two hourly buckets: (10 + 30) / 2 and 50 — the pair recorded in the
-        // same hour is averaged into one point rather than plotted twice.
-        assert_eq!(summary.series.len(), 2);
-        assert!(summary.series.contains(&20.0), "{:?}", summary.series);
-        assert!(summary.series.contains(&50.0), "{:?}", summary.series);
+        // Two hourly buckets, oldest first: the lone 50, then the pair averaged
+        // into one point rather than plotted twice.
+        assert_eq!(summary.series, vec![50.0, 20.0]);
     }
 
     #[test]
