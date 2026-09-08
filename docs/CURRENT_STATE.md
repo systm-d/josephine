@@ -118,7 +118,11 @@ actions à mener, la plus grave d'abord, et seulement quand il y en a.
   **rétablissement** sont variés via `voice.rs` (plusieurs formulations
   EN + FR) ; le **corps des alertes reste stable** (fait + commande)
 - Canal : desktop via `notify-rust` / libnotify
-- `notifications.terminal` : présent en config, **non implémenté**
+- `notifications.terminal` : implémenté (increment B, depuis 0.8.0) — le
+  démon consigne l'alerte dans son journal (`journalctl --user -u josephine`,
+  ou la sortie de `daemon run`) et l'enregistre dans `notifications`, en
+  parallèle du canal desktop. Utile en SSH / headless, où libnotify n'a
+  personne à qui parler.
 
 ### Stockage
 
