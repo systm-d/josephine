@@ -51,6 +51,7 @@ Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est i
 | `notify test` | ✅ |
 | `update` (`--check`, `--yes`) | ✅ |
 | `completions <bash\|zsh\|fish…>` | ✅ |
+| `man` (`--dir <dir>` pour le jeu complet, une page par commande) | ✅ |
 | `explain` (`<check>` optionnel) | ✅ |
 
 **Supprimé du scope :** `watch` (TUI), check Docker.
@@ -118,7 +119,11 @@ actions à mener, la plus grave d'abord, et seulement quand il y en a.
   **rétablissement** sont variés via `voice.rs` (plusieurs formulations
   EN + FR) ; le **corps des alertes reste stable** (fait + commande)
 - Canal : desktop via `notify-rust` / libnotify
-- `notifications.terminal` : présent en config, **non implémenté**
+- `notifications.terminal` : implémenté (increment B, depuis 0.8.0) — le
+  démon consigne l'alerte dans son journal (`journalctl --user -u josephine`,
+  ou la sortie de `daemon run`) et l'enregistre dans `notifications`, en
+  parallèle du canal desktop. Utile en SSH / headless, où libnotify n'a
+  personne à qui parler.
 
 ### Stockage
 

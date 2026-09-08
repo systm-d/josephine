@@ -36,6 +36,7 @@ jobs:
         run: |
           staging="josephine-linux-x86_64"
           mkdir "$staging"
+          ./target/release/josephine man --dir "$staging/man"
           cp target/release/josephine README.md CHANGELOG.md LICENSE-MIT LICENSE-APACHE "$staging/"
           cp -r packaging "$staging/"
           tar czf "$staging.tar.gz" "$staging"
@@ -60,6 +61,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: cargo build --release
         run: cargo build --release --locked -p josephine
+      - name: Render the man pages
+        run: ./target/release/josephine man --dir target/man
       - name: Build the .deb
         run: |
           cargo install cargo-deb --locked
@@ -88,6 +91,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: cargo build --release
         run: cargo build --release --locked -p josephine
+      - name: Render the man pages
+        run: ./target/release/josephine man --dir target/man
       - name: Build the .rpm
         run: |
           cargo install cargo-generate-rpm --locked
@@ -116,6 +121,10 @@ jobs:
     needs: [binaries, debian, fedora]
     runs-on: ubuntu-22.04
     if: startsWith(github.ref, 'refs/tags/v')
+    outputs:
+      version: ${{ steps.render.outputs.version }}
+      sha: ${{ steps.render.outputs.sha }}
+      formula: ${{ steps.render.outputs.formula }}
     steps:
       - uses: actions/checkout@v7
       - name: Download the artifacts
@@ -123,6 +132,7 @@ jobs:
         with:
           path: artifacts
       - name: Render the Homebrew formula and the AUR PKGBUILD
+        id: render
         env:
           GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
@@ -130,6 +140,13 @@ jobs:
           version="${TAG#v}"
           url="https://github.com/${GH_REPO}/archive/refs/tags/${TAG}.tar.gz"
           sha=$(curl -fsSL "$url" | sha256sum | cut -d' ' -f1)
+
+          # The tap job reuses these rather than fetching the tarball a second
+          # time and hoping the two checksums agree.
+          {
+            echo "version=${version}"
+            echo "sha=${sha}"
+          } >> "$GITHUB_OUTPUT"
 
           if [ -f packaging/homebrew/josephine.rb ]; then
             sed \
@@ -139,8 +156,10 @@ jobs:
               packaging/homebrew/josephine.rb > josephine.rb
             echo "Rendered josephine.rb for ${TAG} (sha256 ${sha}):"
             cat josephine.rb
+            echo "formula=true" >> "$GITHUB_OUTPUT"
           else
             echo "packaging/homebrew/josephine.rb missing — skipping the Homebrew formula."
+            echo "formula=false" >> "$GITHUB_OUTPUT"
           fi
 
           if [ -f packaging/aur/PKGBUILD ]; then
@@ -155,6 +174,12 @@ jobs:
           else
             echo "packaging/aur/PKGBUILD missing — skipping the AUR PKGBUILD."
           fi
+      - name: Keep the rendered formula for the tap job
+        if: steps.render.outputs.formula == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: homebrew-formula
+          path: josephine.rb
       - name: Publish the release
         uses: softprops/action-gh-release@v3
         with:
@@ -165,19 +190,27 @@ jobs:
             PKGBUILD
 
   # ---------------------------------------------------------------------------
-  # Homebrew tap: renders Formula/josephine.rb on the default branch from the
-  # packaging/homebrew/josephine.rb template (single source of truth, same sed
-  # as the asset rendering above). User installation:
+  # Homebrew tap: updates Formula/josephine.rb on the default branch, using the
+  # exact file the release job already rendered — one render, one checksum, no
+  # second fetch of the tarball. User installation:
   #   brew tap systm-d/josephine https://github.com/systm-d/josephine
   #   brew install josephine
+  #
+  # It opens a pull request rather than pushing to the default branch: the
+  # branch ruleset requires a pull request and its checks, so a direct push is
+  # rejected and the tap silently keeps serving the previous release (which is
+  # what happened to v0.13.0). The release itself is unaffected — its
+  # josephine.rb asset is correct at publish time; the tap catches up when this
+  # pull request merges.
   # ---------------------------------------------------------------------------
   homebrew:
     name: Update the Homebrew formula (tap)
     needs: release
     runs-on: ubuntu-22.04
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: ${{ startsWith(github.ref, 'refs/tags/v') && needs.release.outputs.formula == 'true' }}
     permissions:
       contents: write
+      pull-requests: write
     steps:
       # The default branch (the tag is a detached HEAD): the tap serves
       # Formula/josephine.rb from the branch head, so it must be updated there.
@@ -185,29 +218,65 @@ jobs:
         with:
           ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
-      - name: Render and commit the formula
+      - name: Take the formula the release already rendered
+        uses: actions/download-artifact@v8
+        with:
+          name: homebrew-formula
+      - name: Open a pull request with the updated formula
         env:
-          GH_REPO: ${{ github.repository }}
-          TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.release.outputs.version }}
+          SHA256: ${{ needs.release.outputs.sha }}
+          BASE: ${{ github.event.repository.default_branch }}
         run: |
-          if [ ! -f packaging/homebrew/josephine.rb ]; then
-            echo "packaging/homebrew/josephine.rb missing on the default branch — skipping."
+          mkdir -p Formula
+          mv josephine.rb Formula/josephine.rb
+          # --porcelain, not `git diff`: on a first bootstrap the formula is
+          # untracked, which `git diff` reports as no change at all.
+          if [ -z "$(git status --porcelain -- Formula/josephine.rb)" ]; then
+            echo "Formula already at ${VERSION} — nothing to do."
             exit 0
           fi
-          version="${TAG#v}"
-          url="https://github.com/${GH_REPO}/archive/refs/tags/${TAG}.tar.gz"
-          sha=$(curl -fsSL "$url" | sha256sum | cut -d' ' -f1)
-          mkdir -p Formula
-          sed \
-            -e "s|url \".*\"|url \"${url}\"|" \
-            -e "s|sha256 \"[0-9a-f]*\"|sha256 \"${sha}\"|" \
-            -e "/# Placeholder: release.yml/d" \
-            packaging/homebrew/josephine.rb > Formula/josephine.rb
+
+          branch="homebrew/josephine-${VERSION}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
           git add Formula/josephine.rb
-          git commit -m "homebrew: josephine ${version}" || { echo "Formula already up to date"; exit 0; }
-          git push
+          git commit -m "homebrew: josephine ${VERSION}"
+
+          # A re-run of this job re-pushes the same branch, hence the lease.
+          pushed=false
+          for attempt in 1 2 3; do
+            if git push --force-with-lease -u origin "$branch"; then
+              pushed=true
+              break
+            fi
+            echo "push failed (attempt ${attempt}), retrying…"
+            sleep $((attempt * 5))
+          done
+          if [ "$pushed" != true ]; then
+            echo "Could not push ${branch} — the tap still serves the previous release."
+            exit 1
+          fi
+
+          if [ -n "$(gh pr list --head "$branch" --state open --json number -q '.[0].number')" ]; then
+            echo "A pull request is already open for ${branch}; it now carries ${VERSION}."
+            exit 0
+          fi
+          gh pr create \
+            --base "$BASE" \
+            --head "$branch" \
+            --title "homebrew: josephine ${VERSION}" \
+            --body "$(printf '%s\n' \
+              "Renders \`Formula/josephine.rb\` for the v${VERSION} release." \
+              "" \
+              "The file is the one the release job rendered and published as the" \
+              "release's \`josephine.rb\` asset, so the tap and the release carry the" \
+              "same source URL and the same sha256 (\`${SHA256}\`) by construction." \
+              "" \
+              "Opened automatically by \`release.yml\`. Until it merges," \
+              "\`brew install josephine\` resolves to the previous release.")"
 
   # ---------------------------------------------------------------------------
   # crates.io: opt-in publication. Enabled by setting the repository variable

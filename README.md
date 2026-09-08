@@ -170,6 +170,8 @@ josephine explain       # what each check watches and how to act
 josephine explain disk  # full explanation for one check
 josephine notify test   # send a test desktop notification
 josephine update        # check GitHub for a newer version and install it
+josephine completions bash  # shell completions (bash, zsh, fish, …)
+josephine man           # the man page, in roff, on stdout
 josephine --version
 ```
 
@@ -201,6 +203,14 @@ it runs `josephine report --since 7d` and prints to the journal
 
 ```sh
 systemctl --user enable --now josephine-report.timer
+```
+
+The `.deb`, `.rpm` and tarball installs ship the manual, so `man josephine` (and
+`man josephine-doctor`, and so on for every subcommand) works out of the box.
+Installed from source, generate it yourself:
+
+```sh
+josephine man --dir ~/.local/share/man/man1
 ```
 
 Configuration lives at `~/.config/josephine/config.yaml` (created on first run).
