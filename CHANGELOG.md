@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **The I/O-bound checks are tested end to end.** `temperature`, `battery`,
+  `network`, `inode` and `kernel` read the machine through a seam
+  (`source::Sysfs` for files, `source::Commands` for `df`/`ping`/`journalctl`),
+  so a test can point them at a fixture tree and canned output and exercise
+  read → parse → `CheckResult`. Until now only the pure parsers were covered,
+  because the paths were hardcoded; the read side — which sensor wins, whether
+  a mains adapter is mistaken for a battery, whether a snap's squashfs buries
+  the real filesystems — was not. Production behaviour is unchanged: `new()`
+  still reads the real machine.
+
+### Added
+
 - **A manual.** `josephine man` writes the man page to stdout, and
   `josephine man --dir <dir>` writes the whole set — one page per command, from
   `josephine(1)` down to `josephine-daemon-start(1)`, every cross-reference

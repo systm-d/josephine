@@ -3,21 +3,32 @@
 //! type, so we can skip read-only image mounts like snaps); runs fine as a
 //! normal user.
 
-use std::process::Command;
+use std::sync::Arc;
 
 use anyhow::Result;
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::CheckThresholds;
 use crate::i18n::{self, Lang};
+use crate::source::{Commands, system_commands};
 
 pub struct InodeCheck {
     thresholds: CheckThresholds,
+    commands: Arc<dyn Commands>,
 }
 
 impl InodeCheck {
     pub fn new(thresholds: CheckThresholds) -> Self {
-        Self { thresholds }
+        Self {
+            thresholds,
+            commands: system_commands(),
+        }
+    }
+
+    /// Read `df` output from a stub instead of running it.
+    pub fn with_commands(mut self, commands: Arc<dyn Commands>) -> Self {
+        self.commands = commands;
+        self
     }
 }
 
@@ -33,7 +44,10 @@ impl Check for InodeCheck {
     }
 
     fn run(&mut self) -> Result<CheckResult> {
-        Ok(build_result(&read_inode_usage(), &self.thresholds))
+        Ok(build_result(
+            &read_inode_usage(self.commands.as_ref()),
+            &self.thresholds,
+        ))
     }
 }
 
@@ -85,12 +99,10 @@ fn build_result(readings: &[InodeReading], thresholds: &CheckThresholds) -> Chec
     }
 }
 
-fn read_inode_usage() -> Vec<InodeReading> {
-    match Command::new("df").args(["-iPT"]).output() {
-        Ok(output) if output.status.success() => {
-            parse_df_inodes(&String::from_utf8_lossy(&output.stdout))
-        }
-        _ => Vec::new(),
+fn read_inode_usage(commands: &dyn Commands) -> Vec<InodeReading> {
+    match commands.output("df", &["-iPT"]) {
+        Some(stdout) => parse_df_inodes(&stdout),
+        None => Vec::new(),
     }
 }
 

@@ -2,21 +2,32 @@
 //! and faults (oops / BUG / panic): the quiet events that destabilise a machine.
 //! Reads `journalctl -k`; degrades gracefully if the journal isn't readable.
 
-use std::process::Command;
+use std::sync::Arc;
 
 use anyhow::Result;
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::KernelCheckConfig;
 use crate::i18n::{self, Lang};
+use crate::source::{Commands, system_commands};
 
 pub struct KernelCheck {
     config: KernelCheckConfig,
+    commands: Arc<dyn Commands>,
 }
 
 impl KernelCheck {
     pub fn new(config: KernelCheckConfig) -> Self {
-        Self { config }
+        Self {
+            config,
+            commands: system_commands(),
+        }
+    }
+
+    /// Read the journal from a stub instead of running `journalctl`.
+    pub fn with_commands(mut self, commands: Arc<dyn Commands>) -> Self {
+        self.commands = commands;
+        self
     }
 }
 
@@ -26,7 +37,7 @@ impl Check for KernelCheck {
     }
 
     fn run(&mut self) -> Result<CheckResult> {
-        let Some(log) = recent_kernel_log() else {
+        let Some(log) = recent_kernel_log(self.commands.as_ref()) else {
             return Ok(unavailable());
         };
         Ok(build_result(count_incidents(&log), &self.config))
@@ -90,9 +101,10 @@ fn unavailable() -> CheckResult {
     }
 }
 
-fn recent_kernel_log() -> Option<String> {
-    let output = Command::new("journalctl")
-        .args([
+fn recent_kernel_log(commands: &dyn Commands) -> Option<String> {
+    commands.output(
+        "journalctl",
+        &[
             "-k",
             "--since",
             "1 hour ago",
@@ -100,13 +112,8 @@ fn recent_kernel_log() -> Option<String> {
             "cat",
             "-q",
             "--no-pager",
-        ])
-        .output()
-        .ok()?;
-    if !output.status.success() {
-        return None;
-    }
-    Some(String::from_utf8_lossy(&output.stdout).into_owned())
+        ],
+    )
 }
 
 /// Count kernel-fault / OOM lines. Safe against false positives because the

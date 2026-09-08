@@ -4,21 +4,36 @@
 
 use std::fs;
 use std::net::Ipv4Addr;
-use std::process::Command;
+use std::sync::Arc;
 
 use anyhow::Result;
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::NetworkCheckConfig;
 use crate::i18n::{self, Lang};
+use crate::source::{Commands, Sysfs, system_commands};
 
 pub struct NetworkCheck {
     config: NetworkCheckConfig,
+    sysfs: Sysfs,
+    commands: Arc<dyn Commands>,
 }
 
 impl NetworkCheck {
     pub fn new(config: NetworkCheckConfig) -> Self {
-        Self { config }
+        Self {
+            config,
+            sysfs: Sysfs::system(),
+            commands: system_commands(),
+        }
+    }
+
+    /// Read the route table, interfaces and resolver from a fixture tree, and
+    /// `ping` from a stub, instead of the running machine.
+    pub fn with_sources(mut self, sysfs: Sysfs, commands: Arc<dyn Commands>) -> Self {
+        self.sysfs = sysfs;
+        self.commands = commands;
+        self
     }
 }
 
@@ -28,14 +43,14 @@ impl Check for NetworkCheck {
     }
 
     fn run(&mut self) -> Result<CheckResult> {
-        let gateway = read_default_gateway();
-        let interfaces = up_interfaces();
-        let nameservers = read_nameservers();
+        let gateway = read_default_gateway(&self.sysfs);
+        let interfaces = up_interfaces(&self.sysfs);
+        let nameservers = read_nameservers(&self.sysfs);
 
         // Latency drives severity; an unreachable/absent gateway maps to the
         // warning level (offline or ICMP-filtered is a nudge, not a panic).
         let (value, status_value, headline) = match gateway {
-            Some(gw) => match ping_latency_ms(gw) {
+            Some(gw) => match ping_latency_ms(self.commands.as_ref(), gw) {
                 Some(ms) => (
                     ms,
                     match i18n::lang() {
@@ -107,9 +122,8 @@ impl Check for NetworkCheck {
     }
 }
 
-fn read_default_gateway() -> Option<Ipv4Addr> {
-    let content = fs::read_to_string("/proc/net/route").ok()?;
-    parse_default_gateway(&content)
+fn read_default_gateway(sysfs: &Sysfs) -> Option<Ipv4Addr> {
+    parse_default_gateway(&sysfs.read("/proc/net/route")?)
 }
 
 /// Parse the default-route gateway from `/proc/net/route` (hex, little-endian).
@@ -130,9 +144,9 @@ fn parse_default_gateway(content: &str) -> Option<Ipv4Addr> {
     None
 }
 
-fn up_interfaces() -> Vec<String> {
+fn up_interfaces(sysfs: &Sysfs) -> Vec<String> {
     let mut interfaces = Vec::new();
-    let Ok(entries) = fs::read_dir("/sys/class/net") else {
+    let Ok(entries) = fs::read_dir(sysfs.path("/sys/class/net")) else {
         return interfaces;
     };
     for entry in entries.flatten() {
@@ -149,8 +163,9 @@ fn up_interfaces() -> Vec<String> {
     interfaces
 }
 
-fn read_nameservers() -> Vec<String> {
-    fs::read_to_string("/etc/resolv.conf")
+fn read_nameservers(sysfs: &Sysfs) -> Vec<String> {
+    sysfs
+        .read("/etc/resolv.conf")
         .map(|content| parse_nameservers(&content))
         .unwrap_or_default()
 }
@@ -165,16 +180,10 @@ fn parse_nameservers(content: &str) -> Vec<String> {
         .collect()
 }
 
-fn ping_latency_ms(ip: Ipv4Addr) -> Option<f64> {
-    let output = Command::new("ping")
-        .args(["-c", "1", "-W", "1"])
-        .arg(ip.to_string())
-        .output()
-        .ok()?;
-    if !output.status.success() {
-        return None;
-    }
-    parse_ping_time(&String::from_utf8_lossy(&output.stdout))
+fn ping_latency_ms(commands: &dyn Commands, ip: Ipv4Addr) -> Option<f64> {
+    let ip = ip.to_string();
+    let stdout = commands.output("ping", &["-c", "1", "-W", "1", &ip])?;
+    parse_ping_time(&stdout)
 }
 
 /// Pull the `time=…` round-trip value (in ms) out of `ping` output.

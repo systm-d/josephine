@@ -177,8 +177,18 @@ Tests unitaires (`josephine-core`) + intégration CLI (`assert_cmd`) couvrant
 config, règles, messages, self-update, réseau, batterie et le parsing des
 commandes (`clean`).
 
-Les checks reposant sur `/proc` / `systemctl` / `ping` ne sont pas exécutés
-en CI ; leur logique pure est testée via des helpers dédiés.
+Les checks liés aux entrées/sorties (`temperature`, `battery`, `network`,
+`inode`, `kernel`) sont testés de bout en bout — lecture → parsing →
+`CheckResult` — via `crates/josephine-core/tests/checks_from_fixtures.rs` :
+un arbre de fixtures (`tests/fixtures/laptop`) tient lieu de `/sys`, `/proc`
+et `/etc`, et `source::StubCommands` fournit la sortie de `df`, `ping` et
+`journalctl`. Aucun test ne dépend du matériel de la machine hôte ; `cargo
+test` est hermétique en CI.
+
+Le module `josephine-core/src/source.rs` porte cette couture : `Sysfs`
+(racine réelle ou arbre de fixtures) et le trait `Commands`
+(`SystemCommands` en production, `StubCommands` en test). En production rien
+ne change — `new()` lit toujours la vraie machine.
 
 Commande : `cargo test --workspace`
 

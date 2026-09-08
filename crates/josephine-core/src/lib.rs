@@ -10,6 +10,7 @@ pub mod paths;
 pub mod remedy;
 pub mod rules;
 pub mod scheduler;
+pub mod source;
 pub mod storage;
 pub mod update;
 pub mod voice;
