@@ -51,6 +51,7 @@ Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est i
 | `notify test` | ✅ |
 | `update` (`--check`, `--yes`) | ✅ |
 | `completions <bash\|zsh\|fish…>` | ✅ |
+| `man` (`--dir <dir>` pour le jeu complet, une page par commande) | ✅ |
 | `explain` (`<check>` optionnel) | ✅ |
 
 **Supprimé du scope :** `watch` (TUI), check Docker.

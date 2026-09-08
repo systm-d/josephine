@@ -22,6 +22,7 @@ anyhow.workspace = true
 chrono.workspace = true
 clap.workspace = true
 clap_complete.workspace = true
+clap_mangen.workspace = true
 colored.workspace = true
 comfy-table.workspace = true
 indicatif.workspace = true
@@ -51,6 +52,7 @@ assets = [
     ["../../packaging/systemd/josephine.service", "usr/lib/systemd/user/josephine.service", "644"],
     ["../../packaging/systemd/josephine-report.service", "usr/lib/systemd/user/josephine-report.service", "644"],
     ["../../packaging/systemd/josephine-report.timer", "usr/lib/systemd/user/josephine-report.timer", "644"],
+    ["../../target/man/*.1", "usr/share/man/man1/", "644"],
     ["../../README.md", "usr/share/doc/josephine/README.md", "644"],
     ["../../LICENSE-MIT", "usr/share/doc/josephine/LICENSE-MIT", "644"],
     ["../../LICENSE-APACHE", "usr/share/doc/josephine/LICENSE-APACHE", "644"],
@@ -62,6 +64,7 @@ assets = [
     { source = "packaging/systemd/josephine.service", dest = "/usr/lib/systemd/user/josephine.service", mode = "644" },
     { source = "packaging/systemd/josephine-report.service", dest = "/usr/lib/systemd/user/josephine-report.service", mode = "644" },
     { source = "packaging/systemd/josephine-report.timer", dest = "/usr/lib/systemd/user/josephine-report.timer", mode = "644" },
+    { source = "target/man/*.1", dest = "/usr/share/man/man1/", mode = "644" },
     { source = "LICENSE-MIT", dest = "/usr/share/licenses/josephine/LICENSE-MIT", mode = "644" },
     { source = "LICENSE-APACHE", dest = "/usr/share/licenses/josephine/LICENSE-APACHE", mode = "644" },
 ]

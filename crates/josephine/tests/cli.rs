@@ -271,3 +271,52 @@ fn completions_generates_a_script() {
         .success()
         .stdout(contains("josephine"));
 }
+
+#[test]
+fn man_generates_a_page() {
+    // Same contract as `completions`: rendered from the static command tree,
+    // no config read, no file created — `josephine man > josephine.1`.
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .env("HOME", isolated_home("man"))
+        .env_remove("XDG_CONFIG_HOME")
+        .env_remove("XDG_DATA_HOME")
+        .arg("man")
+        .assert()
+        .success()
+        .stdout(contains(".TH josephine"))
+        .stdout(contains("SYNOPSIS"));
+}
+
+#[test]
+fn man_dir_writes_a_page_per_command() {
+    let dir = isolated_home("man-dir").join("man");
+
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .env("HOME", isolated_home("man-dir"))
+        .env_remove("XDG_CONFIG_HOME")
+        .env_remove("XDG_DATA_HOME")
+        .args(["man", "--dir"])
+        .arg(&dir)
+        .assert()
+        .success();
+
+    // The top-level page cross-references its subcommands, so each one has to
+    // be there too, or `man josephine-status` sends the reader nowhere.
+    for page in [
+        "josephine.1",
+        "josephine-status.1",
+        "josephine-doctor.1",
+        "josephine-daemon.1",
+        "josephine-daemon-start.1",
+    ] {
+        assert!(dir.join(page).is_file(), "missing man page: {page}");
+    }
+
+    // clap's `help` subcommand mirrors the whole tree; it must stay out.
+    assert!(
+        !dir.join("josephine-help.1").exists(),
+        "the help subtree leaked into the man pages"
+    );
+}

@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **A manual.** `josephine man` writes the man page to stdout, and
+  `josephine man --dir <dir>` writes the whole set — one page per command, from
+  `josephine(1)` down to `josephine-daemon-start(1)`, every cross-reference
+  resolving. The `.deb`, `.rpm` and tarball installs now carry them, so
+  `man josephine` works after an install rather than sending you back to
+  `--help`.
+
+### Fixed
+
+- **The Homebrew tap updates itself again.** The tap job pushed straight to the
+  default branch, which the branch ruleset rejects — so every tag left the
+  formula pinned to the previous release, by hand each time. It now opens a pull
+  request instead, with a retry on the push. It also stops re-downloading the
+  release tarball to recompute its sha256: it reuses the very file the release
+  job rendered, so the formula in the release and the formula in the tap carry
+  the same checksum by construction rather than by coincidence.
+- **`CURRENT_STATE.md` no longer contradicts itself** about the terminal
+  notification channel — the daemon has honoured `notifications.terminal` since
+  0.8.0, and the document said both things twenty lines apart.
+
 ## [0.13.1] - 2026-09-02
 
 ### Fixed

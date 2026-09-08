@@ -20,6 +20,7 @@ predicates = "3"
 chrono = { version = "0.4", features = ["serde"] }
 clap = { version = "4", features = ["derive"] }
 clap_complete = "4"
+clap_mangen = "0.2"
 colored = "3"
 comfy-table = { version = "8", features = ["tty"] }
 indicatif = "0.18"

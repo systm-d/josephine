@@ -97,6 +97,12 @@ enum Commands {
         /// Which shell to generate completions for
         shell: clap_complete::Shell,
     },
+    /// Write the man page to stdout (roff — `josephine man > josephine.1`)
+    Man {
+        /// Write the whole set — one page per subcommand — into this directory
+        #[arg(long, value_name = "DIR")]
+        dir: Option<std::path::PathBuf>,
+    },
 }
 
 /// The command line was malformed (sysexits `EX_USAGE`).
@@ -201,7 +207,9 @@ async fn dispatch() -> Result<ExitCode> {
     // files (it generates from the static command tree), so skip it for that.
     if !matches!(
         cli.command,
-        Some(Commands::Completions { .. }) | Some(Commands::Explain { .. })
+        Some(Commands::Completions { .. })
+            | Some(Commands::Man { .. })
+            | Some(Commands::Explain { .. })
     ) {
         if let Ok(config) = josephine_core::config::Config::load_default() {
             josephine_core::i18n::set_lang(config.language);
@@ -261,10 +269,55 @@ async fn dispatch() -> Result<ExitCode> {
             );
             0
         }
+        Some(Commands::Man { dir }) => {
+            match dir {
+                // The top-level page cross-references josephine-status(1) and
+                // friends, so the packaged set has to carry them too.
+                Some(dir) => write_man_pages(&Cli::command(), "josephine", &dir)?,
+                None => clap_mangen::Man::new(Cli::command()).render(&mut std::io::stdout())?,
+            }
+            0
+        }
         None => severity_code(status_cmd::run(false, false)?),
     };
 
     Ok(ExitCode::from(code))
+}
+
+/// Write `cmd`'s man page into `dir` as `<name>.1`, then recurse into its
+/// subcommands as `<name>-<sub>.1` — the names the generated pages point at.
+fn write_man_pages(
+    cmd: &clap::Command,
+    name: &str,
+    dir: &std::path::Path,
+) -> Result<(), std::io::Error> {
+    std::fs::create_dir_all(dir)?;
+
+    // clap only takes `&'static str` names, and both the page's title and its
+    // cross-references come from the display name, so it has to be set. The
+    // generator runs once and the process exits straight after. Subcommands
+    // carry no version of their own, which would leave the header reading
+    // `"daemon "` instead of naming the release the page describes.
+    let display: &'static str = Box::leak(name.to_owned().into_boxed_str());
+    let mut cmd = cmd
+        .clone()
+        .display_name(display)
+        .version(env!("CARGO_PKG_VERSION"));
+    // clap grafts a `help` subcommand on at build time, and it mirrors the whole
+    // command tree — leaving it in yields josephine-help-daemon-start(1) and
+    // sixty-odd pages nobody will ever open. Drop it, and what remains is one
+    // page per real command, with every cross-reference resolving.
+    cmd = cmd.disable_help_subcommand(true);
+    cmd.build();
+
+    let mut page = Vec::new();
+    clap_mangen::Man::new(cmd.clone()).render(&mut page)?;
+    std::fs::write(dir.join(format!("{name}.1")), page)?;
+
+    for sub in cmd.get_subcommands() {
+        write_man_pages(sub, &format!("{name}-{}", sub.get_name()), dir)?;
+    }
+    Ok(())
 }
 
 #[cfg(test)]
