@@ -273,6 +273,57 @@ fn completions_generates_a_script() {
 }
 
 #[test]
+fn history_json_emits_the_documented_shape() {
+    let output = Command::cargo_bin("josephine")
+        .unwrap()
+        .env("HOME", isolated_home("history-json"))
+        .env_remove("XDG_CONFIG_HOME")
+        .env_remove("XDG_DATA_HOME")
+        .args(["history", "--since", "6h", "--json"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let doc: serde_json::Value =
+        serde_json::from_slice(&output).expect("history --json emits valid JSON");
+
+    // The window is carried both ways: a number to compute with, a label to
+    // print. A fresh install has no samples, so the two lists are empty rather
+    // than absent — a script should not have to special-case day one.
+    assert_eq!(doc["window_hours"], 6);
+    assert_eq!(doc["window"], "6 h");
+    assert!(doc["metrics"].is_array(), "{doc}");
+    assert!(doc["events"].is_array(), "{doc}");
+}
+
+#[test]
+fn history_rejects_a_window_it_cannot_read() {
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .env("HOME", isolated_home("history-bad-window"))
+        .env_remove("XDG_CONFIG_HOME")
+        .env_remove("XDG_DATA_HOME")
+        .args(["history", "--since", "week"])
+        .assert()
+        .failure();
+}
+
+#[test]
+fn history_names_the_checks_it_tracks_when_given_an_unknown_one() {
+    Command::cargo_bin("josephine")
+        .unwrap()
+        .env("HOME", isolated_home("history-bad-check"))
+        .env_remove("XDG_CONFIG_HOME")
+        .env_remove("XDG_DATA_HOME")
+        .args(["history", "--check", "gpu"])
+        .assert()
+        .failure()
+        .stderr(contains("cpu"));
+}
+
+#[test]
 fn man_generates_a_page() {
     // Same contract as `completions`: rendered from the static command tree,
     // no config read, no file created — `josephine man > josephine.1`.

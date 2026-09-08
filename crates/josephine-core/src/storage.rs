@@ -146,10 +146,23 @@ impl Storage {
         Ok(())
     }
 
-    /// Min/avg/max and an hourly-averaged series for one metric over the last
-    /// 24 h. Returns `None` when no sample was recorded in the window.
-    pub fn metric_summary_24h(&self, check: &str, metric: &str) -> Result<Option<MetricSummary>> {
-        let since = (Utc::now() - Duration::hours(24)).to_rfc3339();
+    /// How a series is bucketed for display. An hourly point over a week gives
+    /// 168 of them, which is noise in a sparkline a few dozen characters wide;
+    /// past two days, a daily average reads better and still shows the shape.
+    fn bucket_width(hours: i64) -> usize {
+        // RFC3339 prefix lengths: "YYYY-MM-DDTHH" is 13, "YYYY-MM-DD" is 10.
+        if hours <= 48 { 13 } else { 10 }
+    }
+
+    /// Min/avg/max and an averaged series for one metric over the last
+    /// `hours`. Returns `None` when no sample was recorded in the window.
+    pub fn metric_summary(
+        &self,
+        check: &str,
+        metric: &str,
+        hours: i64,
+    ) -> Result<Option<MetricSummary>> {
+        let since = (Utc::now() - Duration::hours(hours)).to_rfc3339();
 
         let (min, avg, max): (Option<f64>, Option<f64>, Option<f64>) = self.conn.query_row(
             "SELECT MIN(value), AVG(value), MAX(value) FROM metrics
@@ -161,15 +174,18 @@ impl Storage {
             return Ok(None);
         };
 
-        // One point per hour (buckets keyed by the RFC3339 "YYYY-MM-DDTHH" prefix).
+        // One point per bucket, keyed by the RFC3339 date(-hour) prefix.
+        let width = Self::bucket_width(hours) as i64;
         let mut stmt = self.conn.prepare(
             "SELECT AVG(value) FROM metrics
              WHERE check_name = ?1 AND metric_name = ?2 AND recorded_at >= ?3
-             GROUP BY substr(recorded_at, 1, 13)
-             ORDER BY substr(recorded_at, 1, 13)",
+             GROUP BY substr(recorded_at, 1, ?4)
+             ORDER BY substr(recorded_at, 1, ?4)",
         )?;
         let series = stmt
-            .query_map(params![check, metric, &since], |row| row.get::<_, f64>(0))?
+            .query_map(params![check, metric, &since, width], |row| {
+                row.get::<_, f64>(0)
+            })?
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(Some(MetricSummary {
@@ -254,6 +270,13 @@ fn hour_bucket_to_day(bucket: &str) -> Option<f64> {
 mod tests {
     use super::*;
 
+    /// A migrated, empty database that never touches the disk.
+    fn in_memory() -> Storage {
+        let conn = Connection::open_in_memory().unwrap();
+        apply_migrations(&conn).unwrap();
+        Storage { conn }
+    }
+
     #[test]
     fn hour_bucket_parses_to_a_day_offset() {
         // 1970-01-02T00 is exactly one day after the epoch.
@@ -263,6 +286,64 @@ mod tests {
         let b = hour_bucket_to_day("2026-07-28T11").unwrap();
         assert!((b - a - 1.0 / 24.0).abs() < 1e-9);
         assert!(hour_bucket_to_day("not-a-date").is_none());
+    }
+
+    #[test]
+    fn buckets_are_hourly_up_to_two_days_and_daily_beyond() {
+        // "YYYY-MM-DDTHH" = 13 chars (hourly), "YYYY-MM-DD" = 10 (daily).
+        assert_eq!(Storage::bucket_width(6), 13);
+        assert_eq!(Storage::bucket_width(24), 13);
+        assert_eq!(Storage::bucket_width(48), 13);
+        // A week of hourly points is 168 of them — noise in a sparkline.
+        assert_eq!(Storage::bucket_width(49), 10);
+        assert_eq!(Storage::bucket_width(168), 10);
+    }
+
+    #[test]
+    fn summary_covers_the_window_and_averages_each_bucket() {
+        let storage = in_memory();
+
+        // Two samples inside the same hour, one an hour later, and one well
+        // outside a 6 h window.
+        let now = Utc::now();
+        for (offset_hours, value) in [(0.0, 10.0), (0.1, 30.0), (1.0, 50.0), (30.0, 999.0)] {
+            let at = (now - Duration::minutes((offset_hours * 60.0) as i64)).to_rfc3339();
+            storage
+                .conn
+                .execute(
+                    "INSERT INTO metrics (check_name, metric_name, value, recorded_at)
+                     VALUES ('cpu', 'usage_percent', ?1, ?2)",
+                    params![value, at],
+                )
+                .unwrap();
+        }
+
+        let summary = storage
+            .metric_summary("cpu", "usage_percent", 6)
+            .unwrap()
+            .expect("samples inside the window");
+
+        // The 999 sits 30 h back and must not reach a 6 h summary.
+        assert_eq!(summary.max, 50.0);
+        assert_eq!(summary.min, 10.0);
+        assert_eq!(summary.avg, 30.0);
+
+        // Two hourly buckets: (10 + 30) / 2 and 50 — the pair recorded in the
+        // same hour is averaged into one point rather than plotted twice.
+        assert_eq!(summary.series.len(), 2);
+        assert!(summary.series.contains(&20.0), "{:?}", summary.series);
+        assert!(summary.series.contains(&50.0), "{:?}", summary.series);
+    }
+
+    #[test]
+    fn summary_is_none_when_the_window_holds_nothing() {
+        let storage = in_memory();
+        assert!(
+            storage
+                .metric_summary("cpu", "usage_percent", 24)
+                .unwrap()
+                .is_none()
+        );
     }
 
     #[test]

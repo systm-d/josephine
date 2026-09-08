@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`history` can be scoped and exported.** `--since <window>` (`6h`, `3d`)
+  changes the window from the default 24 h, `--check <name>` narrows it to one
+  check and repeats, and `--json` emits a documented, stable shape for scripts
+  and dashboards. The sparkline buckets follow the window — hourly up to 48 h,
+  daily beyond — so a week does not arrive as 168 points squeezed into a few
+  dozen characters. An unknown check name says which ones are tracked rather
+  than printing an empty table.
 - **The I/O-bound checks are tested end to end.** `temperature`, `battery`,
   `network`, `inode` and `kernel` read the machine through a seam
   (`source::Sysfs` for files, `source::Commands` for `df`/`ping`/`journalctl`),

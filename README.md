@@ -159,6 +159,7 @@ josephine status --oneline  # one compact line for a status bar (Waybar, polybar
 josephine doctor        # full diagnostics, and what's left to do
 josephine doctor -v     # verbose: thresholds, top 10 processes, intervals
 josephine history       # last 24 h: min/avg/max + sparkline trends, and events
+josephine history --since 3d --check disk --json   # scoped, machine-readable
 josephine daemon start  # run the background watcher
 josephine daemon status # daemon state (PID, uptime)
 josephine config show   # print the current configuration
@@ -204,6 +205,14 @@ it runs `josephine report --since 7d` and prints to the journal
 ```sh
 systemctl --user enable --now josephine-report.timer
 ```
+
+`josephine history --json` emits a stable document: `window_hours` and a
+printable `window`, an `enabled` flag (false when history is switched off, with
+the lists empty rather than absent), a `metrics` array of
+`{check, metric, unit, min, avg, max, series}`, and an `events` array of
+`{check, metric, from, to, value, message, at}`. `series` holds averaged
+buckets, oldest first — hourly up to 48 h, daily beyond, so a week-long window
+stays legible instead of packing 168 points into a sparkline.
 
 The `.deb`, `.rpm` and tarball installs ship the manual, so `man josephine` (and
 `man josephine-doctor`, and so on for every subcommand) works out of the box.

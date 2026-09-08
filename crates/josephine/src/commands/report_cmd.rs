@@ -4,7 +4,7 @@
 
 use std::path::PathBuf;
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result};
 use chrono::{DateTime, Local, Utc};
 use josephine_core::check::{CheckResult, Severity};
 use josephine_core::config::Config;
@@ -75,7 +75,7 @@ enum Window {
 }
 
 fn build_digest(spec: &str) -> Result<Digest> {
-    let hours = parse_since(spec)?;
+    let hours = crate::since::parse_since(spec)?;
     let paths = Paths::new()?;
     let storage = Storage::open(&paths)?;
     // Ask for one more than we show: if it comes back, the window was busier
@@ -88,33 +88,6 @@ fn build_digest(spec: &str) -> Result<Digest> {
         events,
         truncated,
     })
-}
-
-/// Parse a `--since` window like `7d` or `24h` into a count of hours.
-fn parse_since(spec: &str) -> Result<i64> {
-    let spec = spec.trim();
-    let (value, per) = if let Some(days) = spec.strip_suffix(['d', 'D']) {
-        (days, 24)
-    } else if let Some(hours) = spec.strip_suffix(['h', 'H']) {
-        (hours, 1)
-    } else {
-        bail!(i18n::t(
-            "--since expects a window like `7d` or `24h`.",
-            "--since attend une fenêtre comme `7d` ou `24h`.",
-        ));
-    };
-    let n: i64 = value
-        .trim()
-        .parse()
-        .ok()
-        .filter(|&n| n > 0)
-        .with_context(|| {
-            i18n::t(
-                "--since must be a positive number followed by `d` or `h`.",
-                "--since doit être un nombre positif suivi de `d` ou `h`.",
-            )
-        })?;
-    Ok(n * per)
 }
 
 fn window(hours: i64) -> Window {
@@ -343,21 +316,5 @@ mod tests {
         );
 
         i18n::set_lang(prev);
-    }
-
-    #[test]
-    fn parse_since_accepts_days_and_hours() {
-        assert_eq!(parse_since("7d").unwrap(), 168);
-        assert_eq!(parse_since("24h").unwrap(), 24);
-        assert_eq!(parse_since(" 3D ").unwrap(), 72);
-    }
-
-    #[test]
-    fn parse_since_rejects_garbage() {
-        assert!(parse_since("7").is_err());
-        assert!(parse_since("d").is_err());
-        assert!(parse_since("0d").is_err());
-        assert!(parse_since("-2h").is_err());
-        assert!(parse_since("week").is_err());
     }
 }
