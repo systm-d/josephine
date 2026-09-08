@@ -19,6 +19,8 @@ pub struct Config {
     pub history: HistoryConfig,
     #[serde(default)]
     pub forecast: ForecastConfig,
+    #[serde(default)]
+    pub export: ExportConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -253,6 +255,40 @@ pub struct NotificationsConfig {
     pub desktop: bool,
     #[serde(default)]
     pub terminal: bool,
+}
+
+/// Local, read-only exposure of the latest results. Off by default, and file
+/// only — Joséphine never opens a socket.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+pub struct ExportConfig {
+    #[serde(default)]
+    pub prometheus: PrometheusExportConfig,
+}
+
+/// A Prometheus textfile the daemon rewrites after each check, for
+/// node-exporter's textfile collector to pick up.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+pub struct PrometheusExportConfig {
+    /// Off by default: nothing is written unless asked for.
+    #[serde(default)]
+    pub enabled: bool,
+    /// Where to write it. Empty means the default:
+    /// `<data dir>/josephine.prom`. Point node-exporter's
+    /// `--collector.textfile.directory` at the containing directory, or set
+    /// this to a path inside the directory it already reads.
+    #[serde(default)]
+    pub path: String,
+}
+
+impl PrometheusExportConfig {
+    /// The path to write, resolving the empty default against the data dir.
+    pub fn resolved_path(&self, paths: &Paths) -> std::path::PathBuf {
+        if self.path.trim().is_empty() {
+            paths.data_dir.join("josephine.prom")
+        } else {
+            std::path::PathBuf::from(&self.path)
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -717,6 +753,7 @@ impl Config {
         Self::validate_security(&self.checks.security)?;
         Self::validate_reboot(&self.checks.reboot)?;
         Self::validate_pressure(&self.checks.pressure)?;
+        Self::validate_export(&self.export)?;
         if self.checks.smart.interval_secs < 5 {
             bail!("checks.smart.interval_secs must be ≥ 5 seconds");
         }
@@ -743,6 +780,14 @@ impl Config {
             bail!("forecast.min_fit must be between 0 and 1");
         }
 
+        Ok(())
+    }
+
+    fn validate_export(export: &ExportConfig) -> Result<()> {
+        let path = export.prometheus.path.trim();
+        if export.prometheus.enabled && !path.is_empty() && !Path::new(path).is_absolute() {
+            bail!("export.prometheus.path must be an absolute path");
+        }
         Ok(())
     }
 

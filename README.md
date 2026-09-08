@@ -159,8 +159,10 @@ josephine status --oneline  # one compact line for a status bar (Waybar, polybar
 josephine doctor        # full diagnostics, and what's left to do
 josephine doctor -v     # verbose: thresholds, top 10 processes, intervals
 josephine history       # last 24 h: min/avg/max + sparkline trends, and events
+josephine history --since 3d --check disk --json   # scoped, machine-readable
 josephine daemon start  # run the background watcher
 josephine daemon status # daemon state (PID, uptime)
+josephine config init --profile server  # starter config for a kind of machine
 josephine config show   # print the current configuration
 josephine config edit   # edit the config in $EDITOR, then re-validate
 josephine report        # dated plain-text health report (-o writes to a file)
@@ -205,6 +207,14 @@ it runs `josephine report --since 7d` and prints to the journal
 systemctl --user enable --now josephine-report.timer
 ```
 
+`josephine history --json` emits a stable document: `window_hours` and a
+printable `window`, an `enabled` flag (false when history is switched off, with
+the lists empty rather than absent), a `metrics` array of
+`{check, metric, unit, min, avg, max, series}`, and an `events` array of
+`{check, metric, from, to, value, message, at}`. `series` holds averaged
+buckets, oldest first — hourly up to 48 h, daily beyond, so a week-long window
+stays legible instead of packing 168 points into a sparkline.
+
 The `.deb`, `.rpm` and tarball installs ship the manual, so `man josephine` (and
 `man josephine-doctor`, and so on for every subcommand) works out of the box.
 Installed from source, generate it yourself:
@@ -214,7 +224,36 @@ josephine man --dir ~/.local/share/man/man1
 ```
 
 Configuration lives at `~/.config/josephine/config.yaml` (created on first run).
+`josephine config init --profile <laptop|desktop|server>` writes a starter one
+instead: `desktop` drops the battery check, and `server` drops it too, warns on
+the first failed unit, watches disk and inodes from 80 %, keeps 90 days of
+history, and sends alerts to the journal rather than a desktop nobody is
+sitting at. A profile is only a starting point — the file is yours afterwards,
+and nothing reads the profile name again. It refuses to overwrite an existing
+configuration unless you pass `--force`.
 History and the daemon's state live under `~/.local/share/josephine/`.
+
+### Feeding a dashboard, still 100 % local
+
+Joséphine can write her latest results as a Prometheus textfile for
+node-exporter's textfile collector to pick up. Off by default; no server, no
+port, nothing about her becomes reachable from the network:
+
+```yaml
+export:
+  prometheus:
+    enabled: true
+    # Optional. Defaults to ~/.local/share/josephine/josephine.prom — point
+    # node-exporter's --collector.textfile.directory at the folder holding it,
+    # or set an absolute path inside a directory it already reads.
+    path: /var/lib/node_exporter/textfile_collector/josephine.prom
+```
+
+The daemon rewrites the file after each check, atomically, so a scrape never
+catches it half-written. It exposes `josephine_metric{check,metric,unit}`,
+`josephine_check_severity{check}` (0 ok, 1 attention, 2 critical) and
+`josephine_last_write_timestamp_seconds` — the same figures `josephine status`
+shows, and nothing more.
 
 The `status` header is deliberately sober. Want a flourish? Drop any ASCII/Braille
 art in `~/.config/josephine/banner.txt` and it appears above the title, tinted

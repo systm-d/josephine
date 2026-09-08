@@ -44,9 +44,9 @@ Chaque check implémente le trait `Check` (`josephine-core/src/check.rs`), est i
 |----------|--------|
 | `status` (défaut, `--json`, `--oneline`, code de sortie 0/1/2 ; 64/70 en cas d’échec) | ✅ |
 | `doctor` (`--verbose`, `--json`) | ✅ |
-| `history` | ✅ |
+| `history` (`--since`, `--check` répétable, `--json`) | ✅ |
 | `daemon start/stop/restart/status/logs/run` | ✅ |
-| `config show/validate/edit` | ✅ |
+| `config show/validate/edit`, `config init --profile <laptop\|desktop\|server>` | ✅ |
 | `clean` (`--apply`), `report` (`-o`, `--json`, `--since`) | ✅ |
 | `notify test` | ✅ |
 | `update` (`--check`, `--yes`) | ✅ |
@@ -167,6 +167,12 @@ Structures notables :
   libérée et non accumulée ; rendu **doctor-only**
   (section « Prévoyance »), sans notification.
 
+- `ExportConfig` — exposition locale, **désactivée par défaut** :
+  `export.prometheus.{enabled, path}`. Le démon réécrit un fichier textfile
+  Prometheus après chaque check, de façon atomique (écriture d'un `.tmp` puis
+  `rename`, pour qu'un scrape ne tombe jamais sur un fichier à moitié écrit).
+  Fichier uniquement — aucun socket, aucun port : `export.rs`.
+
 Validation dans `config.rs::validate()`.
 
 ---
@@ -177,8 +183,18 @@ Tests unitaires (`josephine-core`) + intégration CLI (`assert_cmd`) couvrant
 config, règles, messages, self-update, réseau, batterie et le parsing des
 commandes (`clean`).
 
-Les checks reposant sur `/proc` / `systemctl` / `ping` ne sont pas exécutés
-en CI ; leur logique pure est testée via des helpers dédiés.
+Les checks liés aux entrées/sorties (`temperature`, `battery`, `network`,
+`inode`, `kernel`) sont testés de bout en bout — lecture → parsing →
+`CheckResult` — via `crates/josephine-core/tests/checks_from_fixtures.rs` :
+un arbre de fixtures (`tests/fixtures/laptop`) tient lieu de `/sys`, `/proc`
+et `/etc`, et `source::StubCommands` fournit la sortie de `df`, `ping` et
+`journalctl`. Aucun test ne dépend du matériel de la machine hôte ; `cargo
+test` est hermétique en CI.
+
+Le module `josephine-core/src/source.rs` porte cette couture : `Sysfs`
+(racine réelle ou arbre de fixtures) et le trait `Commands`
+(`SystemCommands` en production, `StubCommands` en test). En production rien
+ne change — `new()` lit toujours la vraie machine.
 
 Commande : `cargo test --workspace`
 

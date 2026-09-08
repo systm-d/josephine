@@ -9,6 +9,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **A local, opt-in metrics export.** With `export.prometheus.enabled`, the
+  daemon writes its latest results as a Prometheus textfile for node-exporter's
+  textfile collector — `josephine_metric{check,metric,unit}`,
+  `josephine_check_severity{check}` and a write timestamp. A file, not a
+  server: a homelab that graphs anything already runs node-exporter, and a
+  guardian that opens a listening socket has a new attack surface. Off by
+  default, and written atomically so a scrape never catches a half-written
+  file.
+- **Starter configurations per kind of machine.** `josephine config init
+  --profile <laptop|desktop|server>` writes a config tuned for the machine it
+  is watching. The defaults were written for a laptop; a desktop has no battery
+  to report on, and a server wants the first failed unit, disk and inodes from
+  80 %, ninety days of history, and its alerts in the journal rather than to a
+  desktop nobody is sitting at. A profile is a starting point, not a mode — the
+  file is the user's afterwards and the name is never read again. It refuses to
+  overwrite an existing configuration without `--force`.
+- **`history` can be scoped and exported.** `--since <window>` (`6h`, `3d`)
+  changes the window from the default 24 h, `--check <name>` narrows it to one
+  check and repeats, and `--json` emits a documented, stable shape for scripts
+  and dashboards. The sparkline buckets follow the window — hourly up to 48 h,
+  daily beyond — so a week does not arrive as 168 points squeezed into a few
+  dozen characters. An unknown check name says which ones are tracked rather
+  than printing an empty table.
+- **The I/O-bound checks are tested end to end.** `temperature`, `battery`,
+  `network`, `inode` and `kernel` read the machine through a seam
+  (`source::Sysfs` for files, `source::Commands` for `df`/`ping`/`journalctl`),
+  so a test can point them at a fixture tree and canned output and exercise
+  read → parse → `CheckResult`. Until now only the pure parsers were covered,
+  because the paths were hardcoded; the read side — which sensor wins, whether
+  a mains adapter is mistaken for a battery, whether a snap's squashfs buries
+  the real filesystems — was not. Production behaviour is unchanged: `new()`
+  still reads the real machine.
+
+### Added
+
 - **A manual.** `josephine man` writes the man page to stdout, and
   `josephine man --dir <dir>` writes the whole set — one page per command, from
   `josephine(1)` down to `josephine-daemon-start(1)`, every cross-reference

@@ -11,14 +11,25 @@ use anyhow::Result;
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::BatteryCheckConfig;
 use crate::i18n::{self, Lang};
+use crate::source::Sysfs;
 
 pub struct BatteryCheck {
     config: BatteryCheckConfig,
+    sysfs: Sysfs,
 }
 
 impl BatteryCheck {
     pub fn new(config: BatteryCheckConfig) -> Self {
-        Self { config }
+        Self {
+            config,
+            sysfs: Sysfs::system(),
+        }
+    }
+
+    /// Read the batteries from a fixture tree instead of the running machine.
+    pub fn with_sysfs(mut self, sysfs: Sysfs) -> Self {
+        self.sysfs = sysfs;
+        self
     }
 }
 
@@ -37,7 +48,7 @@ impl Check for BatteryCheck {
     }
 
     fn run(&mut self) -> Result<CheckResult> {
-        Ok(build_result(&read_batteries(), &self.config))
+        Ok(build_result(&read_batteries(&self.sysfs), &self.config))
     }
 }
 
@@ -121,8 +132,8 @@ fn translate_status(status: &str) -> &'static str {
     }
 }
 
-fn read_batteries() -> Vec<BatteryReading> {
-    let base = Path::new("/sys/class/power_supply");
+fn read_batteries(sysfs: &Sysfs) -> Vec<BatteryReading> {
+    let base = sysfs.path("/sys/class/power_supply");
     let mut batteries = Vec::new();
     let Ok(entries) = fs::read_dir(base) else {
         return batteries;

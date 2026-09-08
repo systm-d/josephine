@@ -44,7 +44,17 @@ enum Commands {
         json: bool,
     },
     /// The last 24 hours
-    History,
+    History {
+        /// Window to summarise, e.g. `6h` or `3d` (default: 24h)
+        #[arg(long, value_name = "WINDOW")]
+        since: Option<String>,
+        /// Focus on one check; repeatable
+        #[arg(long = "check", value_name = "NAME")]
+        checks: Vec<String>,
+        /// Machine-readable output
+        #[arg(long)]
+        json: bool,
+    },
     /// Manage the monitoring daemon
     Daemon {
         #[command(subcommand)]
@@ -210,6 +220,11 @@ async fn dispatch() -> Result<ExitCode> {
         Some(Commands::Completions { .. })
             | Some(Commands::Man { .. })
             | Some(Commands::Explain { .. })
+            // `config init` decides for itself whether a config exists, so it
+            // must not be preceded by a load that creates one.
+            | Some(Commands::Config {
+                action: ConfigAction::Init { .. },
+            })
     ) {
         if let Ok(config) = josephine_core::config::Config::load_default() {
             josephine_core::i18n::set_lang(config.language);
@@ -224,8 +239,12 @@ async fn dispatch() -> Result<ExitCode> {
             doctor_cmd::run(verbose, json)?;
             0
         }
-        Some(Commands::History) => {
-            history_cmd::run()?;
+        Some(Commands::History {
+            since,
+            checks,
+            json,
+        }) => {
+            history_cmd::run(since, checks, json)?;
             0
         }
         Some(Commands::Daemon { action }) => {

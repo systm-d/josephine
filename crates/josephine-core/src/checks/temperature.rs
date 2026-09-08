@@ -1,11 +1,11 @@
 use std::fs;
-use std::path::Path;
 
 use anyhow::{Context, Result};
 
 use crate::check::{Check, CheckResult, Metric};
 use crate::config::TemperatureThresholds;
 use crate::i18n::{self, Lang};
+use crate::source::Sysfs;
 
 #[derive(Debug, Clone)]
 pub struct ThermalReading {
@@ -15,11 +15,21 @@ pub struct ThermalReading {
 
 pub struct TemperatureCheck {
     thresholds: TemperatureThresholds,
+    sysfs: Sysfs,
 }
 
 impl TemperatureCheck {
     pub fn new(thresholds: TemperatureThresholds) -> Self {
-        Self { thresholds }
+        Self {
+            thresholds,
+            sysfs: Sysfs::system(),
+        }
+    }
+
+    /// Read the sensors from a fixture tree instead of the running machine.
+    pub fn with_sysfs(mut self, sysfs: Sysfs) -> Self {
+        self.sysfs = sysfs;
+        self
     }
 }
 
@@ -29,8 +39,8 @@ impl Check for TemperatureCheck {
     }
 
     fn run(&mut self) -> Result<CheckResult> {
-        let mut readings = read_thermal_zones()?;
-        readings.extend(read_nvme_temps()?);
+        let mut readings = read_thermal_zones_in(&self.sysfs)?;
+        readings.extend(read_nvme_temps_in(&self.sysfs)?);
 
         if readings.is_empty() {
             return Ok(CheckResult {
@@ -95,8 +105,9 @@ impl Check for TemperatureCheck {
     }
 }
 
-pub fn read_thermal_zones() -> Result<Vec<ThermalReading>> {
-    let base = Path::new("/sys/class/thermal");
+fn read_thermal_zones_in(sysfs: &Sysfs) -> Result<Vec<ThermalReading>> {
+    let base = sysfs.path("/sys/class/thermal");
+    let base = base.as_path();
     if !base.exists() {
         return Ok(Vec::new());
     }
@@ -140,8 +151,9 @@ pub fn read_thermal_zones() -> Result<Vec<ThermalReading>> {
     Ok(readings)
 }
 
-pub fn read_nvme_temps() -> Result<Vec<ThermalReading>> {
-    let base = Path::new("/sys/class/nvme");
+fn read_nvme_temps_in(sysfs: &Sysfs) -> Result<Vec<ThermalReading>> {
+    let base = sysfs.path("/sys/class/nvme");
+    let base = base.as_path();
     if !base.exists() {
         return Ok(Vec::new());
     }
