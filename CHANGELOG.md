@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-09-08
+
 ### Added
 
 - **A local, opt-in metrics export.** With `export.prometheus.enabled`, the
@@ -41,9 +43,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a mains adapter is mistaken for a battery, whether a snap's squashfs buries
   the real filesystems — was not. Production behaviour is unchanged: `new()`
   still reads the real machine.
-
-### Added
-
 - **A manual.** `josephine man` writes the man page to stdout, and
   `josephine man --dir <dir>` writes the whole set — one page per command, from
   `josephine(1)` down to `josephine-daemon-start(1)`, every cross-reference

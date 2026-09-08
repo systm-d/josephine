@@ -1,7 +1,7 @@
 # Joséphine — État actuel du code
 
-**Version :** 0.13.1  
-**Dernière mise à jour :** 2026-09-03  
+**Version :** 0.14.0  
+**Dernière mise à jour :** 2026-09-08  
 **Langage :** Rust (workspace Cargo)  
 **Cible :** Linux (Debian 13+ recommandé)
 
