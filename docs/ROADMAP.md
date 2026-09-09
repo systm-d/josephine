@@ -1,6 +1,6 @@
 # Joséphine — Roadmap
 
-**Baseline actuelle :** v0.7.0 — voir [CURRENT_STATE.md](CURRENT_STATE.md)
+**Baseline actuelle :** v0.14.0 — voir [CURRENT_STATE.md](CURRENT_STATE.md)
 
 ---
 
@@ -58,7 +58,7 @@ Surveillance locale silencieuse de la **machine** :
 
 | # | Feature | État |
 |---|---------|------|
-| 1 | `josephine fix` — actions guidées (systemd, espace disque) | ✅ |
+| 1 | `josephine fix` — actions guidées (systemd, espace disque) | ✅ livré, **retiré en v0.11.0** — ses conseils vivent dans `doctor` |
 | 2 | `config edit` — `$EDITOR` + revalidation | ✅ |
 | 3 | Sparklines / synthèse enrichie dans `history` | ✅ |
 
@@ -98,6 +98,21 @@ alignées, ton détoné « chaleur sobre » en anglais et en français, sur
 
 ---
 
+## v0.10.0 → v0.14.0 — la boîte à outils complète ✅
+
+Les increments A→D refermés, la baseline a continué d'avancer sans plan formel.
+Ce que chaque version a apporté :
+
+| Version | Apport |
+|---------|--------|
+| v0.10.0 | `voice.rs` — variété de ton (lignes de caractère seulement, faits d'alerte stables) ; `doctor` ouvre sur un verdict ; Homebrew passe en tap ; release en jobs parallèles |
+| v0.11.0 | `doctor` ferme sur **ce qu'il reste à faire** (`remedy.rs`) ; `josephine fix` supprimé |
+| v0.12.0 | Flake Nix, avec modules NixOS et Home Manager |
+| v0.13.0 | `status --oneline` + codes de sortie (0/1/2 = santé, 64/70 = sysexits) ; digest hebdomadaire `report --since` ; usure SSD/NVMe dans `smart` ; **prévoyance** dans `doctor` ; checks `reboot` et `pressure` — **16 au total** ; identité *ange gardien* rétablie |
+| v0.14.0 | `josephine man` (une page par commande) ; `config init --profile <laptop\|desktop\|server>` ; `history --since/--check/--json` ; export Prometheus textfile (opt-in, fichier seulement) ; checks I/O testés de bout en bout |
+
+---
+
 ## v1.0+ — Écosystème (non planifié en détail)
 
 - Plugins internes (postgres, nginx…)
@@ -128,3 +143,7 @@ Si non → autre outil.
 | 2026-06-29 | Logo ASCII reporté |
 | 2026-07-08 | Refonte CLI « Constellation sobre » (ton *chaleur sobre*, increment A) actée |
 | 2026-07-09 | v0.7.0 : increment A livré (rendu + notifications) ; increment C (finitions) démarré |
+| 2026-07-25 | `josephine fix` retiré : il promettait une réparation qu'il refusait d'exécuter ; ses conseils rejoignent la section finale de `doctor` |
+| 2026-07-27 | Le dépôt devient un flake Nix (modules NixOS + Home Manager) |
+| 2026-09-02 | v0.13.0 : prévoyance dans `doctor`, checks `reboot` et `pressure` (16 checks), identité *ange gardien* rétablie |
+| 2026-09-08 | v0.14.0 : manuel, profils de configuration, `history` scopable, export Prometheus — un fichier, jamais un socket |
