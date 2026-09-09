@@ -202,6 +202,16 @@ jobs:
   # what happened to v0.13.0). The release itself is unaffected — its
   # josephine.rb asset is correct at publish time; the tap catches up when this
   # pull request merges.
+  #
+  # Opening that pull request takes more than the `pull-requests: write` below:
+  # the "Allow GitHub Actions to create and approve pull requests" setting gates
+  # it, and the organization gates the repository (v0.14.0 died on `GitHub
+  # Actions is not permitted to create or approve pull requests`, and the repo
+  # toggle would not even flip until the org's was on). Both are enabled now —
+  # but a policy change elsewhere would take it away again, and the tap falling
+  # behind is not worth a red release. So a refused `gh pr create` warns instead
+  # of failing: the branch is already pushed, and the warning carries the link
+  # to open the pull request by hand.
   # ---------------------------------------------------------------------------
   homebrew:
     name: Update the Homebrew formula (tap)
@@ -264,7 +274,7 @@ jobs:
             echo "A pull request is already open for ${branch}; it now carries ${VERSION}."
             exit 0
           fi
-          gh pr create \
+          if gh pr create \
             --base "$BASE" \
             --head "$branch" \
             --title "homebrew: josephine ${VERSION}" \
@@ -276,7 +286,14 @@ jobs:
               "same source URL and the same sha256 (\`${SHA256}\`) by construction." \
               "" \
               "Opened automatically by \`release.yml\`. Until it merges," \
-              "\`brew install josephine\` resolves to the previous release.")"
+              "\`brew install josephine\` resolves to the previous release.")"; then
+            exit 0
+          fi
+
+          # The branch is pushed, so this is a click away rather than a lost
+          # release — see the job's header comment.
+          compare="https://github.com/${GITHUB_REPOSITORY}/compare/${BASE}...${branch}?expand=1"
+          echo "::warning title=Homebrew tap::Could not open the pull request for ${branch} (is \"Allow GitHub Actions to create and approve pull requests\" still enabled on the org and the repo?). The branch is pushed — open it by hand: ${compare} — until it merges, brew install josephine resolves to the previous release."
 
   # ---------------------------------------------------------------------------
   # crates.io: opt-in publication. Enabled by setting the repository variable
