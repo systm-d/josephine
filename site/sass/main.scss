@@ -459,6 +459,47 @@ footer {
   opacity: 0.7;
 }
 
+/* ---------- contributors ---------- */
+.people {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
+  margin-top: 1.6rem;
+}
+.person {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.1rem 0.9rem;
+  padding: 1.05rem 1.15rem;
+  background: var(--night-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: border-color 0.16s ease, transform 0.16s ease;
+
+  &:hover { border-color: var(--violet); transform: translateY(-2px); }
+}
+.person__av {
+  grid-row: span 2;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--night);
+  border: 1px solid var(--line);
+}
+.person__n {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  color: var(--star);
+  align-self: end;
+}
+.person__c {
+  font-size: 0.85rem;
+  color: var(--dim-2);
+  align-self: start;
+}
+
 /* ---------- sixteen checks ---------- */
 .checks {
   display: grid;
