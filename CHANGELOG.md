@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **The site thanks the people who wrote her.** A closing section on the
+  landing page credits every human contributor, with their avatar and commit
+  count, linking to their GitHub profile. The list is refreshed from the API
+  when the site is built, and the avatars are **downloaded at build time and
+  served from the site** — nothing on this page reaches a third party, and a
+  project whose argument is that nothing leaves your machine should not hand
+  every visitor's IP to GitHub to draw two faces. Bots are filtered out.
+
 ### Fixed
 
 - **The French README describes the Joséphine that exists.** It had stayed in

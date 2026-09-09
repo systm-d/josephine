@@ -309,5 +309,37 @@ Your machine, watched over.
 {# ============================ INSTALL (from markdown) ============================ #}
 {{ section.content | safe }}
 
+{# ============================ CONTRIBUTORS ============================ #}
+{#- Refreshed by site/refresh-contributors.sh, which the Pages workflow runs
+    before the build. The avatars are served from this site, never hotlinked
+    from GitHub: nothing else on this page reaches a third party, and it would
+    be a poor look for a project that promises nothing leaves your machine. -#}
+{%- set people = load_data(path="data/contributors.json") -%}
+{% if people | length > 0 %}
+<hr class="divider" />
+
+<section class="reveal" aria-labelledby="people">
+  <p class="eyebrow">{% if fr %}Merci{% else %}Thanks{% endif %}</p>
+  <h2 id="people">{% if fr %}Celles et ceux qui l'aident{% else %}The people who help{% endif %}</h2>
+  <p class="section__lede">
+    {%- if fr -%}
+    Joséphine est un projet ouvert. Voici les personnes dont le code se trouve dans la version que vous installez.
+    {%- else -%}
+    Joséphine is an open project. These are the people whose code is in the version you install.
+    {%- endif -%}
+  </p>
+
+  <div class="people">
+    {% for person in people %}
+    <a class="person" href="https://github.com/{{ person.login }}" rel="noopener">
+      <img class="person__av" src="{{ get_url(path=person.avatar) }}" width="48" height="48" alt="" loading="lazy">
+      <span class="person__n">{{ person.login }}</span>
+      <span class="person__c">{{ person.contributions }} commit{% if person.contributions > 1 %}s{% endif %}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 </main>
 {% endblock content %}

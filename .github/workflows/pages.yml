@@ -24,6 +24,15 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v7
+      - name: Refresh the contributors and their avatars
+        # Never fatal: site/data/contributors.json and site/static/contributors/
+        # are committed, so a GitHub hiccup ships the last known list rather
+        # than failing the deploy.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: ./site/refresh-contributors.sh
       - name: Configure Pages (enable if needed)
         uses: actions/configure-pages@v6
         with:
