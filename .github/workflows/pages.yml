@@ -6,6 +6,12 @@ on:
     paths:
       - "site/**"
       - ".github/workflows/pages.yml"
+  # The contributors list is refreshed at build time, so the site only learns
+  # about a new one when it rebuilds — and nothing under site/ changes for
+  # weeks at a time. Hence a weekly rebuild. Deliberately off the hour: GitHub
+  # delays scheduled runs that all pile onto :00.
+  schedule:
+    - cron: "17 6 * * 1"
   workflow_dispatch:
 
 permissions:

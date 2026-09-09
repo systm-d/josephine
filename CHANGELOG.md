@@ -15,7 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   when the site is built, and the avatars are **downloaded at build time and
   served from the site** — nothing on this page reaches a third party, and a
   project whose argument is that nothing leaves your machine should not hand
-  every visitor's IP to GitHub to draw two faces. Bots are filtered out.
+  every visitor's IP to GitHub to draw two faces. Bots are filtered out, and
+  the site rebuilds weekly so a new contributor appears without anyone having
+  to touch it.
 
 ### Fixed
 
