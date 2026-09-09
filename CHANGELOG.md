@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **The French README describes the Joséphine that exists.** It had stayed in
+  the v0.1 era while the English one kept up: five checks instead of sixteen, a
+  `git clone` as the only way to install, Rust 1.75, and terminal notifications
+  still marked *non implémenté* six minor versions after they shipped. It now
+  mirrors `README.md` — every install channel, the exit-code contract, the
+  configuration profiles, the manual and the Prometheus export.
+- **The site shows all sixteen checks.** The heading read *Sixteen vital signs*
+  over fourteen cards: `reboot` and `pressure`, both added in 0.13.0, never got
+  one.
+
+### Changed
+
+- **The developer docs match the code again.** `ROADMAP.md` announced v0.7.0 as
+  the baseline seven minor versions later, and still listed `josephine fix` as
+  a live command after 0.11.0 folded it into `doctor`. `DEVELOPMENT.md`
+  told contributors that user-facing text is French — it has been English-first
+  with a French translation since 0.5.0 — and pointed at a `stub_cmd.rs` that
+  no longer exists.
+
 ## [0.14.0] - 2026-09-08
 
 ### Added

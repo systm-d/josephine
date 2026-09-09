@@ -35,6 +35,10 @@
 <svg {{ c | safe }}><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>
 {%- elif name == "security" -%}
 <svg {{ c | safe }}><path d="M12 3l7 3v5c0 4.4-3 7.4-7 9-4-1.6-7-4.6-7-9V6z"/><path d="M9.3 12l1.9 2 3.5-4"/></svg>
+{%- elif name == "reboot" -%}
+<svg {{ c | safe }}><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4.2h-4.2"/><path d="M12 8v4.6"/></svg>
+{%- elif name == "pressure" -%}
+<svg {{ c | safe }}><path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l3.7-4.4"/><circle cx="12" cy="17" r="1.1" fill="currentColor" stroke="none"/></svg>
 {%- elif name == "status" -%}
 <svg {{ c | safe }}><path d="M4 6h16M4 12h16M4 18h10"/></svg>
 {%- elif name == "history" -%}

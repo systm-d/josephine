@@ -4,7 +4,7 @@
 
 ## Prérequis
 
-- Rust ≥ 1.75 (stable)
+- Rust ≥ 1.85 (stable) — `rust-version` du workspace
 - Linux pour exécuter les checks réels
 - `libnotify-bin` pour tester les notifications desktop
 
@@ -18,8 +18,12 @@ cargo build
 cargo build --release
 
 # Tests
-cargo test
+cargo test --workspace
 cargo test -p josephine-core
+
+# Barrière qualité (avant chaque PR)
+cargo fmt --check
+cargo clippy --workspace --all-targets -- -D warnings
 
 # Exécution locale
 cargo run -p josephine -- status
@@ -49,11 +53,19 @@ josephine/
 
 ### Code
 
-- Messages utilisateur et notifications : **français**
-- Ton bienveillant, jamais alarmiste
+- Toute chaîne visible par l'utilisateur existe en **anglais et en français** —
+  `i18n::t(en, fr)`, ou `match i18n::lang()` quand il y a interpolation.
+  L'anglais est la langue par défaut, le français s'active avec `language: fr`
+- Ton bienveillant, jamais alarmiste ; jamais `ERROR` / `FATAL` / `PANIC`
+- Identifiants de code en anglais
 - Changements minimaux par PR / commit logique
 - Un check = un fichier dans `checks/`
 - Textes de notification uniquement dans `messages.rs`
+- Ce qu'un check surveille, pourquoi et comment agir : une entrée `Advice` dans
+  `remedy.rs` — partagée par `josephine explain` et la section finale de
+  `doctor`. Un test échoue si elle manque
+- Formulations de « voix » (salutations, sign-offs) : `voice.rs` — de la
+  variété uniquement, jamais les faits d'une alerte
 
 ### Config
 
@@ -65,7 +77,7 @@ josephine/
 
 - Commandes interactives : spinner (`run_checks_with_progress`)
 - Respect `NO_COLOR` / non-TTY : pas de couleurs ni spinner
-- Stubs : message « bientôt » via `stub_cmd.rs`
+- Gravité portée par la forme *et* la couleur (`●` / `▲` / `✕`), lisible dans un pipe
 
 ### Tests
 
@@ -114,7 +126,9 @@ Forcer une alerte : baisser temporairement un seuil dans `~/.config/josephine/co
 - [ ] Spec ou section roadmap mise à jour
 - [ ] Config + validation si applicable
 - [ ] Tests unitaires
-- [ ] Messages notification (si alertes)
+- [ ] Messages notification (si alertes), en anglais **et** en français
+- [ ] Entrée `Advice` dans `remedy.rs` si c'est un nouveau check
 - [ ] Affichage CLI (`status` / `doctor` / `history`)
-- [ ] README si commande utilisateur visible
+- [ ] README.md **et** README.fr.md si commande utilisateur visible
+- [ ] CHANGELOG.md sous `[Unreleased]`
 - [ ] CURRENT_STATE.md mis à jour

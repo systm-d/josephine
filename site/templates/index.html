@@ -225,6 +225,8 @@ Your machine, watched over.
     <div class="check"><span class="check__ic">{{ m::icon(name="filesystem") }}</span><div><h3>{% if fr %}Système de fichiers{% else %}Filesystem{% endif %}</h3><p>{% if fr %}Remontages en lecture seule{% else %}Read-only remounts{% endif %}</p></div></div>
     <div class="check"><span class="check__ic">{{ m::icon(name="clock") }}</span><div><h3>{% if fr %}Horloge{% else %}Clock{% endif %}</h3><p>{% if fr %}Dérive et synchro NTP{% else %}NTP drift and sync{% endif %}</p></div></div>
     <div class="check"><span class="check__ic">{{ m::icon(name="security") }}</span><div><h3>{% if fr %}Sécurité{% else %}Security{% endif %}</h3><p>{% if fr %}Connexions échouées récentes{% else %}Recent failed logins{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="reboot") }}</span><div><h3>{% if fr %}Redémarrage{% else %}Reboot{% endif %}</h3><p>{% if fr %}En attente après une mise à jour{% else %}Pending after an update{% endif %}</p></div></div>
+    <div class="check"><span class="check__ic">{{ m::icon(name="pressure") }}</span><div><h3>{% if fr %}Pression{% else %}Pressure{% endif %}</h3><p>{% if fr %}Blocages PSI, avant l'OOM killer{% else %}PSI stalls, before the OOM killer{% endif %}</p></div></div>
   </div>
 </section>
 

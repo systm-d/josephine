@@ -256,8 +256,11 @@ crates/josephine/src/
 
 ## Prochaine étape documentée
 
-Voir [ROADMAP.md](ROADMAP.md) et le programme d'increments CLI en cours :
-[superpowers/specs/2026-07-08-josephine-cli-render-tone-design.md](superpowers/specs/2026-07-08-josephine-cli-render-tone-design.md)
-(increment A, livré) et
-[superpowers/plans/2026-07-09-josephine-cli-increment-c.md](superpowers/plans/2026-07-09-josephine-cli-increment-c.md)
-(increment C, en cours).
+Le programme d'increments CLI est **entièrement livré** : A (rendu & ton,
+v0.7.0), C (solidité & finitions, v0.7.1), B (sortie machine & canaux, v0.8.0),
+D (nouveaux checks/commandes, v0.9.0). Voir la
+[spec d'origine](superpowers/specs/2026-07-08-josephine-cli-render-tone-design.md)
+pour les intentions de rendu, qui font toujours autorité.
+
+Rien n'est planifié au-delà de v0.14.0 : voir [ROADMAP.md](ROADMAP.md), dont la
+section « v1.0+ — Écosystème » reste volontairement non détaillée.
