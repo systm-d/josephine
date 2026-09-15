@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **rustls updated to 0.23.45** (RUSTSEC-2026-0285, medium). TLS 1.3 handshake
+  messages were accepted across encryption level boundaries. It reaches
+  Joséphine through `ureq`, which is how `josephine update` talks to GitHub
+  Releases — the one place she opens a TLS connection. A lockfile bump; no
+  code change.
+
 ### Added
 
 - **The site thanks the people who wrote her.** A closing section on the
